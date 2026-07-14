@@ -26,6 +26,7 @@
                             document.documentElement.className = 'guest';
                             console.log(r)
                         }
+                        console.log(r)
                     })
                     .catch(function(){});
             }
