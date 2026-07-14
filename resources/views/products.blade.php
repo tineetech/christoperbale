@@ -118,10 +118,10 @@ if ($brand) {
         @endif
         <div class="prod-img-wrap">
           <img src="{{ $product['img'] }}" alt="{{ $product['name'] }}" loading="lazy">
+          <span class="badge-brand">{{ $product['brand'] }}</span>
           <div class="prod-overlay"><button class="add-btn" onclick="event.stopPropagation()">+ Keranjang</button></div>
         </div>
         <div class="prod-info">
-          <div class="prod-brand">{{ $product['brand'] }}</div>
           <h3>{{ $product['name'] }}</h3>
           <div class="price-row">
             <span class="current">Rp{{ number_format($product['price'] * 15000, 0, ',', '.') }}</span>

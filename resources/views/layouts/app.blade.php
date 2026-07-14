@@ -12,7 +12,6 @@
 <body>
 <script>document.documentElement.className=localStorage.getItem('token')?'logged-in':'guest';</script>
 
-@include('components.announce')
 @include('components.header', ['active' => request()->path()])
 @include('components.mobile-drawer', ['active' => request()->path()])
 

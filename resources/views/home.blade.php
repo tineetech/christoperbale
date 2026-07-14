@@ -128,16 +128,7 @@
           <div class="prod-overlay"><button class="add-btn" onclick="event.stopPropagation()">+ Keranjang</button></div>
         </div>
         <div class="prod-info">
-          <div class="rating">
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <span>(124)</span>
-          </div>
           <h3>CHRISBALE Urban Runner</h3>
-          <div class="price-row"><span class="current">Rp2.239.000</span></div>
         </div>
       </article>
       <article class="prod-card" onclick="window.location='/product/gold-leather-loafer'">
@@ -147,16 +138,7 @@
           <div class="prod-overlay"><button class="add-btn" onclick="event.stopPropagation()">+ Keranjang</button></div>
         </div>
         <div class="prod-info">
-          <div class="rating">
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <span>(89)</span>
-          </div>
           <h3>Gold Leather Loafer</h3>
-          <div class="price-row"><span class="current">Rp2.839.000</span><span class="old">Rp3.739.000</span></div>
         </div>
       </article>
       <article class="prod-card" onclick="window.location='/product/combat-boot-black'">
@@ -166,16 +148,7 @@
           <div class="prod-overlay"><button class="add-btn" onclick="event.stopPropagation()">+ Keranjang</button></div>
         </div>
         <div class="prod-info">
-          <div class="rating">
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-empty" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <span>(56)</span>
-          </div>
           <h3>Combat Boot — Hitam</h3>
-          <div class="price-row"><span class="current">Rp3.229.000</span><span class="old">Rp4.199.000</span></div>
         </div>
       </article>
       <article class="prod-card" onclick="window.location='/product/classic-slip-on-white'">
@@ -185,16 +158,7 @@
           <div class="prod-overlay"><button class="add-btn" onclick="event.stopPropagation()">+ Keranjang</button></div>
         </div>
         <div class="prod-info">
-          <div class="rating">
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <span>(203)</span>
-          </div>
           <h3>Classic Slip-On Putih</h3>
-          <div class="price-row"><span class="current">Rp1.489.000</span><span class="old">Rp2.089.000</span></div>
         </div>
       </article>
     </div>
@@ -220,16 +184,7 @@
           <div class="prod-overlay"><button class="add-btn" onclick="event.stopPropagation()">+ Keranjang</button></div>
         </div>
         <div class="prod-info">
-          <div class="rating">
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-empty" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <span>(42)</span>
-          </div>
           <h3>Red Strap Sandal</h3>
-          <div class="price-row"><span class="current">Rp1.789.000</span></div>
         </div>
       </article>
       <article class="prod-card" onclick="window.location='/product/navy-slide-sandal'">
@@ -239,16 +194,7 @@
           <div class="prod-overlay"><button class="add-btn" onclick="event.stopPropagation()">+ Keranjang</button></div>
         </div>
         <div class="prod-info">
-          <div class="rating">
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <span>(78)</span>
-          </div>
           <h3>Navy Slide Sandal</h3>
-          <div class="price-row"><span class="current">Rp1.639.000</span></div>
         </div>
       </article>
       <article class="prod-card" onclick="window.location='/product/brown-leather-mule'">
@@ -257,16 +203,7 @@
           <div class="prod-overlay"><button class="add-btn" onclick="event.stopPropagation()">+ Keranjang</button></div>
         </div>
         <div class="prod-info">
-          <div class="rating">
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <span>(34)</span>
-          </div>
           <h3>Brown Leather Mule</h3>
-          <div class="price-row"><span class="current">Rp2.389.000</span></div>
         </div>
       </article>
       <article class="prod-card" onclick="window.location='/product/canvas-high-top'">
@@ -276,16 +213,7 @@
           <div class="prod-overlay"><button class="add-btn" onclick="event.stopPropagation()">+ Keranjang</button></div>
         </div>
         <div class="prod-info">
-          <div class="rating">
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg class="star-full" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <span>(167)</span>
-          </div>
           <h3>Canvas High Top</h3>
-          <div class="price-row"><span class="current">Rp1.339.000</span><span class="old">Rp1.779.000</span></div>
         </div>
       </article>
     </div>

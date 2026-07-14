@@ -22,6 +22,7 @@
 html{scroll-behavior:smooth;overflow-x:hidden;width:100%;}
 body{
   margin:0;
+  padding-top:148px;
   background:var(--bg);
   color:var(--ink);
   font-family:'Inter',sans-serif;
@@ -46,8 +47,7 @@ img,svg{display:block;max-width:100%;}
 .header-bar{
   background:var(--bg-card);
   border-bottom:1px solid var(--line);
-  position:sticky;top:0;z-index:100;
-  box-shadow: 0 1px 8px rgba(17,16,14,0.04);
+  position:fixed;top:0;left:0;right:0;z-index:100;
 }
 .header-row-1{
   max-width:1280px;margin:0 auto;padding:0 32px;
@@ -298,9 +298,9 @@ img,svg{display:block;max-width:100%;}
 .section-link{font-size:12px;font-weight:400;color:var(--ink-soft);letter-spacing:0.08em;text-transform:uppercase;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--ink-soft);padding-bottom:2px;transition:color .2s,border-color .2s;flex-shrink:0;}
 .section-link:hover{color:var(--ink);border-color:var(--ink);}
 
-.grid-prod{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;max-width:100%;}
-.prod-card{background:var(--bg-card);padding:0;text-align:center;transition:box-shadow .25s;position:relative;overflow:hidden;cursor:pointer;}
-.prod-card:hover{z-index:2;box-shadow:var(--shadow-hover);}
+.grid-prod{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:100%;}
+.prod-card{background:var(--bg-card);padding:0;text-align:left;position:relative;overflow:hidden;cursor:pointer;border-radius:0;}
+.prod-card:hover{z-index:2;}
 .prod-card .badge-tag{position:absolute;top:14px;left:14px;z-index:3;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;}
 .badge-new{background:var(--ink);color:#fff;}
 .badge-sale{background:var(--accent);color:#fff;}
@@ -312,16 +312,12 @@ img,svg{display:block;max-width:100%;}
 .prod-card:hover .prod-overlay{opacity:1;}
 .prod-overlay .add-btn{background:#fff;color:var(--ink);padding:9px 22px;border-radius:999px;font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;transition:background .2s, color .2s;white-space:nowrap;}
 .prod-overlay .add-btn:hover{background:var(--accent);color:#fff;}
-.prod-info{padding:16px 14px 20px;border-top:1px solid var(--line-soft);}
-.prod-card .rating{display:flex;align-items:center;justify-content:center;gap:3px;margin-bottom:7px;}
-.prod-card .rating svg{width:11px;height:11px;}
-.prod-card .rating .star-full{fill:var(--accent);color:var(--accent);}
-.prod-card .rating .star-empty{fill:none;stroke:var(--ink-muted);stroke-width:1.5;}
-.prod-card h3{font-size:13.5px;font-weight:400;margin-bottom:6px;font-family:'Playfair Display',serif;letter-spacing:0.02em;color:var(--ink);}
-.prod-card .price-row{display:flex;align-items:center;justify-content:center;gap:8px;}
-.prod-card .price-row .current{font-size:13px;font-weight:500;color:var(--ink);}
+.prod-info{padding:16px 14px 20px;}
+.prod-card h3{font-size:13.5px;font-weight:400;font-family:Helvetica, Arial, sans-serif;letter-spacing:0.02em;color:var(--ink);}
+.badge-brand{position:absolute;top:14px;right:14px;z-index:3;font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:rgba(17,16,14,0.55);color:#fff;backdrop-filter:blur(4px);}
+.prod-card .price-row{display:flex;align-items:center;gap:8px;margin-top:4px;}
+.prod-card .price-row .current{font-size:15px;font-weight:600;color:var(--accent);}
 .prod-card .price-row .old{font-size:11.5px;color:var(--ink-muted);text-decoration:line-through;}
-.prod-brand{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;font-weight:500;}
 
 .featured-banner{position:relative;border-radius:var(--radius);overflow:hidden;min-height:400px;display:grid;grid-template-columns:1fr 1fr;background:#111;max-width:100%;}
 .featured-img-side{position:relative;overflow:hidden;}
@@ -677,6 +673,7 @@ footer{background:#0F0D0B;color:#B5B0A8;padding:60px 0 24px;}
 @media(max-width:900px){
   .header-row-2{display:none;}
   .hamburger{display:flex;}
+  body{padding-top:102px;}
   .story-grid{grid-template-columns:1fr;gap:32px;}
   .story-grid.reverse{direction:ltr;}
   .tab-panel{grid-template-columns:1fr;}

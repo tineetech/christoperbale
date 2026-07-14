@@ -1,5 +1,6 @@
 @props(['active' => '/'])
 <header class="header-bar" id="top">
+  @include('components.announce')
   <div class="header-row-1">
     <button class="hamburger" id="menuToggle" aria-label="Buka menu">
       <span></span><span></span><span></span>
