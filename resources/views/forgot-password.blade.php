@@ -550,8 +550,6 @@
 
 @section('content')
 
-<script>if(localStorage.getItem('token')){window.location.href='/';}</script>
-
 <div class="forgot-page">
   <div class="forgot-grid">
 

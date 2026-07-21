@@ -774,8 +774,6 @@
 
 @section('content')
 
-<script>if(localStorage.getItem('token')){window.location.href='/';}</script>
-
 <div class="register-page">
   <div class="register-grid">
 

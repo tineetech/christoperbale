@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class GoogleAuthController extends Controller
 {
@@ -21,22 +24,30 @@ class GoogleAuthController extends Controller
             return redirect('/login')->withErrors(['email' => 'Gagal autentikasi dengan Google.']);
         }
 
-        $beUrl = rtrim(env('BE_URL', 'http://127.0.0.1:8002'), '/');
 
-        $response = Http::post($beUrl . '/api/auth/google', [
-            'email' => $googleUser->getEmail(),
-            'nama'  => $googleUser->getName(),
-        ]);
+        $pengguna = Pengguna::where('email', $googleUser->getEmail())->first();
 
-        if ($response->successful()) {
-            $data = $response->json();
+        if (!$pengguna) {
+            // Register baru
+            $pengguna = Pengguna::create([
+                'nama'     => $googleUser->getName(),
+                'email'    => $googleUser->getEmail(),
+                'photo_profile'    => $googleUser->getAvatar(),
+                'password' => Hash::make(Str::random(16)),
+                'role_id'  => 1,
+            ]);
+        }
+
+
+        if ($pengguna) {
+            $data = $pengguna->json();
             return view('auth-callback', [
                 'token'   => $data['token'],
                 'message' => $data['message'] ?? 'Login berhasil',
             ]);
         }
 
-        $data = $response->json();
+        $data = $pengguna->json();
         $message = $data['message'] ?? 'Gagal autentikasi dengan Google.';
 
         return redirect('/login')->withErrors(['email' => $message]);

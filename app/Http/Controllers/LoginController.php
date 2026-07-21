@@ -3,44 +3,31 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
     public function index()
     {
+        if (Auth::check()) {
+            return redirect('/dashboard');
+        }
         return view('login');
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'email'    => 'required|email',
+        $credentials = $request->validate([
+            'email'    => 'required',
             'password' => 'required',
         ]);
 
-        $beUrl = rtrim(env('BE_URL', 'http://127.0.0.1:8002'), '/');
-
-        $response = Http::post($beUrl . '/api/login', [
-            'email'    => $request->email,
-            'password' => $request->password,
-        ]);
-
-        if ($response->successful()) {
-            $data = $response->json();
-            return response()->json([
-                'success' => true,
-                'token'   => $data['token'],
-                'message' => $data['message'] ?? 'Login berhasil',
-            ]);
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password]) ||
+            Auth::attempt(['nama' => $request->email, 'password' => $request->password])) {
+            $request->session()->regenerate();
+            return redirect()->intended('/dashboard')->with('success', 'Login berhasil');
         }
 
-        $data = $response->json();
-        $message = $data['message'] ?? 'Email atau password salah';
-
-        return response()->json([
-            'success' => false,
-            'message' => $message,
-        ], 401);
+        return back()->with('error', 'Email/nama atau password salah')->onlyInput('email');
     }
 }

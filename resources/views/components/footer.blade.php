@@ -2,7 +2,9 @@
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-brand">
-        <div class="logo">CHRIS<span>BALE</span></div>
+        <div class="bg-red-400" style="width:auto;justify-content:start; display: flex;align-items: start">
+          <div class="logo">CHRIS<span>BALE</span></div>
+        </div>
         <p>Destinasi alas kaki premium Anda. Setiap pasang dikurasi untuk kenyamanan, dibuat untuk ketahanan, dan dirancang untuk gaya hidup modern.</p>
       </div>
       <div>

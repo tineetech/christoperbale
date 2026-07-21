@@ -3,41 +3,37 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
 
 class ForgotPasswordController extends Controller
 {
     public function index()
     {
+        if (Auth::check()) {
+            return redirect('/dashboard');
+        }
         return view('forgot-password');
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-        ]);
+        $request->validate(['email' => 'required|email']);
 
-        $beUrl = rtrim(env('BE_URL', 'http://127.0.0.1:8002'), '/');
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
 
-        $response = Http::post($beUrl . '/api/forgot-password', [
-            'email' => $request->email,
-        ]);
-
-        if ($response->successful()) {
-            $data = $response->json();
+        if ($status === Password::RESET_LINK_SENT) {
             return response()->json([
                 'success' => true,
-                'message' => $data['message'] ?? 'Tautan reset password telah dikirim ke email Anda. Silakan cek inbox utama/kotak spam.',
+                'message' => 'Tautan reset password telah dikirim ke email Anda.',
             ]);
         }
 
-        $data = $response->json();
-        $message = $data['message'] ?? 'Email tidak ditemukan.';
-
         return response()->json([
             'success' => false,
-            'message' => $message,
+            'message' => 'Email tidak ditemukan.',
         ], 404);
     }
 }

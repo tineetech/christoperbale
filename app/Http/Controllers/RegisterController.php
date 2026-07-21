@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pengguna;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Registered;
 
 class RegisterController extends Controller
 {
     public function index()
     {
+        if (Auth::check()) {
+            return redirect('/dashboard');
+        }
         return view('register');
     }
 
@@ -16,37 +22,21 @@ class RegisterController extends Controller
     {
         $request->validate([
             'name'                  => 'required|string|max:100',
-            'email'                 => 'required|email',
+            'email'                 => 'required|email|unique:pengguna,email',
             'password'              => 'required|min:6|confirmed',
             'password_confirmation' => 'required',
         ]);
 
-        $beUrl = rtrim(env('BE_URL', 'http://127.0.0.1:8002'), '/');
-
-        $response = Http::post($beUrl . '/api/register', [
+        $user = Pengguna::create([
             'nama'      => $request->name,
-            'email'     => $request->email,
-            'password'  => $request->password,
-            'password_confirmation' => $request->password_confirmation,
             'full_name' => $request->name,
-            'phone'     => null,
-            'gender'    => null,
+            'email'     => $request->email,
+            'password'  => Hash::make($request->password),
+            'role_id'   => 1,
         ]);
 
-        if ($response->successful()) {
-            return redirect('/login')->with('success', 'Registrasi berhasil! Silakan masuk.');
-        }
+        event(new Registered($user));
 
-        $errors = $response->json();
-
-        if (isset($errors['errors'])) {
-            return back()->withErrors($errors['errors'])->withInput();
-        }
-
-        if (isset($errors['message'])) {
-            return back()->withErrors(['email' => $errors['message']])->withInput();
-        }
-
-        return back()->withErrors(['email' => 'Registrasi gagal. Silakan coba lagi.'])->withInput();
+        return redirect('/login')->with('success', 'Registrasi berhasil! Silakan masuk.');
     }
 }

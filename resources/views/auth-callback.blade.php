@@ -21,6 +21,7 @@ p{font-size:14px;color:#4A4642;}
 (function(){
   var token = @json($token);
   localStorage.setItem('token', token);
+  document.cookie = 'token=' + token + ';path=/;max-age=' + (86400 * 7);
   setTimeout(function(){ window.location.href = '/'; }, 800);
 })();
 </script>

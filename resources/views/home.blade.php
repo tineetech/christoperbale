@@ -2,6 +2,15 @@
 
 @section('title', 'CHRISBALE — Premium Footwear Marketplace')
 
+@push('styles')
+<style>
+    .testi-card blockquote {
+        font-family: 'Inter', sans-serif !important;
+        font-style: normal;
+    }
+</style>
+@endpush
+
 @section('content')
 
     <!-- HERO CAROUSEL -->
@@ -19,8 +28,8 @@
                     </div>
                 </div>
                 <div class="hero-overlay">
-                    <span class="hero-tag">&#9679; Koleksi Baru 2026</span>
-                    <h1>Melangkah dengan <em>Gaya</em> —<br>Kenyamanan Bertemu<br>Elegansi Urban</h1>
+                    {{-- <span class="hero-tag">&#9679; Koleksi Baru 2026</span> --}}
+                    <h1>Kenyamanan Bertemu<br>Elegansi Urban</h1>
                     <p>Temukan koleksi alas kaki terbaru yang dikurasi untuk langkah modern. Dari sneaker premium hingga
                         boots buatan tangan — setiap langkah bercerita.</p>
                     <div class="hero-actions">
@@ -38,7 +47,7 @@
                         alt="Limited Edition">
                 </div>
                 <div class="hero-overlay">
-                    <span class="hero-tag">&#9733; Edisi Terbatas</span>
+                    {{-- <span class="hero-tag">&#9733; Edisi Terbatas</span> --}}
                     <h1>Hanya <em>500 Pasang</em><br>Sneaker Kulit Italia<br>Buatan Tangan</h1>
                     <p>Kulit Italia full-grain, insole memory foam, dan emblem emas khas kami. Eksklusif hanya di CHRISBALE
                         — sebelum habis.</p>
@@ -52,24 +61,24 @@
                 </div>
             </div>
             <div class="hero-slide">
-                <div class="hero-bg">
-                    <div class="hero-bg-left">
+                <div class="hero-bg-full">
+                    {{-- <div class="hero-bg-left"> --}}
                         <img src="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=900&q=80&auto=format&fit=crop"
                             alt="Sale Boots">
-                    </div>
-                    <div class="hero-bg-right">
+                    {{-- </div> --}}
+                    {{-- <div class="hero-bg-right">
                         <img src="https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=900&q=80&auto=format&fit=crop"
                             alt="Sale Chelsea">
-                    </div>
+                    </div> --}}
                 </div>
                 <div class="hero-overlay">
-                    <span class="hero-tag" style="border-color:rgba(192,57,43,0.5);color:#FF8A75;">&#9670; Flash Sale —
-                        Berakhir Minggu Ini</span>
-                    <h1>Diskon Hingga <em style="color:#FF8A75;">30%</em><br>Boots Premium &amp;<br>Seri Signature</h1>
+                    {{-- <span class="hero-tag" style="border-color:rgba(192,57,43,0.5);color:#FF8A75;">&#9670; Flash Sale —
+                        Berakhir Minggu Ini</span> --}}
+                    <h1>Diskon Hingga <em style="color:;">30%</em><br>Boots Premium &amp;<br>Seri Signature</h1>
                     <p>Sale terbesar musim ini telah tiba. Dapatkan boots buatan tangan, loafers kulit, dan high-top ikonik
                         dengan harga tak tertandingi. Stok terbatas.</p>
                     <div class="hero-actions">
-                        <a href="#sale" class="btn-primary" style="background:#C0392B;">Beli di Sale <svg width="13"
+                        <a href="#sale" class="btn-primary" style="background:;">Beli di Sale <svg width="13"
                                 height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                 <path d="M5 12h14M13 6l6 6-6 6" />
                             </svg></a>
@@ -83,7 +92,7 @@
                         alt="New Arrivals">
                 </div>
                 <div class="hero-overlay">
-                    <span class="hero-tag">&#9632; Baru Minggu Ini</span>
+                    {{-- <span class="hero-tag">&#9632; Baru Minggu Ini</span> --}}
                     <h1>Fresh Drops —<br>Dibuat untuk <em>Jalanan</em><br>dan Studio</h1>
                     <p>Performa siap-pakai bertemu desain mewah minimalis. Siluet baru baru saja tiba — dikurasi untuk
                         mereka yang bergerak dengan penuh tujuan.</p>
@@ -117,11 +126,11 @@
         </div>
 
         <div class="carousel-counter" id="heroCounter">01 / 04</div>
-        <div class="carousel-progress" id="heroProgress"></div>
+        {{-- <div class="carousel-progress" id="heroProgress"></div> --}}
     </section>
 
     <!-- MARQUEE -->
-    <div class="marquee">
+    {{-- <div class="marquee">
         <div class="marquee-inner marquee-animate">
             <span>Barang Baru Setiap Hari</span><span class="sep">✦</span>
             <span>Gratis Ongkir di Atas Rp2 Juta</span><span class="sep">✦</span>
@@ -134,7 +143,7 @@
             <span>Kualitas Premium Terjamin</span><span class="sep">✦</span>
             <span>Eksklusif CHRISBALE</span><span class="sep">✦</span>
         </div>
-    </div>
+    </div> --}}
 
     <!-- PRODUCT GRID — Best Sellers -->
     <section class="section" id="shop">

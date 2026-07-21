@@ -2,18 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pengguna;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
 
 class ResetPasswordController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, string $token)
     {
-        $token = $request->query('token');
+        if (Auth::check()) {
+            return redirect('/dashboard');
+        }
+
         $email = $request->query('email');
 
         if (!$token || !$email) {
             return redirect('/login')->withErrors(['email' => 'Link reset password tidak valid.']);
+        }
+
+        $user = Pengguna::where('email', $email)->first();
+
+        if (!$user || !Password::broker()->getRepository()->exists($user, $token)) {
+            return redirect('/login')->withErrors(['email' => 'Token reset password tidak valid atau sudah kedaluwarsa.']);
         }
 
         return view('reset-password', compact('token', 'email'));
@@ -28,28 +39,25 @@ class ResetPasswordController extends Controller
             'password_confirmation' => 'required',
         ]);
 
-        $beUrl = rtrim(env('BE_URL', 'http://127.0.0.1:8002'), '/');
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => bcrypt($password),
+                ])->save();
+            }
+        );
 
-        $response = Http::post($beUrl . '/api/reset-password', [
-            'token'                 => $request->token,
-            'email'                 => $request->email,
-            'password'              => $request->password,
-            'password_confirmation' => $request->password_confirmation,
-        ]);
-
-        if ($response->successful()) {
+        if ($status === Password::PASSWORD_RESET) {
             return response()->json([
                 'success' => true,
                 'message' => 'Password berhasil direset. Silakan login.',
             ]);
         }
 
-        $data = $response->json();
-        $message = $data['message'] ?? 'Token reset password tidak valid atau sudah kedaluwarsa.';
-
         return response()->json([
             'success' => false,
-            'message' => $message,
+            'message' => 'Token reset password tidak valid atau sudah kedaluwarsa.',
         ], 400);
     }
 }

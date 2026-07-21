@@ -14,25 +14,15 @@
 </head>
 
 <body>
+    @if (Auth::check())
     <script>
-        (function(){
-            var token = localStorage.getItem('token');
-            var loggedIn = !!token;
-            if (loggedIn) {
-                fetch("{{ rtrim(env('BE_URL', 'http://127.0.0.1:8002'), '/') }}/api/user", { headers: { 'Authorization': 'Bearer ' + token } })
-                    .then(function(r){
-                        if (r.status === 401 || r.status === 500) {
-                            localStorage.removeItem('token');
-                            document.documentElement.className = 'guest';
-                            console.log(r)
-                        }
-                        console.log(r)
-                    })
-                    .catch(function(){});
-            }
-            document.documentElement.className = loggedIn ? 'logged-in' : 'guest';
-        })();
+        document.documentElement.className = "logged-in";
     </script>
+    @else
+    <script>
+        document.documentElement.className = "guest";
+    </script>
+    @endif
 
     @include('components.header', ['active' => request()->path()])
     @include('components.mobile-drawer', ['active' => request()->path()])

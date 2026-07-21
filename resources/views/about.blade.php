@@ -30,7 +30,7 @@
 </section>
 
 <!-- MARQUEE -->
-<div class="marquee">
+{{-- <div class="marquee">
   <div class="marquee-inner marquee-animate">
     <span>Berdiri di Jakarta</span><span class="sep">✦</span>
     <span>Keahlian Premium</span><span class="sep">✦</span>
@@ -45,7 +45,7 @@
     <span>Kirim ke 15 Negara</span><span class="sep">✦</span>
     <span>Garansi 2 Tahun</span><span class="sep">✦</span>
   </div>
-</div>
+</div> --}}
 
 <!-- STATS BAR -->
 <div class="stats-bar">
@@ -100,7 +100,7 @@
 </section>
 
 <!-- INTERACTIVE TABS — Our Values -->
-<section class="tabs-section">
+{{-- <section class="tabs-section">
   <div class="wrap">
     <div class="section-head reveal" style="margin-bottom:0;">
       <div>
@@ -183,10 +183,10 @@
       </div>
     </div>
   </div>
-</section>
+</section> --}}
 
 <!-- OUR CRAFT — Story Block 2 -->
-<section class="section">
+{{-- <section class="section">
   <div class="wrap">
     <div class="story-grid reverse reveal">
       <div class="story-img-wrap">
@@ -209,7 +209,7 @@
       </div>
     </div>
   </div>
-</section>
+</section> --}}
 
 <!-- TESTIMONIALS -->
 <section class="section" style="padding-top:0;">
