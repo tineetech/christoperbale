@@ -514,9 +514,67 @@ document.addEventListener('DOMContentLoaded', function () {
     // =========================================================
     const faqDataset = [
         {
+            id: 'what',
+            title: 'Tentang CHRISBALE',
+            keywords: ['apa', 'apakah', 'tentang', 'produk', 'sepatu', 'sandal', 'footwear', 'jenis', 'bahan', 'material', 'deskripsi', 'apa itu chrisbale', 'apa yang dijual'],
+            question: 'Apa itu CHRISBALE dan produk apa saja yang dijual?',
+            answer: `CHRISBALE adalah brand alas kaki (footwear) lokal Indonesia yang menghadirkan koleksi sepatu dan sandal pria berdesain modern, elegan, dan nyaman.
+
+Produk unggulan kami meliputi:
+- Sepatu Sneaker & Casual Urban
+- Sepatu Pantofel / Formal / Loafers
+- Sandal Slip-on & Casual (Model kekinian / Birkenstyle)
+Semua produk dibuat dari material sintetis & kulit pilihan berkualitas tinggi yang awet, tidak licin, dan nyaman untuk penggunaan harian.`
+        },
+        {
+            id: 'who',
+            title: 'Profil Brand & Target Konsumen',
+            keywords: ['siapa', 'siapakah', 'owner', 'produsen', 'pembuat', 'brand', 'lokal', 'siapa chrisbale', 'untuk siapa', 'siapa pemilik'],
+            question: 'Siapa CHRISBALE dan untuk siapa produk ini dibuat?',
+            answer: `CHRISBALE adalah brand fashion footwear lokal buatan karya anak bangsa Indonesia.
+
+Produk CHRISBALE dirancang khusus untuk pria modern yang mengutamakan penampilan stylish, kerapihan, dan kenyamanan — baik untuk aktivitas kerja/kantor, acara formal, perkuliahan, hingga santai akhir pekan.`
+        },
+        {
+            id: 'where',
+            title: 'Lokasi Toko & Pengiriman',
+            keywords: ['dimana', 'di mana', 'toko', 'lokasi', 'shopee', 'cb_officialshop', 'alamat', 'gudang', 'dikirim dari', 'offline', 'online', 'dimana tokonya', 'dimana shopee'],
+            question: 'Di mana toko resmi CHRISBALE dan dari mana produk dikirim?',
+            answer: `Saat ini CHRISBALE berfokus pada penjualan online resmi melalui:
+- Website Resmi: CHRISBALE Official
+- Shopee Official Store: cb_officialshop (Christian Bale / CHRISBALE Official)
+
+Semua pesanan dikirim langsung dari gudang utama kami di Indonesia dengan pengemasan rapi dan aman menggunakan dus/box resmi.`
+        },
+        {
+            id: 'when',
+            title: 'Waktu Operasional, Pengiriman & Garansi',
+            keywords: ['kapan', 'jam', 'buka', 'operasional', 'durasi', 'lama', 'waktu', 'sampai', 'garansi', 'proses', 'kapan dikirim', 'berapa hari', 'kapan sampai'],
+            question: 'Kapan jam operasional CS, durasi pengiriman, dan batas garansi retur?',
+            answer: `Informasi waktu & operasional CHRISBALE:
+
+- Jam Operasional CS: Senin - Minggu (09:00 - 21:00 WIB)
+- Proses Pengiriman: Pesanan diproses & dikirim H+1 kerja setelah pembayaran terverifikasi.
+- Durasi Pengiriman: 1-3 hari kerja (Jabodetabek / Pulau Jawa) & 3-5 hari kerja (Luar Pulau Jawa).
+- Batas Garansi Retur / Tukar Size: Maksimal 7 hari setelah paket diterima.`
+        },
+        {
+            id: 'why',
+            title: 'Keunggulan Produk',
+            keywords: ['mengapa', 'kenapa', 'keunggulan', 'kelebihan', 'alasan', 'kenapa harus', 'mengapa memilih', 'bagus', 'kualitas', 'kenapa beli'],
+            question: 'Mengapa saya harus memilih & membeli produk CHRISBALE?',
+            answer: `Keunggulan utama membeli produk CHRISBALE:
+
+1. Desain Elegan & Ergonomis: Mengikuti tren fashion modern dengan kenyamanan maksimal.
+2. Material Berkualitas Tinggi: Awet, fleksibel, jahitan rapi, dan sol anti-licin.
+3. Harga Terjangkau: Kualitas premium dengan harga brand lokal yang bersahabat.
+4. Garansi Tukar Size: Jika ukuran kurang pas, bisa ditukar dalam 7 hari.
+5. 100% Produk Original & Layanan CS Responsif.`
+        },
+        {
             id: 'checkout',
             title: 'Panduan Checkout',
-            keywords: ['checkout', 'beli', 'cara pesan', 'order', 'pesan', 'keranjang', 'langkah checkout'],
+            keywords: ['checkout', 'beli', 'cara pesan', 'order', 'pesan', 'keranjang', 'langkah checkout', 'bagaimana beli', 'bagaimana pesan'],
             question: 'Bagaimana cara melakukan checkout di CHRISBALE?',
             answer: `Berikut adalah panduan langkah mudah untuk melakukan checkout:
 
@@ -529,7 +587,7 @@ document.addEventListener('DOMContentLoaded', function () {
         {
             id: 'pembayaran',
             title: 'Panduan Pembayaran',
-            keywords: ['bayar', 'pembayaran', 'transfer', 'bank', 'cod', 'e-wallet', 'gopay', 'ovo', 'dana', 'shopeepay', 'va', 'virtual account', 'kartu kredit'],
+            keywords: ['bayar', 'pembayaran', 'transfer', 'bank', 'cod', 'e-wallet', 'gopay', 'ovo', 'dana', 'shopeepay', 'va', 'virtual account', 'kartu kredit', 'bagaimana bayar'],
             question: 'Apa saja metode pembayaran yang tersedia?',
             answer: `CHRISBALE menyediakan berbagai pilihan pembayaran yang aman & mudah:
 
@@ -541,7 +599,7 @@ document.addEventListener('DOMContentLoaded', function () {
         {
             id: 'tracking',
             title: 'Panduan Tracking Pesanan',
-            keywords: ['track', 'tracking', 'lacak', 'status', 'resi', 'posisi', 'dikirim', 'dimana', 'pengiriman', 'paket'],
+            keywords: ['track', 'tracking', 'lacak', 'status', 'resi', 'posisi', 'dikirim', 'dimana paket', 'pengiriman', 'paket', 'bagaimana lacak'],
             question: 'Bagaimana cara melacak / tracking status pesanan saya?',
             answer: `Untuk melacak status pesanan Anda:
 
@@ -553,7 +611,7 @@ document.addEventListener('DOMContentLoaded', function () {
         {
             id: 'retur',
             title: 'Panduan Retur Produk',
-            keywords: ['retur', 'tukar', 'kembalikan', 'garansi', 'ukuran', 'size', 'rusak', 'batal', 'pengembalian', 'salah size'],
+            keywords: ['retur', 'tukar', 'kembalikan', 'garansi', 'ukuran', 'size', 'rusak', 'batal', 'pengembalian', 'salah size', 'bagaimana retur'],
             question: 'Bagaimana kebijakan & cara melakukan retur produk?',
             answer: `Ketentuan & Langkah Pengajuan Retur / Tukar Size:
 
@@ -565,7 +623,7 @@ document.addEventListener('DOMContentLoaded', function () {
         {
             id: 'cs',
             title: 'Customer Service & Bantuan',
-            keywords: ['cs', 'contact', 'admin', 'bantuan', 'hubungi cs', 'whatsapp', 'email', 'telepon', 'kontak'],
+            keywords: ['cs', 'contact', 'admin', 'bantuan', 'hubungi cs', 'whatsapp', 'email', 'telepon', 'kontak', 'hubungi admin'],
             question: 'Bagaimana cara menghubungi Customer Service?',
             answer: `Layanan Customer Service CHRISBALE siap membantu Anda:
 
@@ -714,7 +772,60 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 400);
     }
 
-    // Handle Manual Question Typing Search
+    // =========================================================
+    // FUZZY MATCHING (LEVENSHTEIN DISTANCE) & TYPO NORMALIZATION
+    // =========================================================
+    function levenshteinDistance(a, b) {
+        if (a.length === 0) return b.length;
+        if (b.length === 0) return a.length;
+        const matrix = [];
+        for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+        for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                } else {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j - 1] + 1, // substitution
+                        matrix[i][j - 1] + 1,     // insertion
+                        matrix[i - 1][j] + 1      // deletion
+                    );
+                }
+            }
+        }
+        return matrix[b.length][a.length];
+    }
+
+    function isFuzzyMatch(token, keyword) {
+        const t = token.toLowerCase();
+        const k = keyword.toLowerCase();
+        if (t === k) return true;
+        if (t.includes(k) || k.includes(t)) return true;
+        
+        const minLen = Math.min(t.length, k.length);
+        if (minLen <= 3) return t === k;
+        
+        const maxEdits = minLen <= 5 ? 1 : 2;
+        return levenshteinDistance(t, k) <= maxEdits;
+    }
+
+    // Common Indonesian Typo & Slang Normalization Dictionary
+    const typoDictionary = {
+        'cekot': 'checkout', 'cekout': 'checkout', 'chekout': 'checkout', 'orderan': 'order',
+        'bhayar': 'bayar', 'biyer': 'bayar', 'byr': 'bayar', 'trf': 'transfer', 'transfr': 'transfer',
+        'traking': 'tracking', 'trakin': 'tracking', 'resi': 'tracking', 'resii': 'tracking',
+        'ratur': 'retur', 'ritur': 'retur', 'tukar': 'retur', 'garansi': 'retur',
+        'crisbal': 'chrisbale', 'krisbale': 'chrisbale', 'krisbal': 'chrisbale', 'shope': 'shopee',
+        'dimna': 'dimana', 'dmana': 'dimana', 'gimana': 'bagaimana', 'gmna': 'bagaimana'
+    };
+
+    function normalizeTokens(tokens) {
+        return tokens.map(token => typoDictionary[token] || token);
+    }
+
+    // Enhanced Token Scoring Search Engine for 5W1H & Natural Indonesian Input (with Typo Tolerance)
     function handleManualQuestion(userQuery) {
         const trimmed = userQuery.trim();
         if (!trimmed) return;
@@ -724,41 +835,61 @@ document.addEventListener('DOMContentLoaded', function () {
         showTypingIndicator();
 
         const queryLower = trimmed.toLowerCase();
+        const cleanQuery = queryLower.replace(/[^\w\s]/gi, ' ');
+        const rawTokens = cleanQuery.split(/\s+/).filter(t => t.length > 1);
+        const tokens = normalizeTokens(rawTokens);
 
         // Unsupported or out-of-scope topics check
         const unsupportedKeywords = [
             'kripto', 'crypto', 'bitcoin', 'eth', 'usdt', 'paypal', 'pinjol', 
-            'kredit hp', 'paylater', 'utang', 'hutang', 'diskon ultah', 'ulang tahun',
-            'toko fisik', 'toko offline', 'lokasi toko', 'cabang'
+            'kredit hp', 'paylater', 'utang', 'hutang', 'diskon ultah', 'ulang tahun'
         ];
         
         const isUnsupported = unsupportedKeywords.some(ukw => queryLower.includes(ukw));
 
-        let matchedItem = null;
+        let bestMatch = null;
+        let highestScore = 0;
 
         if (!isUnsupported) {
-            // 1. First priority: Check multi-word phrase matches (e.g. "cara bayar", "lacak resi", "retur barang")
-            matchedItem = faqDataset.find(item => {
-                return item.keywords.some(kw => kw.includes(' ') && queryLower.includes(kw));
-            });
+            faqDataset.forEach(item => {
+                let score = 0;
 
-            // 2. Second priority: Check exact word boundary matches for key terms
-            if (!matchedItem) {
-                matchedItem = faqDataset.find(item => {
-                    return item.keywords.some(kw => {
-                        const regex = new RegExp(`\\b${kw}\\b`, 'i');
-                        return regex.test(queryLower);
+                // 1. Multi-word phrase exact matches
+                item.keywords.forEach(kw => {
+                    const kwLower = kw.toLowerCase();
+                    if (kwLower.includes(' ') && queryLower.includes(kwLower)) {
+                        score += 15;
+                    } else if (queryLower.includes(kwLower)) {
+                        score += 6;
+                    }
+                });
+
+                // 2. Token overlap & Fuzzy Typo Matches
+                tokens.forEach(token => {
+                    item.keywords.forEach(kw => {
+                        const kwLower = kw.toLowerCase();
+                        if (kwLower === token) {
+                            score += 5;
+                        } else if (isFuzzyMatch(token, kwLower)) {
+                            score += 4; // Bonus score for typo fuzzy match
+                        }
                     });
                 });
-            }
+
+                if (score > highestScore) {
+                    highestScore = score;
+                    bestMatch = item;
+                }
+            });
         }
 
         setTimeout(function () {
             removeTypingIndicator();
-            if (matchedItem && !isUnsupported) {
-                appendBotMessage(`**${matchedItem.title}**:\n\n${matchedItem.answer}`);
+            if (bestMatch && highestScore >= 4 && !isUnsupported) {
+                appendBotMessage(`**${bestMatch.title}**:\n\n${bestMatch.answer}`);
             } else {
                 appendBotMessage(fallbackAnswer);
+                appendOptionButtons();
             }
         }, 450);
     }
