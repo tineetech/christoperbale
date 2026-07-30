@@ -51,6 +51,15 @@
             <!-- Messages and option buttons injected dynamically via Javascript -->
         </div>
 
+        <!-- Quick Action Chips (Above Typing Input) -->
+        <div class="cb-faq-chips-bar" id="cb-faq-chips">
+            <button type="button" class="cb-chip-item" data-topic="checkout">Cara Order</button>
+            <button type="button" class="cb-chip-item" data-topic="pembayaran">Metode Bayar</button>
+            <button type="button" class="cb-chip-item" data-topic="tracking">Lacak Paket</button>
+            <button type="button" class="cb-chip-item" data-topic="retur">Syarat Retur</button>
+            <button type="button" class="cb-chip-item" data-topic="cs">Hubungi CS</button>
+        </div>
+
         <!-- Footer Manual Input -->
         <form id="cb-faq-form" class="cb-faq-footer" autocomplete="off" onsubmit="return false;">
             <input type="text" id="cb-faq-input" class="cb-faq-input-field" placeholder="Ketik pertanyaan Anda di sini..." />
@@ -335,30 +344,25 @@
 .cb-msg-bot .cb-msg-time { align-self: flex-start; }
 .cb-msg-user .cb-msg-time { align-self: flex-end; }
 
-/* Option Buttons Group (Matching Chat Bubble Style) */
-.cb-faq-options-group {
+/* Option Buttons Group Inside First Chat Bubble */
+.cb-bubble-options {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-top: 2px;
-    margin-bottom: 6px;
-    max-width: 88%;
-    align-self: flex-start;
-    animation: cbFadeMsg 0.25s ease-out forwards;
+    margin-top: 12px;
 }
 
 .cb-option-btn {
     width: 100%;
-    padding: 11px 14px;
-    font-size: 13px;
+    padding: 9px 12px;
+    font-size: 12.5px;
     font-weight: 500;
     font-family: inherit;
     line-height: 1.4;
     color: var(--ink, #11100E);
-    background: var(--bg, #FAFAF8);
+    background: #FFFFFF;
     border: 1px solid var(--line, #E6E3DE);
-    border-radius: 12px;
-    border-top-left-radius: 4px;
+    border-radius: 8px;
     text-align: left;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -372,6 +376,37 @@
     color: #FFFFFF;
     border-color: var(--ink, #11100E);
     transform: translateX(2px);
+}
+
+/* Quick Topic Chips (Above Typing Input) */
+.cb-faq-chips-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--bg, #FAFAF8);
+    border-top: 1px solid var(--line-soft, #F0EDE8);
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.cb-chip-item {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink, #11100E);
+    background: var(--bg-card, #FFFFFF);
+    border: 1px solid var(--line, #E6E3DE);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.cb-chip-item:hover {
+    background: var(--ink, #11100E);
+    color: #FFFFFF;
+    border-color: var(--ink, #11100E);
 }
 
 /* Typing Indicator */
@@ -526,6 +561,17 @@ document.addEventListener('DOMContentLoaded', function () {
 2. Sepatu belum pernah dipakai outdoor & box asli dalam kondisi utuh.
 3. Wajib menyertakan video unboxing sebagai syarat verifikasi.
 4. Hubungi Customer Service kami untuk bantuan proses retur.`
+        },
+        {
+            id: 'cs',
+            title: 'Customer Service & Bantuan',
+            keywords: ['cs', 'contact', 'admin', 'bantuan', 'hubungi cs', 'whatsapp', 'email', 'telepon', 'kontak'],
+            question: 'Bagaimana cara menghubungi Customer Service?',
+            answer: `Layanan Customer Service CHRISBALE siap membantu Anda:
+
+- WhatsApp CS: 0812-3456-7890
+- Email: support@chrisbale.com
+- Jam Operasional: Senin - Minggu (09:00 - 21:00 WIB)`
         }
     ];
 
@@ -539,6 +585,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const chatBody = document.getElementById('cb-faq-body');
     const form = document.getElementById('cb-faq-form');
     const inputField = document.getElementById('cb-faq-input');
+    const chipsContainer = document.getElementById('cb-faq-chips');
     const iconChat = triggerBtn.querySelector('.cb-icon-chat');
     const iconClose = triggerBtn.querySelector('.cb-icon-close');
 
@@ -567,27 +614,26 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Append Option Buttons directly under chat bubble
-    function appendOptionButtons() {
-        const optsDiv = document.createElement('div');
-        optsDiv.className = 'cb-faq-options-group';
-        optsDiv.innerHTML = `
-            <button type="button" class="cb-option-btn" data-topic="checkout">Panduan Checkout</button>
-            <button type="button" class="cb-option-btn" data-topic="pembayaran">Panduan Pembayaran</button>
-            <button type="button" class="cb-option-btn" data-topic="tracking">Panduan Tracking Pesanan</button>
-            <button type="button" class="cb-option-btn" data-topic="retur">Panduan Retur Produk</button>
-        `;
-        chatBody.appendChild(optsDiv);
-        scrollToBottom();
-    }
-
-    // Render Initial Bot Greeting
+    // Render Initial Bot Greeting with Option Buttons inside the First Chat Bubble
     function initChat() {
         chatBody.innerHTML = '';
-        appendBotMessage(`Halo! Selamat datang di **CHRISBALE**.
-
-Silakan pilih topik pertanyaan di bawah ini atau ketik pertanyaan Anda secara langsung:`);
-        appendOptionButtons();
+        const welcomeDiv = document.createElement('div');
+        welcomeDiv.className = 'cb-msg cb-msg-bot';
+        welcomeDiv.innerHTML = `
+            <div class="cb-msg-bubble">
+                Halo! Selamat datang di <strong>CHRISBALE</strong>.<br><br>
+                Silakan pilih topik pertanyaan di bawah ini atau ketik pertanyaan Anda secara langsung:
+                <div class="cb-bubble-options">
+                    <button type="button" class="cb-option-btn" data-topic="checkout">Panduan Checkout</button>
+                    <button type="button" class="cb-option-btn" data-topic="pembayaran">Panduan Pembayaran</button>
+                    <button type="button" class="cb-option-btn" data-topic="tracking">Panduan Tracking Pesanan</button>
+                    <button type="button" class="cb-option-btn" data-topic="retur">Panduan Retur Produk</button>
+                </div>
+            </div>
+            <div class="cb-msg-time">${getCurrentTime()}</div>
+        `;
+        chatBody.appendChild(welcomeDiv);
+        scrollToBottom();
     }
 
     // Append Message to Chat Log
@@ -713,7 +759,6 @@ Silakan pilih topik pertanyaan di bawah ini atau ketik pertanyaan Anda secara la
                 appendBotMessage(`**${matchedItem.title}**:\n\n${matchedItem.answer}`);
             } else {
                 appendBotMessage(fallbackAnswer);
-                appendOptionButtons();
             }
         }, 450);
     }
@@ -734,6 +779,17 @@ Silakan pilih topik pertanyaan di bawah ini atau ketik pertanyaan Anda secara la
             handleSelectTopic(topic);
         }
     });
+
+    // Handle Chips clicks above typing bar
+    if (chipsContainer) {
+        chipsContainer.addEventListener('click', function (e) {
+            const btn = e.target.closest('.cb-chip-item');
+            if (btn) {
+                const topic = btn.getAttribute('data-topic');
+                handleSelectTopic(topic);
+            }
+        });
+    }
 
     // Form submit for manual input
     form.addEventListener('submit', function (e) {
