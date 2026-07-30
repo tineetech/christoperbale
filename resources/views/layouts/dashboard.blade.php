@@ -17,6 +17,8 @@
             max-width: 100%;
         }
 
+        .dashboard-main {
+        }
         .dashboard-main,
         .dash-panel,
         .dash-panel.active {
@@ -1511,6 +1513,11 @@
         }
 
         /* ---- RESPONSIVE ---- */
+        @media (min-width: 1024px) {
+            .dashboard-layout {
+               margin-top: 20px;
+            }
+        }
         @media (max-width: 1024px) {
             .dashboard-layout {
                 grid-template-columns: 240px 1fr;
@@ -1541,6 +1548,7 @@
         @media (max-width: 768px) {
             .dashboard-layout {
                 grid-template-columns: 1fr;
+                margin-top: -50px;
                 max-width: 100%;
                 box-sizing: border-box;
             }
@@ -2124,6 +2132,14 @@
                             </svg>
                             Pesanan Saya
                             <span class="dash-nav-badge">{{ $dashUser->penjualan()->where('order_web', true)->count() }}</span>
+                        </a>
+                        <a href="{{ route('dashboard.keranjang') }}" class="dash-nav-item {{ request()->routeIs('dashboard.keranjang') ? 'active' : '' }}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                            </svg>
+                            Keranjang
+                            <span class="dash-nav-badge">{{ \App\Models\Cart::where('user_id', $dashUser->id)->count() }}</span>
                         </a>
                         <a href="{{ route('dashboard.wishlist') }}" class="dash-nav-item {{ request()->routeIs('dashboard.wishlist') ? 'active' : '' }}">
                             <svg viewBox="0 0 24 24">

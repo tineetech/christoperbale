@@ -2,193 +2,221 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
+use App\Models\DiscountProduct;
+use App\Models\PenjualanDetail;
+use App\Models\Produk;
+use App\Models\ProdukVarian;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    public function products()
+    private function productDiscount($produk)
     {
+        $activeDiscounts = DiscountProduct::with('discount')
+            ->where('product_id', $produk->id)
+            ->where('status', 'active')
+            ->get()
+            ->filter(fn($dp) => $dp->discount);
+
+        if ($activeDiscounts->isEmpty()) {
+            return [
+                'price' => (float) $produk->harga_normal,
+                'old' => null,
+                'badge' => null,
+            ];
+        }
+
+        $totalPercent = 0;
+        $totalFixed = 0;
+
+        foreach ($activeDiscounts as $dp) {
+            $d = $dp->discount;
+            if ($d->type === 'percentage') {
+                $totalPercent += (float) $d->value;
+            } elseif ($d->type === 'fixed') {
+                $totalFixed += (float) $d->value;
+            }
+        }
+
+        $price = (float) $produk->harga_normal;
+        $price = $price * (1 - $totalPercent / 100);
+        $price = max(0, $price - $totalFixed);
+
         return [
-            'chrisbale-urban-runner' => [
-                'slug' => 'chrisbale-urban-runner', 'name' => 'CHRISBALE Urban Runner', 'brand' => 'CHRISBALE',
-                'price' => 149, 'old' => null, 'badge' => 'new', 'rating' => 5, 'review_count' => 124,
-                'img' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80&auto=format&fit=crop',
-                'imgs' => [
-                    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80',
-                    'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800&q=80',
-                    'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800&q=80',
-                ],
-                'desc' => 'Sneaker performa tinggi dengan desain urban modern. Dibuat dari bahan premium yang nyaman dipakai sepanjang hari, cocok untuk gaya aktif Anda.',
-                'features' => ['Upper mesh breathable', 'Insole memory foam', 'Sol karet anti-slip', 'Desain ergonomis', 'Berat ringan hanya 280gr'],
-                'sizes' => [39, 40, 41, 42, 43, 44], 'colors' => ['Hitam', 'Putih', 'Navy'],
-                'sku' => 'CB-UR-001', 'category' => 'Sneakers',
-            ],
-            'gold-leather-loafer' => [
-                'slug' => 'gold-leather-loafer', 'name' => 'Gold Leather Loafer', 'brand' => 'Agatha',
-                'price' => 189, 'old' => 249, 'badge' => 'hot', 'rating' => 5, 'review_count' => 89,
-                'img' => 'https://images.unsplash.com/photo-1614252369475-531eba835eb1?w=800&q=80&auto=format&fit=crop',
-                'imgs' => [
-                    'https://images.unsplash.com/photo-1614252369475-531eba835eb1?w=800&q=80',
-                    'https://images.unsplash.com/photo-1614252369475-531eba835eb1?w=800&q=80',
-                ],
-                'desc' => 'Loafers kulit dengan detail emas yang elegan. Perpaduan sempurna antara gaya klasik dan sentuhan mewah untuk tampilan formal maupun kasual.',
-                'features' => ['Kulit sapi full-grain', 'Aksen emas 24K', 'Insole empuk', 'Sol kulit fleksibel', 'Buatan tangan'],
-                'sizes' => [38, 39, 40, 41, 42], 'colors' => ['Emas', 'Cokelat', 'Hitam'],
-                'sku' => 'AG-GL-002', 'category' => 'Loafers',
-            ],
-            'combat-boot-black' => [
-                'slug' => 'combat-boot-black', 'name' => 'Combat Boot — Hitam', 'brand' => 'CHRISBALE',
-                'price' => 215, 'old' => 280, 'badge' => 'new', 'rating' => 4, 'review_count' => 56,
-                'img' => 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=800&q=80&auto=format&fit=crop',
-                'imgs' => [
-                    'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=800&q=80',
-                    'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=800&q=80',
-                ],
-                'desc' => 'Boot gagah dengan gaya combat ikonik. Dibuat dari kulit premium dengan sol kokoh, siap menemani petualangan Anda di berbagai medan.',
-                'features' => ['Kulit full-grain tebal', 'Sol karet gigi', 'Ritsleting samping', 'Lapisan dalam hangat', 'Tahan air'],
-                'sizes' => [40, 41, 42, 43, 44, 45], 'colors' => ['Hitam', 'Cokelat Tua'],
-                'sku' => 'CB-CB-003', 'category' => 'Boots',
-            ],
-            'classic-slip-on-white' => [
-                'slug' => 'classic-slip-on-white', 'name' => 'Classic Slip-On Putih', 'brand' => 'Agatha',
-                'price' => 99, 'old' => 139, 'badge' => 'sale', 'rating' => 5, 'review_count' => 203,
-                'img' => 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=800&q=80&auto=format&fit=crop',
-                'imgs' => [
-                    'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=800&q=80',
-                    'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=800&q=80',
-                ],
-                'desc' => 'Slip-on klasik warna putih yang timeless. Nyaman dipakai tanpa tali, cocok untuk gaya sehari-hari yang santai namun tetap stylish.',
-                'features' => ['Canvas premium', 'Insole empuk', 'Sol karet fleksibel', 'Tanpa tali', 'Ringan'],
-                'sizes' => [38, 39, 40, 41, 42, 43], 'colors' => ['Putih', 'Krem'],
-                'sku' => 'AG-CS-004', 'category' => 'Sneakers',
-            ],
-            'red-strap-sandal' => [
-                'slug' => 'red-strap-sandal', 'name' => 'Red Strap Sandal', 'brand' => 'CHRISBALE',
-                'price' => 119, 'old' => null, 'badge' => 'new', 'rating' => 4, 'review_count' => 42,
-                'img' => 'https://images.unsplash.com/photo-1603487742131-4160ec999306?w=800&q=80&auto=format&fit=crop',
-                'imgs' => [
-                    'https://images.unsplash.com/photo-1603487742131-4160ec999306?w=800&q=80',
-                    'https://images.unsplash.com/photo-1603487742131-4160ec999306?w=800&q=80',
-                ],
-                'desc' => 'Sandal strap merah yang berani dan stylish. Nyaman dipakai untuk liburan atau hangout santai dengan desain yang menonjol.',
-                'features' => ['Kulit asli', 'Strap adjustable', 'Sol karet', 'Nyaman dipakai lama', 'Desain时尚'],
-                'sizes' => [37, 38, 39, 40, 41], 'colors' => ['Merah', 'Hitam'],
-                'sku' => 'CB-RS-005', 'category' => 'Sandal',
-            ],
-            'navy-slide-sandal' => [
-                'slug' => 'navy-slide-sandal', 'name' => 'Navy Slide Sandal', 'brand' => 'Agatha',
-                'price' => 109, 'old' => null, 'badge' => 'new', 'rating' => 5, 'review_count' => 78,
-                'img' => 'https://images.unsplash.com/photo-1562183241-b937e9102f3b?w=800&q=80&auto=format&fit=crop',
-                'imgs' => [
-                    'https://images.unsplash.com/photo-1562183241-b937e9102f3b?w=800&q=80',
-                    'https://images.unsplash.com/photo-1562183241-b937e9102f3b?w=800&q=80',
-                ],
-                'desc' => 'Slide sandal navy yang elegan dan praktis. Tinggal selip dan jalan — kenyamanan maksimal untuk hari-hari santai Anda.',
-                'features' => ['Material premium', 'Desain slide', 'Sol empuk', 'Anti-slip', 'Tahan air'],
-                'sizes' => [38, 39, 40, 41, 42], 'colors' => ['Navy', 'Hitam', 'Putih'],
-                'sku' => 'AG-NS-006', 'category' => 'Sandal',
-            ],
-            'brown-leather-mule' => [
-                'slug' => 'brown-leather-mule', 'name' => 'Brown Leather Mule', 'brand' => 'CHRISBALE',
-                'price' => 159, 'old' => null, 'badge' => null, 'rating' => 5, 'review_count' => 34,
-                'img' => 'https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?w=800&q=80&auto=format&fit=crop',
-                'imgs' => [
-                    'https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?w=800&q=80',
-                    'https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?w=800&q=80',
-                ],
-                'desc' => 'Mule kulit cokelat yang sophisticated. Perpaduan antara kenyamanan sandal dan elegansi sepatu — sempurna untuk ke kantor maupun acara semi-formal.',
-                'features' => ['Kulit sapi premium', 'Insole memory foam', 'Sol kulit', 'Desain open-back', 'Buatan tangan'],
-                'sizes' => [39, 40, 41, 42, 43], 'colors' => ['Cokelat', 'Hitam'],
-                'sku' => 'CB-BM-007', 'category' => 'Loafers',
-            ],
-            'canvas-high-top' => [
-                'slug' => 'canvas-high-top', 'name' => 'Canvas High Top', 'brand' => 'Agatha',
-                'price' => 89, 'old' => 118, 'badge' => 'sale', 'rating' => 5, 'review_count' => 167,
-                'img' => 'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800&q=80&auto=format&fit=crop',
-                'imgs' => [
-                    'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800&q=80',
-                    'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800&q=80',
-                ],
-                'desc' => 'High top canvas klasik yang wajib dimiliki. Gaya kasual ikonik dengan harga terjangkau — favorit sepanjang masa untuk semua kalangan.',
-                'features' => ['Canvas premium', 'Sol karet putih', 'Tali panjang', 'Ventilasi baik', 'Nyaman seharian'],
-                'sizes' => [38, 39, 40, 41, 42, 43, 44], 'colors' => ['Putih', 'Hitam', 'Merah'],
-                'sku' => 'AG-CH-008', 'category' => 'Sneakers',
-            ],
-            'chrisbale-heritage-boot' => [
-                'slug' => 'chrisbale-heritage-boot', 'name' => 'CHRISBALE Heritage Boot', 'brand' => 'CHRISBALE',
-                'price' => 245, 'old' => null, 'badge' => null, 'rating' => 5, 'review_count' => 28,
-                'img' => 'https://images.unsplash.com/photo-1605408499391-636e48a28621?w=800&q=80&auto=format&fit=crop',
-                'imgs' => [
-                    'https://images.unsplash.com/photo-1605408499391-636e48a28621?w=800&q=80',
-                    'https://images.unsplash.com/photo-1605408499391-636e48a28621?w=800&q=80',
-                ],
-                'desc' => 'Boot warisan dengan desain klasik yang tak lekang waktu. Kulit pilihan dan konstruksi kokoh membuatnya awet dipakai bertahun-tahun.',
-                'features' => ['Kulit pull-up eksklusif', 'Sol welt Goodyear', 'Insole kulit', 'Tahan lama', 'Bisa di-resole'],
-                'sizes' => [40, 41, 42, 43, 44, 45], 'colors' => ['Cokelat Tua', 'Hitam'],
-                'sku' => 'CB-HB-009', 'category' => 'Boots',
-            ],
-            'agatha-woven-mule' => [
-                'slug' => 'agatha-woven-mule', 'name' => 'Agatha Woven Mule', 'brand' => 'Agatha',
-                'price' => 135, 'old' => null, 'badge' => 'new', 'rating' => 5, 'review_count' => 47,
-                'img' => 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&q=80&auto=format&fit=crop',
-                'imgs' => [
-                    'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&q=80',
-                    'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&q=80',
-                ],
-                'desc' => 'Mule anyaman khas Agatha yang anggun. Detail anyaman tangan memberikan tekstur unik — perpaduan sempurna antara tradisi dan gaya modern.',
-                'features' => ['Anyaman kulit tangan', 'Insole empuk', 'Sol karet', 'Desain terbuka', 'Ringan'],
-                'sizes' => [37, 38, 39, 40, 41], 'colors' => ['Cokelat', 'Krem', 'Hitam'],
-                'sku' => 'AG-WM-010', 'category' => 'Loafers',
-            ],
-            'chrisbale-trail-runner' => [
-                'slug' => 'chrisbale-trail-runner', 'name' => 'CHRISBALE Trail Runner', 'brand' => 'CHRISBALE',
-                'price' => 175, 'old' => null, 'badge' => 'hot', 'rating' => 5, 'review_count' => 93,
-                'img' => 'https://images.unsplash.com/photo-1584735175315-9d5df23be1f2?w=800&q=80&auto=format&fit=crop',
-                'imgs' => [
-                    'https://images.unsplash.com/photo-1584735175315-9d5df23be1f2?w=800&q=80',
-                    'https://images.unsplash.com/photo-1584735175315-9d5df23be1f2?w=800&q=80',
-                ],
-                'desc' => 'Trail runner siap diajak ke medan apa pun. Grip maksimal, bantalan responsif, dan material tahan air — teman setia petualangan Anda.',
-                'features' => ['Upper tahan air', 'Sol Vibram', 'Bantalan React', 'Pelindung jari', 'Reflective detail'],
-                'sizes' => [39, 40, 41, 42, 43, 44, 45], 'colors' => ['Hitam', 'Abu-Abu', 'Hijau Army'],
-                'sku' => 'CB-TR-011', 'category' => 'Sneakers',
-            ],
-            'agatha-buckle-slide' => [
-                'slug' => 'agatha-buckle-slide', 'name' => 'Agatha Buckle Slide', 'brand' => 'Agatha',
-                'price' => 128, 'old' => 165, 'badge' => 'sale', 'rating' => 5, 'review_count' => 112,
-                'img' => 'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=800&q=80&auto=format&fit=crop',
-                'imgs' => [
-                    'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=800&q=80',
-                    'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=800&q=80',
-                ],
-                'desc' => 'Slide dengan detail buckle yang fashion-forward. Nyaman dipakai dan mudah dipadukan dengan berbagai outfit kasual hingga semi-formal.',
-                'features' => ['Kulit halus', 'Detail buckle emas', 'Insole empuk', 'Sol karet', 'Desain slide mudah'],
-                'sizes' => [37, 38, 39, 40, 41, 42], 'colors' => ['Hitam', 'Cokelat', 'Putih'],
-                'sku' => 'AG-BS-012', 'category' => 'Sandal',
-            ],
+            'price' => $price,
+            'old' => (float) $produk->harga_normal,
+            'badge' => 'sale',
         ];
     }
 
     public function index($brand = null)
     {
-        $allProducts = $this->products();
+        $query = Produk::with(['brand', 'fotoUtama'])->where('status', 'aktif');
+
+        $selectedBrand = null;
+        if ($brand) {
+            $selectedBrand = Brand::where('status_brand', 'aktif')
+                ->whereRaw('LOWER(nama_brand) = ?', [strtolower($brand)])
+                ->first();
+            if ($selectedBrand) {
+                $query->where('brand_id', $selectedBrand->id);
+            }
+        }
+
+        $products = $query->get();
+
+        $allBrands = Brand::where('status_brand', 'aktif')->get();
+
+        $formatted = $products->map(function ($p) {
+            $imgUrl = $p->fotoUtama
+                ? env('BE_URL') . '/storage/' . $p->fotoUtama->foto
+                : null;
+
+            $disc = $this->productDiscount($p);
+
+            $badge = $disc['badge'];
+            if (!$badge && $p->created_at && $p->created_at->diffInDays(now()) < 30) {
+                $badge = 'new';
+            }
+
+            return [
+                'slug' => $p->slug,
+                'name' => $p->nama_produk,
+                'brand' => $p->brand->nama_brand ?? '',
+                'price' => (float) $disc['price'],
+                'old' => $disc['old'],
+                'badge' => $badge,
+                'img' => $imgUrl,
+                'category' => '',
+            ];
+        });
 
         return view('products', [
-            'brand' => $brand ? ucfirst(strtolower($brand)) : null,
-            'allProducts' => $allProducts,
+            'brand' => $selectedBrand?->nama_brand,
+            'allProducts' => $formatted->toArray(),
+            'brands' => $allBrands,
         ]);
     }
 
     public function show($slug)
     {
-        $allProducts = $this->products();
+        $product = Produk::with(['brand', 'foto', 'fotoUtama', 'barang'])->where('slug', $slug)->firstOrFail();
 
-        if (!array_key_exists($slug, $allProducts)) {
-            abort(404);
+        $imgUrl = $product->fotoUtama
+            ? env('BE_URL') . '/storage/' . $product->fotoUtama->foto
+            : null;
+
+        $imgs = $product->foto->sortBy('urutan')->map(fn($f) => env('BE_URL') . '/storage/' . $f->foto)->toArray();
+        if (empty($imgs) && $imgUrl) {
+            $imgs = [$imgUrl];
         }
 
+        $disc = $this->productDiscount($product);
+
+        $badge = $disc['badge'];
+        if (!$badge && $product->created_at && $product->created_at->diffInDays(now()) < 30) {
+            $badge = 'new';
+        }
+
+        // Varian (size + color) with stock check
+        $varian = ProdukVarian::with('barang.stok')
+            ->where('produk_id', $product->id)
+            ->get();
+
+        $sizes = $varian->groupBy('size')->map(function ($group) {
+            $available = $group->contains(fn($v) => $v->barang && $v->barang->stok && $v->barang->stok->jumlah_stok >= 1);
+            return ['value' => $group->first()->size, 'available' => $available];
+        })->values()->toArray();
+
+        $colorRules = [
+            [['baby', 'pink'], '#F4C2C2'],
+            [['burgundy'], '#800020'],
+            [['cream'], '#FFFDD0'],
+            [['hitam', 'black'], '#111111'],
+            [['putih', 'white'], '#F5F5F5'],
+            [['abu'], '#616161'],
+            [['navy', 'biru'], '#1A237E'],
+            [['merah', 'red'], '#D32F2F'],
+            [['cokelat', 'coklat', 'brown'], '#5D4037'],
+            [['krem', 'beige'], '#FFF8E1'],
+            [['emas', 'gold'], '#C7A252'],
+            [['hijau', 'green', 'army'], '#4B5320'],
+            [['kuning', 'yellow'], '#FFD700'],
+            [['ungu', 'purple'], '#8E24AA'],
+            [['jingga', 'orange'], '#FF6F00'],
+        ];
+
+        $colors = $varian->groupBy('warna')->map(function ($group) use ($colorRules) {
+            $name = $group->first()->warna;
+            $lower = strtolower($name);
+            $hex = '#333333';
+            foreach ($colorRules as [$keywords, $color]) {
+                foreach ($keywords as $kw) {
+                    if (str_contains($lower, $kw)) {
+                        $hex = $color;
+                        break 2;
+                    }
+                }
+            }
+            $available = $group->contains(fn($v) => $v->barang && $v->barang->stok && $v->barang->stok->jumlah_stok >= 1);
+            return [
+                'name' => $name,
+                'hex' => $hex,
+                'available' => $available,
+            ];
+        })->values()->toArray();
+
+        // Review count: distinct penjualan that include this product
+        $barangIds = $product->barang->pluck('id');
+        $reviewCount = PenjualanDetail::whereIn('barang_id', $barangIds)
+            ->distinct('penjualan_id')
+            ->count('penjualan_id');
+
+        $allProducts = Produk::with(['brand', 'fotoUtama'])
+            ->where('status', 'aktif')
+            ->where('id', '!=', $product->id)
+            ->take(8)
+            ->get()
+            ->map(function ($p) {
+                $disc = $this->productDiscount($p);
+                return [
+                    'slug' => $p->slug,
+                    'name' => $p->nama_produk,
+                    'brand' => $p->brand->nama_brand ?? '',
+                    'price' => $disc['price'],
+                    'old' => $disc['old'],
+                    'badge' => $disc['badge'],
+                    'img' => $p->fotoUtama ? env('BE_URL') . '/storage/' . $p->fotoUtama->foto : null,
+                    'category' => '',
+                ];
+            })
+            ->toArray();
+
+        $productData = [
+            'id' => $product->id,
+            'slug' => $product->slug,
+            'name' => $product->nama_produk,
+            'brand' => $product->brand->nama_brand ?? '',
+            'price' => (float) $disc['price'],
+            'old' => $disc['old'],
+            'badge' => $badge,
+            'rating' => 5,
+            'review_count' => $reviewCount,
+            'total_buyers' => $reviewCount,
+            'img' => $imgUrl,
+            'imgs' => $imgs,
+            'desc' => $product->deskripsi ?? '',
+            'features' => [],
+            'sizes' => $sizes,
+            'colors' => $colors,
+            'sku' => '',
+            'category' => '',
+        ];
+
         return view('product-detail', [
-            'product' => $allProducts[$slug],
+            'product' => $productData,
             'allProducts' => $allProducts,
         ]);
     }

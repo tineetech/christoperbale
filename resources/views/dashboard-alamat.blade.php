@@ -136,7 +136,7 @@
                         </div>
                         <div class="form-group">
                             <label for="addr_district">Kecamatan</label>
-                            <input type="text" id="addr_district" name="district" placeholder="Kebayoran Baru">
+                            <input type="text" id="addr_district" name="district" placeholder="Kebayoran Baru" required>
                         </div>
                         <div class="form-group">
                             <label for="addr_postal_code">Kode Pos <span style="color:var(--red);">*</span></label>

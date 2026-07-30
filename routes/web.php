@@ -9,6 +9,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ResetPasswordController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Session;
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/about', [AboutController::class, 'index']);
 Route::get('/contact', [ContactController::class, 'index']);
-Route::get('/products/{brand?}', [ProductController::class, 'index'])->whereIn('brand', ['chrisbale', 'agatha']);
+Route::get('/products/{brand?}', [ProductController::class, 'index']);
 Route::get('/product/{slug}', [ProductController::class, 'show']);
 Route::view('/terms', 'terms');
 Route::view('/privacy', 'privacy');
@@ -39,6 +40,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'overview'])->name('dashboard');
     Route::get('/dashboard/pesanan', [DashboardController::class, 'pesanan'])->name('dashboard.pesanan');
     Route::get('/dashboard/pesanan/{id}', [DashboardController::class, 'pesananDetail'])->name('dashboard.pesanan.detail');
+    Route::get('/dashboard/keranjang', [DashboardController::class, 'keranjang'])->name('dashboard.keranjang');
+    Route::delete('/dashboard/keranjang/{id}', [DashboardController::class, 'deleteCartItem'])->name('dashboard.keranjang.delete');
+    Route::post('/cart/add', [DashboardController::class, 'addToCart'])->name('cart.add');
     Route::get('/dashboard/wishlist', [DashboardController::class, 'wishlist'])->name('dashboard.wishlist');
     Route::get('/dashboard/profil', [DashboardController::class, 'profil'])->name('dashboard.profil');
     Route::post('/dashboard/profil', [DashboardController::class, 'updateProfile'])->name('dashboard.profil.update');
@@ -51,6 +55,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/voucher', [DashboardController::class, 'voucher'])->name('dashboard.voucher');
     Route::get('/dashboard/voucher/{id}', [DashboardController::class, 'voucherDetail'])->name('dashboard.voucher.detail');
     Route::post('/dashboard/voucher/claim', [DashboardController::class, 'claimVoucher'])->name('dashboard.voucher.claim');
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
 
     Route::get('/logout', function () {
         Auth::guard('web')->logout();

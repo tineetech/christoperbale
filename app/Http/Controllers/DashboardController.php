@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
+use App\Models\DiscountProduct;
 use App\Models\Penjualan;
+use App\Models\PengaturanWeb;
 use App\Models\Pengguna;
+use App\Models\ProdukVarian;
 use App\Models\UserAddress;
 use App\Models\UserVoucher;
 use App\Models\Voucher;
@@ -101,7 +105,7 @@ class DashboardController extends Controller
             'phone'         => 'required|string|max:20',
             'province'      => 'required|string|max:100',
             'city'          => 'required|string|max:100',
-            'district'      => 'nullable|string|max:100',
+            'district'      => 'required|string|max:100',
             'postal_code'   => 'required|string|max:10',
             'address'       => 'required|string',
         ]);
@@ -116,6 +120,11 @@ class DashboardController extends Controller
             $data['is_default'] = true;
         } else {
             $data['is_default'] = !$hasAddresses;
+        }
+
+        $areaId = $this->lookupBiteshipArea($data['district'] ?? '', $data['city'], $data['province'], $data['postal_code']);
+        if ($areaId) {
+            $data['area_id'] = $areaId;
         }
 
         UserAddress::create($data);
@@ -133,7 +142,7 @@ class DashboardController extends Controller
             'phone'         => 'required|string|max:20',
             'province'      => 'required|string|max:100',
             'city'          => 'required|string|max:100',
-            'district'      => 'nullable|string|max:100',
+            'district'      => 'required|string|max:100',
             'postal_code'   => 'required|string|max:10',
             'address'       => 'required|string',
         ]);
@@ -143,6 +152,11 @@ class DashboardController extends Controller
         if ($request->boolean('is_default')) {
             Auth::user()->addresses()->where('id', '!=', $id)->update(['is_default' => false]);
             $data['is_default'] = true;
+        }
+
+        $areaId = $this->lookupBiteshipArea($data['district'] ?? '', $data['city'], $data['province'], $data['postal_code']);
+        if ($areaId) {
+            $data['area_id'] = $areaId;
         }
 
         $address->update($data);
@@ -294,5 +308,151 @@ class DashboardController extends Controller
         ]);
 
         return redirect()->route('dashboard.profil')->with('success', 'Kata sandi berhasil diperbarui.');
+    }
+
+    public function keranjang()
+    {
+        $user = Auth::user();
+        $items = Cart::with('barang.produk.brand', 'barang.produkVarian')
+            ->where('user_id', $user->id)
+            ->get()
+            ->sortBy(fn($i) => $i->barang?->produk_id);
+
+        $items->each(function ($item) {
+            $normal = (float) ($item->barang->produk->harga_normal ?? 0);
+            $activeDiscounts = DiscountProduct::with('discount')
+                ->where('product_id', $item->barang->produk_id)
+                ->where('status', 'active')
+                ->get()
+                ->filter(fn($dp) => $dp->discount);
+
+            $totalPercent = 0;
+            $totalFixed = 0;
+            foreach ($activeDiscounts as $dp) {
+                $d = $dp->discount;
+                if ($d->type === 'percentage') $totalPercent += (float) $d->value;
+                elseif ($d->type === 'fixed') $totalFixed += (float) $d->value;
+            }
+
+            $discounted = $normal;
+            $discounted = $discounted * (1 - $totalPercent / 100);
+            $discounted = max(0, $discounted - $totalFixed);
+
+            $item->discountPercent = $totalPercent + ($normal > 0 ? round(($totalFixed / $normal) * 100) : 0);
+            $item->finalPrice = $discounted;
+            $item->hasDiscount = $activeDiscounts->isNotEmpty();
+
+            $varian = $item->barang->produkVarian->first();
+            $item->varianSize = $varian?->size ?? '';
+            $item->varianColor = $varian?->warna ?? '';
+        });
+
+        return view('dashboard-keranjang', [
+            'title' => 'Keranjang — CHRISBALE',
+            'items' => $items,
+        ]);
+    }
+
+    public function deleteCartItem($id)
+    {
+        $item = Cart::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        $item->delete();
+        return response()->json(['ok' => true]);
+    }
+
+    public function addToCart(Request $request)
+    {
+        $request->validate([
+            'produk_id' => 'required|integer',
+            'size' => 'nullable|string|max:50',
+            'color' => 'nullable|string|max:50',
+            'qty' => 'required|integer|min:1|max:99',
+        ]);
+
+        $varian = ProdukVarian::where('produk_id', $request->produk_id)
+            ->where('size', $request->size)
+            ->where('warna', $request->color)
+            ->first();
+
+        if (!$varian) {
+            return response()->json(['ok' => false, 'message' => 'Varian tidak ditemukan.'], 404);
+        }
+
+        $existing = Cart::where('user_id', Auth::id())
+            ->where('barang_id', $varian->barang_id)
+            ->first();
+
+        if ($existing) {
+            $newQty = $existing->qty + $request->qty;
+            $existing->update(['qty' => min($newQty, 99)]);
+        } else {
+            Cart::create([
+                'user_id' => Auth::id(),
+                'barang_id' => $varian->barang_id,
+                'qty' => $request->qty,
+            ]);
+        }
+
+        return response()->json(['ok' => true, 'message' => 'Produk ditambahkan ke keranjang.']);
+    }
+
+    private function lookupBiteshipArea($district, $city, $province, $postalCode)
+    {
+        $apiKey = PengaturanWeb::where('key', 'Api Key Biteship')->value('value');
+        if (!$apiKey) {
+            return null;
+        }
+
+        $input = trim($district . ' ' . $city . ' ' . $province . ' ' . $postalCode);
+        $input = preg_replace('/\s+/', ' ', $input);
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => 'https://api.biteship.com/v1/maps/areas?input=' . urlencode($input),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $apiKey,
+                'Content-Type: application/json',
+            ],
+            CURLOPT_TIMEOUT => 10,
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            return null;
+        }
+
+        $data = json_decode($response, true);
+        if (empty($data['success']) || empty($data['areas'])) {
+            return null;
+        }
+
+        $areaId = $data['areas'][0]['id'] ?? null;
+        if (!$areaId) {
+            return null;
+        }
+
+        $ch2 = curl_init();
+        curl_setopt_array($ch2, [
+            CURLOPT_URL => 'https://api.biteship.com/v1/maps/areas/' . $areaId,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $apiKey,
+                'Content-Type: application/json',
+            ],
+            CURLOPT_TIMEOUT => 10,
+        ]);
+        $response2 = curl_exec($ch2);
+        $httpCode2 = curl_getinfo($ch2, CURLINFO_HTTP_CODE);
+        curl_close($ch2);
+
+        if ($httpCode2 !== 200) {
+            return $areaId;
+        }
+
+        $data2 = json_decode($response2, true);
+        return $data2['areas'][0]['id'] ?? $areaId;
     }
 }

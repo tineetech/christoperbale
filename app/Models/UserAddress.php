@@ -18,6 +18,7 @@ class UserAddress extends Model
         'postal_code',
         'address',
         'label',
+        'area_id',
         'is_default',
     ];
 
