@@ -1,5 +1,5 @@
 <!-- =========================================================
-     CHRISBALE STICKY FAQ CHATBOT COMPONENT (HTML, CSS & JS)
+     CHRISBALE STICKY FAQ CHATBOT COMPONENT (CLEAN DESIGN)
      ========================================================= -->
 <div id="cb-faq-wrapper">
     <!-- Sticky Floating Button (Bottom Right) -->
@@ -46,36 +46,9 @@
             </div>
         </div>
 
-        <!-- Template Questions Selector Dropdown -->
-        <div class="cb-faq-dropdown-bar">
-            <label for="cb-faq-select" class="cb-faq-select-label">Pilihan Pertanyaan Cepat:</label>
-            <div class="cb-faq-select-wrapper">
-                <select id="cb-faq-select" class="cb-faq-select-input">
-                    <option value="" disabled selected>-- Pilih Pertanyaan Template --</option>
-                    <option value="checkout">Panduan Checkout</option>
-                    <option value="pembayaran">Panduan Pembayaran</option>
-                    <option value="tracking">Panduan Tracking Pesanan</option>
-                    <option value="retur">Panduan Retur Produk</option>
-                </select>
-                <div class="cb-faq-select-arrow">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                </div>
-            </div>
-        </div>
-
         <!-- Chat History Body -->
         <div id="cb-faq-body" class="cb-faq-body">
-            <!-- Messages injected dynamically via Javascript -->
-        </div>
-
-        <!-- Quick Topic Chips -->
-        <div class="cb-faq-chips-bar" id="cb-faq-chips">
-            <button type="button" class="cb-chip-item" data-topic="checkout">Checkout</button>
-            <button type="button" class="cb-chip-item" data-topic="pembayaran">Pembayaran</button>
-            <button type="button" class="cb-chip-item" data-topic="tracking">Tracking</button>
-            <button type="button" class="cb-chip-item" data-topic="retur">Retur</button>
+            <!-- Messages and option buttons injected dynamically via Javascript -->
         </div>
 
         <!-- Footer Manual Input -->
@@ -280,65 +253,10 @@
     color: #FFFFFF;
 }
 
-/* Dropdown Select Bar */
-.cb-faq-dropdown-bar {
-    background: var(--bg, #FAFAF8);
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--line, #E6E3DE);
-}
-
-.cb-faq-select-label {
-    display: block;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--ink-soft, #4A4642);
-    margin-bottom: 6px;
-}
-
-.cb-faq-select-wrapper {
-    position: relative;
-    width: 100%;
-}
-
-.cb-faq-select-input {
-    width: 100%;
-    padding: 9px 34px 9px 12px;
-    font-size: 13px;
-    font-weight: 500;
-    font-family: inherit;
-    color: var(--ink, #11100E);
-    background: var(--bg-card, #FFFFFF);
-    border: 1.5px solid var(--line, #E6E3DE);
-    border-radius: 8px;
-    appearance: none;
-    -webkit-appearance: none;
-    cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.cb-faq-select-input:focus {
-    outline: none;
-    border-color: var(--accent, #B8860B);
-    box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.12);
-}
-
-.cb-faq-select-arrow {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    color: var(--ink-muted, #8A8580);
-    display: flex;
-    align-items: center;
-}
-
 /* Chat Body */
 .cb-faq-body {
     flex: 1;
-    padding: 16px;
+    padding: 18px 16px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -368,7 +286,7 @@
 .cb-msg {
     display: flex;
     flex-direction: column;
-    max-width: 86%;
+    max-width: 88%;
     animation: cbFadeMsg 0.25s ease-out forwards;
 }
 
@@ -386,7 +304,7 @@
 }
 
 .cb-msg-bubble {
-    padding: 12px 14px;
+    padding: 12px 15px;
     border-radius: 12px;
     font-size: 13px;
     line-height: 1.5;
@@ -417,6 +335,45 @@
 .cb-msg-bot .cb-msg-time { align-self: flex-start; }
 .cb-msg-user .cb-msg-time { align-self: flex-end; }
 
+/* Option Buttons Group (Matching Chat Bubble Style) */
+.cb-faq-options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 2px;
+    margin-bottom: 6px;
+    max-width: 88%;
+    align-self: flex-start;
+    animation: cbFadeMsg 0.25s ease-out forwards;
+}
+
+.cb-option-btn {
+    width: 100%;
+    padding: 11px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    line-height: 1.4;
+    color: var(--ink, #11100E);
+    background: var(--bg, #FAFAF8);
+    border: 1px solid var(--line, #E6E3DE);
+    border-radius: 12px;
+    border-top-left-radius: 4px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cb-option-btn:hover {
+    background: var(--ink, #11100E);
+    color: #FFFFFF;
+    border-color: var(--ink, #11100E);
+    transform: translateX(2px);
+}
+
 /* Typing Indicator */
 .cb-typing-indicator {
     display: inline-flex;
@@ -444,37 +401,6 @@
 @keyframes cbTyping {
     0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
     40% { transform: scale(1); opacity: 1; }
-}
-
-/* Quick Topic Chips */
-.cb-faq-chips-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    background: var(--bg, #FAFAF8);
-    border-top: 1px solid var(--line-soft, #F0EDE8);
-    overflow-x: auto;
-    white-space: nowrap;
-}
-
-.cb-chip-item {
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--ink, #11100E);
-    background: var(--bg-card, #FFFFFF);
-    border: 1px solid var(--line, #E6E3DE);
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.cb-chip-item:hover {
-    background: var(--ink, #11100E);
-    color: #FFFFFF;
-    border-color: var(--ink, #11100E);
 }
 
 /* Footer Input */
@@ -603,18 +529,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     ];
 
-    const fallbackAnswer = "Maaf, pertanyaan Anda belum ada di data template kami. Silakan pilih dari dropdown pertanyaan template yang tersedia atau hubungi Customer Service kami untuk bantuan lebih lanjut.";
+    const fallbackAnswer = "Maaf, pertanyaan Anda belum ada di data template kami. Silakan pilih dari opsi pertanyaan yang tersedia di bawah ini atau hubungi Customer Service kami untuk bantuan lebih lanjut.";
 
     // DOM Elements
     const triggerBtn = document.getElementById('cb-faq-trigger');
     const modal = document.getElementById('cb-faq-modal');
     const closeBtn = document.getElementById('cb-faq-close-btn');
     const resetBtn = document.getElementById('cb-faq-reset-btn');
-    const selectDropdown = document.getElementById('cb-faq-select');
     const chatBody = document.getElementById('cb-faq-body');
     const form = document.getElementById('cb-faq-form');
     const inputField = document.getElementById('cb-faq-input');
-    const chipsContainer = document.getElementById('cb-faq-chips');
     const iconChat = triggerBtn.querySelector('.cb-icon-chat');
     const iconClose = triggerBtn.querySelector('.cb-icon-close');
 
@@ -643,12 +567,27 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Append Option Buttons directly under chat bubble
+    function appendOptionButtons() {
+        const optsDiv = document.createElement('div');
+        optsDiv.className = 'cb-faq-options-group';
+        optsDiv.innerHTML = `
+            <button type="button" class="cb-option-btn" data-topic="checkout">Panduan Checkout</button>
+            <button type="button" class="cb-option-btn" data-topic="pembayaran">Panduan Pembayaran</button>
+            <button type="button" class="cb-option-btn" data-topic="tracking">Panduan Tracking Pesanan</button>
+            <button type="button" class="cb-option-btn" data-topic="retur">Panduan Retur Produk</button>
+        `;
+        chatBody.appendChild(optsDiv);
+        scrollToBottom();
+    }
+
     // Render Initial Bot Greeting
     function initChat() {
         chatBody.innerHTML = '';
         appendBotMessage(`Halo! Selamat datang di **CHRISBALE**.
 
-Silakan pilih **pertanyaan template** dari dropdown di atas, atau ketik pertanyaan Anda secara langsung.`);
+Silakan pilih topik pertanyaan di bawah ini atau ketik pertanyaan Anda secara langsung:`);
+        appendOptionButtons();
     }
 
     // Append Message to Chat Log
@@ -715,7 +654,7 @@ Silakan pilih **pertanyaan template** dari dropdown di atas, atau ketik pertanya
         return escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     }
 
-    // Handle Selecting a Template Topic from Dropdown / Chips
+    // Handle Selecting a Template Topic
     function handleSelectTopic(topicId) {
         const item = faqDataset.find(d => d.id === topicId);
         if (!item) return;
@@ -774,6 +713,7 @@ Silakan pilih **pertanyaan template** dari dropdown di atas, atau ketik pertanya
                 appendBotMessage(`**${matchedItem.title}**:\n\n${matchedItem.answer}`);
             } else {
                 appendBotMessage(fallbackAnswer);
+                appendOptionButtons();
             }
         }, 450);
     }
@@ -783,23 +723,12 @@ Silakan pilih **pertanyaan template** dari dropdown di atas, atau ketik pertanya
     closeBtn.addEventListener('click', toggleModal);
     
     resetBtn.addEventListener('click', function () {
-        selectDropdown.selectedIndex = 0;
         initChat();
     });
 
-    // Dropdown change event
-    selectDropdown.addEventListener('change', function () {
-        const selectedValue = this.value;
-        if (selectedValue) {
-            handleSelectTopic(selectedValue);
-            // Reset dropdown back to default placeholder so it can be re-selected if needed
-            setTimeout(() => { selectDropdown.selectedIndex = 0; }, 300);
-        }
-    });
-
-    // Chips click event
-    chipsContainer.addEventListener('click', function (e) {
-        const btn = e.target.closest('.cb-chip-item');
+    // Handle Option Button clicks inside chat log (Event Delegation)
+    chatBody.addEventListener('click', function (e) {
+        const btn = e.target.closest('.cb-option-btn');
         if (btn) {
             const topic = btn.getAttribute('data-topic');
             handleSelectTopic(topic);
