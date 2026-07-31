@@ -487,6 +487,159 @@
     color: #FFFFFF;
 }
 
+/* CS Form Card & Input Field Enhancements */
+.cb-cs-card {
+    white-space: normal !important;
+    background: #FFFFFF;
+    border: 1px solid var(--line, #E6E3DE);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 4px;
+    box-shadow: 0 4px 14px rgba(17, 16, 14, 0.05);
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.cb-cs-card * {
+    white-space: normal !important;
+    box-sizing: border-box;
+}
+
+.cb-cs-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--line, #E6E3DE);
+}
+
+.cb-cs-icon-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #25D366, #1EBE57);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+}
+
+.cb-cs-title {
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--ink, #11100E);
+    line-height: 1.2;
+}
+
+.cb-cs-subtitle {
+    font-size: 11px;
+    color: var(--ink-muted, #666);
+    margin-top: 2px;
+}
+
+.cb-cs-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.cb-cs-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+}
+
+.cb-cs-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink, #11100E);
+    letter-spacing: 0.01em;
+}
+
+.cb-cs-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.cb-cs-input-icon {
+    position: absolute;
+    left: 10px;
+    color: #8A8580;
+    pointer-events: none;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cb-cs-input,
+.cb-cs-textarea {
+    width: 100%;
+    padding: 8px 10px 8px 32px;
+    font-size: 12.5px;
+    font-family: inherit;
+    color: var(--ink, #11100E);
+    background: var(--bg, #FAFAF8);
+    border: 1px solid var(--line, #E6E3DE);
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.cb-cs-textarea {
+    padding: 8px 10px 8px 32px;
+    resize: vertical;
+    min-height: 54px;
+    line-height: 1.4;
+}
+
+.cb-cs-input:focus,
+.cb-cs-textarea:focus {
+    background: #FFFFFF;
+    border-color: var(--accent, #B8860B);
+    box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.12);
+}
+
+.cb-cs-input-wrap:focus-within .cb-cs-input-icon {
+    color: var(--accent, #B8860B);
+}
+
+.cb-cs-submit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 10px 16px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #FFFFFF;
+    background: linear-gradient(135deg, #25D366 0%, #1EBE57 100%);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 100%;
+}
+
+.cb-cs-submit-btn:hover {
+    background: linear-gradient(135deg, #1EBE57 0%, #17A34A 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 211, 102, 0.4);
+}
+
+.cb-cs-submit-btn:active {
+    transform: translateY(0);
+}
+
 /* Responsive adjustment for small mobile screens */
 @media (max-width: 480px) {
     .cb-faq-trigger-btn {
@@ -686,6 +839,7 @@ Semua pesanan dikirim langsung dari gudang utama kami di Indonesia dengan pengem
                     <button type="button" class="cb-option-btn" data-topic="pembayaran">Panduan Pembayaran</button>
                     <button type="button" class="cb-option-btn" data-topic="tracking">Panduan Tracking Pesanan</button>
                     <button type="button" class="cb-option-btn" data-topic="retur">Panduan Retur Produk</button>
+                    <button type="button" class="cb-option-btn" data-topic="cs">Hubungi CS</button>
                 </div>
             </div>
             <div class="cb-msg-time">${getCurrentTime()}</div>
@@ -714,6 +868,96 @@ Semua pesanan dikirim langsung dari gudang utama kami di Indonesia dengan pengem
             <div class="cb-msg-time">${getCurrentTime()}</div>
         `;
         chatBody.appendChild(msgDiv);
+        scrollToBottom();
+    }
+
+    // Render CS Contact Form inside Chat
+    function appendCsFormMessage() {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'cb-msg cb-msg-bot';
+        msgDiv.style.maxWidth = '96%';
+        msgDiv.innerHTML = `
+            <div class="cb-msg-bubble" style="padding:4px; background:transparent; border:none;">
+                <div class="cb-cs-card">
+                    <div class="cb-cs-header">
+                        <div class="cb-cs-icon-badge">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="cb-cs-title">Hubungi Customer Service</div>
+                            <div class="cb-cs-subtitle">Lengkapi data untuk terhubung via WhatsApp</div>
+                        </div>
+                    </div>
+                    <form class="cb-cs-form" autocomplete="off">
+                        <div class="cb-cs-field">
+                            <label class="cb-cs-label">Nama Lengkap</label>
+                            <div class="cb-cs-input-wrap">
+                                <span class="cb-cs-input-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                </span>
+                                <input type="text" name="cs_name" class="cb-cs-input" placeholder="Masukkan nama Anda" required />
+                            </div>
+                        </div>
+                        <div class="cb-cs-field">
+                            <label class="cb-cs-label">Alamat Email</label>
+                            <div class="cb-cs-input-wrap">
+                                <span class="cb-cs-input-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                    </svg>
+                                </span>
+                                <input type="email" name="cs_email" class="cb-cs-input" placeholder="nama@email.com" required />
+                            </div>
+                        </div>
+                        <div class="cb-cs-field">
+                            <label class="cb-cs-label">Keperluan / Subject</label>
+                            <div class="cb-cs-input-wrap">
+                                <span class="cb-cs-input-icon" style="top:10px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                    </svg>
+                                </span>
+                                <textarea name="cs_subject" class="cb-cs-textarea" rows="2" placeholder="Tuliskan keperluan / pertanyaan..." required></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="cb-cs-submit-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                            </svg>
+                            Hubungi via WhatsApp
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="cb-msg-time">${getCurrentTime()}</div>
+        `;
+        chatBody.appendChild(msgDiv);
+        scrollToBottom();
+    }
+
+    function appendOptionButtons() {
+        const optionsDiv = document.createElement('div');
+        optionsDiv.className = 'cb-msg cb-msg-bot';
+        optionsDiv.innerHTML = `
+            <div class="cb-msg-bubble">
+                Silakan pilih dari opsi pertanyaan berikut:
+                <div class="cb-bubble-options">
+                    <button type="button" class="cb-option-btn" data-topic="checkout">Panduan Checkout</button>
+                    <button type="button" class="cb-option-btn" data-topic="pembayaran">Panduan Pembayaran</button>
+                    <button type="button" class="cb-option-btn" data-topic="tracking">Panduan Tracking Pesanan</button>
+                    <button type="button" class="cb-option-btn" data-topic="retur">Panduan Retur Produk</button>
+                    <button type="button" class="cb-option-btn" data-topic="cs">Hubungi CS</button>
+                </div>
+            </div>
+            <div class="cb-msg-time">${getCurrentTime()}</div>
+        `;
+        chatBody.appendChild(optionsDiv);
         scrollToBottom();
     }
 
@@ -768,7 +1012,11 @@ Semua pesanan dikirim langsung dari gudang utama kami di Indonesia dengan pengem
 
         setTimeout(function () {
             removeTypingIndicator();
-            appendBotMessage(item.answer);
+            if (topicId === 'cs') {
+                appendCsFormMessage();
+            } else {
+                appendBotMessage(item.answer);
+            }
         }, 400);
     }
 
@@ -886,7 +1134,11 @@ Semua pesanan dikirim langsung dari gudang utama kami di Indonesia dengan pengem
         setTimeout(function () {
             removeTypingIndicator();
             if (bestMatch && highestScore >= 4 && !isUnsupported) {
-                appendBotMessage(`**${bestMatch.title}**:\n\n${bestMatch.answer}`);
+                if (bestMatch.id === 'cs') {
+                    appendCsFormMessage();
+                } else {
+                    appendBotMessage(`**${bestMatch.title}**:\n\n${bestMatch.answer}`);
+                }
             } else {
                 appendBotMessage(fallbackAnswer);
                 appendOptionButtons();
@@ -922,11 +1174,52 @@ Semua pesanan dikirim langsung dari gudang utama kami di Indonesia dengan pengem
         });
     }
 
+    // Handle CS Form submission inside chatbot (Event Delegation)
+    chatBody.addEventListener('submit', function (e) {
+        const csForm = e.target.closest('.cb-cs-form');
+        if (csForm) {
+            e.preventDefault();
+            const nameInput = csForm.querySelector('input[name="cs_name"]');
+            const emailInput = csForm.querySelector('input[name="cs_email"]');
+            const subjectInput = csForm.querySelector('textarea[name="cs_subject"]');
+
+            const name = nameInput ? nameInput.value.trim() : '';
+            const email = emailInput ? emailInput.value.trim() : '';
+            const subject = subjectInput ? subjectInput.value.trim() : '';
+
+            if (!name || !email || !subject) return;
+
+            // WhatsApp API Phone Number
+            const WA_PHONE = '6287774487198';
+
+            const messageText = `Halo CS CHRISBALE,\n\nNama: ${name}\nEmail: ${email}\nKeperluan: ${subject}`;
+            const encodedText = encodeURIComponent(messageText);
+
+            const waUrl = WA_PHONE 
+                ? `https://wa.me/${WA_PHONE}?text=${encodedText}`
+                : `https://wa.me/?text=${encodedText}`;
+
+            window.open(waUrl, '_blank');
+
+            appendBotMessage(`Terima kasih **${escapeHTML(name)}**! Data Anda telah disiapkan. Mengalihkan Anda ke WhatsApp Customer Service...`);
+        }
+    });
+
     // Form submit for manual input
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         handleManualQuestion(inputField.value);
     });
+
+    // Global helper to open FAQ chatbot from anywhere
+    window.openFaqChatbot = function (topic) {
+        if (!isModalOpen) {
+            toggleModal();
+        }
+        if (topic) {
+            handleSelectTopic(topic);
+        }
+    };
 
     // Initialize initial chat messages
     initChat();
