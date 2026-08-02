@@ -21,4 +21,9 @@ class ShippingRateCacheItem extends Model
     {
         return $this->belongsTo(ShippingRateCache::class, 'shipping_rate_cache_id');
     }
+
+    public function barang()
+    {
+        return $this->belongsTo(Barang::class);
+    }
 }

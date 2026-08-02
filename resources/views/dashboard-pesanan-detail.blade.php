@@ -15,7 +15,7 @@
     };
 
     $steps = ['Dikonfirmasi', 'Dikemas', 'Dikirim', 'Tiba'];
-    $statusMap = ['confirmed' => 0, 'packed' => 0, 'dikirim' => 1, 'shipping' => 1, 'selesai' => 3];
+    $statusMap = ['proses' => 0, 'packing' => 1, 'dikirim' => 2, 'selesai' => 3];
     $stepIndex = $statusMap[$order->status] ?? -1;
 @endphp
 
@@ -112,11 +112,11 @@
             @if ($order->pembayaran)
             <div class="info-row">
                 <span class="info-label">Metode</span>
-                <span class="info-value">{{ $order->pembayaran->payment_provider ?? '-' }} {{ $order->pembayaran->payment_method ? '— ' . $order->pembayaran->payment_method : '' }}</span>
+                <span class="info-value">Midtrans {{ $order->pembayaran->payment_method ? '— ' . $order->pembayaran->payment_method : '' }} {{ $order->pembayaran->payment_type ? '(' . $order->pembayaran->payment_type . ')' : '' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Status</span>
-                <span class="info-value">{{ ucfirst($order->pembayaran->payment_status ?? '-') }}</span>
+                <span class="info-value">{{ ucfirst($order->pembayaran->status ?? '-') }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Waktu Bayar</span>

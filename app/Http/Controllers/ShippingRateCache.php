@@ -15,13 +15,25 @@ class ShippingRateCache extends Model
         'expires_at',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'expires_at' => 'datetime',
+        ];
+    }
+
     public function items()
     {
-        return $this->hasMany(ShippingRateCacheItem::class, 'shipping_rate_cache_id');
+        return $this->hasMany(ShippingRateCacheItem::class);
     }
 
     public function rates()
     {
-        return $this->hasMany(ShippingRateCacheRate::class, 'shipping_rate_cache_id');
+        return $this->hasMany(ShippingRateCacheRate::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(Pengguna::class);
     }
 }

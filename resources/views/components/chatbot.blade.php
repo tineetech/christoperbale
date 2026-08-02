@@ -837,8 +837,6 @@ Semua pesanan dikirim langsung dari gudang utama kami di Indonesia dengan pengem
                 <div class="cb-bubble-options">
                     <button type="button" class="cb-option-btn" data-topic="checkout">Panduan Checkout</button>
                     <button type="button" class="cb-option-btn" data-topic="pembayaran">Panduan Pembayaran</button>
-                    <button type="button" class="cb-option-btn" data-topic="tracking">Panduan Tracking Pesanan</button>
-                    <button type="button" class="cb-option-btn" data-topic="retur">Panduan Retur Produk</button>
                     <button type="button" class="cb-option-btn" data-topic="cs">Hubungi CS</button>
                 </div>
             </div>

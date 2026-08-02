@@ -32,6 +32,11 @@
             flex-shrink: 0;
         }
 
+        .cart-item input[type=checkbox]:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
         .cart-item-img {
             width: 64px;
             height: 64px;
@@ -120,6 +125,34 @@
 
         .cart-item-qty button:hover {
             border-color: var(--accent);
+        }
+
+        .cart-item-qty button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: var(--line);
+        }
+
+        .cart-stock-info {
+            font-size: 11px;
+            color: var(--ink-muted);
+            margin-top: 3px;
+        }
+
+        .cart-stock-warn {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--red);
+            margin-top: 3px;
+        }
+
+        .cart-item.is-insufficient {
+            border-color: rgba(192, 57, 43, 0.45);
+            background: rgba(192, 57, 43, 0.04);
+        }
+
+        .cart-item.is-insufficient .name {
+            color: var(--red);
         }
 
         .cart-item-qty span {
@@ -298,9 +331,9 @@
                     @if ($prevProdukId !== null && !$isGrouped)
                         <div class="cart-group-sep"></div>
                     @endif
-                    <div class="cart-item{{ $isGrouped ? ' grouped' : '' }}" data-id="{{ $item->id }}" data-price="{{ $item->finalPrice }}"
-                        data-qty="{{ $item->qty }}">
-                        <input type="checkbox" class="cart-check" onchange="updateCheckoutBar()">
+                    <div class="cart-item{{ $isGrouped ? ' grouped' : '' }}{{ ($item->stok ?? 0) < $item->qty ? ' is-insufficient' : '' }}" data-id="{{ $item->id }}" data-price="{{ $item->finalPrice }}"
+                        data-qty="{{ $item->qty }}" data-stok="{{ $item->stok ?? 0 }}">
+                        <input type="checkbox" class="cart-check" onchange="updateCheckoutBar()" {{ ($item->stok ?? 0) < $item->qty ? 'disabled' : '' }}>
                         <a href="/product/{{ $item->barang->produk->slug }}?size={{ urlencode($item->varianSize) }}&color={{ urlencode($item->varianColor) }}" class="cart-item-link">
                         <div class="cart-item-img">
                             @if ($item->barang && $item->barang->produk && $item->barang->produk->fotoUtama)
@@ -315,6 +348,11 @@
                             <div class="name">{{ $item->barang->produk->nama_produk }}
                         </div>
                             <div class="variant">{{ $item->barang->nama_barang ?? '' }}</div>
+                            @if (($item->stok ?? 0) < $item->qty)
+                                <div class="cart-stock-warn">Stok tersedia hanya {{ $item->stok }} (dipesan {{ $item->qty }})</div>
+                            @else
+                                <div class="cart-stock-info">Stok tersedia: {{ $item->stok }}</div>
+                            @endif
                             <div class="price">
                                 @if ($item->hasDiscount)
                                 <span style="color:var(--accent);">Rp{{ number_format($item->finalPrice, 0, ',', '.') }}</span>
@@ -327,9 +365,9 @@
                         </div>
                         </a>
                         <div class="cart-item-qty">
-                            <button onclick="changeQty(this, -1)">−</button>
+                            <button class="qty-minus" onclick="changeQty(this, -1)">−</button>
                             <span>{{ $item->qty }}</span>
-                            <button onclick="changeQty(this, 1)">+</button>
+                            <button class="qty-plus" onclick="changeQty(this, 1)" {{ ($item->stok ?? 0) <= $item->qty ? 'disabled' : '' }}>+</button>
                         </div>
                     </div>
                     @php $prevProdukId = $currProdukId; @endphp
@@ -354,31 +392,51 @@ if (cartList) {
         var checks = document.querySelectorAll('.cart-check:checked');
         var total = 0;
         var ids = [];
+        var hasInsufficient = false;
         checks.forEach(function(c){
             var item = c.closest('.cart-item');
             var price = parseFloat(item.dataset.price) || 0;
             var qty = parseInt(item.dataset.qty) || 1;
             total += price * qty;
             ids.push(item.dataset.id);
+            if ((parseInt(item.dataset.stok) || 0) < qty) hasInsufficient = true;
         });
         document.getElementById('selectedCount').textContent = checks.length;
         document.getElementById('totalPrice').textContent = 'Rp' + total.toLocaleString('id-ID');
         var btn = document.getElementById('btnCheckout');
-        btn.disabled = checks.length === 0;
+        btn.disabled = checks.length === 0 || hasInsufficient;
         btn.dataset.ids = ids.join(',');
     }
 
     function toggleSelectAll(source) {
         document.querySelectorAll('.cart-check').forEach(function(c) {
-            c.checked = source.checked;
+            if (!c.disabled) c.checked = source.checked;
         });
         updateCheckoutBar();
+    }
+
+    function refreshInsufficient(container) {
+        var qty = parseInt(container.dataset.qty) || 0;
+        var stok = parseInt(container.dataset.stok) || 0;
+        var warn = container.querySelector('.cart-stock-warn');
+        var check = container.querySelector('.cart-check');
+        if (qty > stok) {
+            container.classList.add('is-insufficient');
+            if (warn) warn.style.display = '';
+            if (check) { check.checked = false; check.disabled = true; }
+        } else {
+            container.classList.remove('is-insufficient');
+            if (warn) warn.style.display = 'none';
+            if (check) check.disabled = false;
+        }
     }
 
     function changeQty(btn, delta) {
         var container = btn.closest('.cart-item');
         var span = container.querySelector('.cart-item-qty span');
         var qty = parseInt(span.textContent) + delta;
+        var stok = parseInt(container.dataset.stok) || 0;
+
         if (qty < 1) {
             Swal.fire({
                 title: 'Hapus barang?',
@@ -401,15 +459,65 @@ if (cartList) {
             });
             return;
         }
+
+        if (qty > stok) {
+            Swal.fire({ icon: 'warning', title: 'Stok Tidak Cukup', text: stok <= 0 ? 'Stok produk ini sedang habis.' : 'Stok tersedia: ' + stok + '.' });
+            return;
+        }
+
         if (qty > 99) qty = 99;
         span.textContent = qty;
         container.dataset.qty = qty;
+
+        var plusBtn = container.querySelector('.qty-plus');
+        if (plusBtn) plusBtn.disabled = qty >= stok || stok <= 0;
+        refreshInsufficient(container);
         updateCheckoutBar();
+
+        fetch('/dashboard/keranjang/' + container.dataset.id, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+            },
+            body: JSON.stringify({ qty: qty })
+        }).then(function(r) {
+            if (!r.ok) return r.json().then(function(d) { throw new Error(d.message || 'Gagal'); });
+            return r.json();
+        }).catch(function(e) {
+            Swal.fire({ icon: 'error', title: 'Gagal', text: e.message });
+        });
     }
+
+    document.querySelectorAll('.cart-item').forEach(function(container) {
+        refreshInsufficient(container);
+    });
 
     function goCheckout() {
         var btn = document.getElementById('btnCheckout');
         if (btn.disabled) return;
+
+        var checks = document.querySelectorAll('.cart-check:checked');
+        var insufficient = null;
+        checks.forEach(function(c) {
+            var item = c.closest('.cart-item');
+            var qty = parseInt(item.dataset.qty) || 1;
+            var stok = parseInt(item.dataset.stok) || 0;
+            if (qty > stok) insufficient = item;
+        });
+
+        if (insufficient) {
+            var check = insufficient.querySelector('.cart-check');
+            if (check) { check.checked = false; check.disabled = true; }
+            updateCheckoutBar();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Stok Tidak Cukup',
+                text: 'Ada produk yang stoknya tidak mencukupi sehingga tidak dapat diproses. Kurangi jumlahnya atau pilih produk lain.'
+            });
+            return;
+        }
+
         window.location.href = '/checkout?items=' + btn.dataset.ids;
     }
 

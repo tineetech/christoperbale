@@ -168,6 +168,16 @@ class ProductController extends Controller
             ];
         })->values()->toArray();
 
+        $variants = $varian->map(function ($v) {
+            return [
+                'size' => $v->size,
+                'color' => $v->warna,
+                'nama' => $v->barang->nama_barang ?? '',
+                'available' => $v->barang && $v->barang->stok && $v->barang->stok->jumlah_stok >= 1,
+                'stok' => $v->barang && $v->barang->stok ? (int) $v->barang->stok->jumlah_stok : 0,
+            ];
+        })->values()->toArray();
+
         // Review count: distinct penjualan that include this product
         $barangIds = $product->barang->pluck('id');
         $reviewCount = PenjualanDetail::whereIn('barang_id', $barangIds)
@@ -211,6 +221,7 @@ class ProductController extends Controller
             'features' => [],
             'sizes' => $sizes,
             'colors' => $colors,
+            'variants' => $variants,
             'sku' => '',
             'category' => '',
         ];

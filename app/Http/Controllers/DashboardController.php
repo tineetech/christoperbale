@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use App\Models\DiscountProduct;
+use App\Models\Pembayaran;
 use App\Models\Penjualan;
 use App\Models\PengaturanWeb;
 use App\Models\Pengguna;
 use App\Models\ProdukVarian;
+use App\Models\StokBarang;
 use App\Models\UserAddress;
 use App\Models\UserVoucher;
 use App\Models\Voucher;
@@ -39,7 +41,7 @@ class DashboardController extends Controller
         return view('dashboard', compact('totalOrders', 'completed', 'processing', 'recentOrders'));
     }
 
-    public function pesanan()
+    public function pesanan(Request $request)
     {
         if (!Auth::check()) {
             return redirect()->route('login');
@@ -47,13 +49,47 @@ class DashboardController extends Controller
 
         $user = Auth::user();
 
-        $orders = Penjualan::with(['detail.barang', 'pembayaran'])
+        $query = Penjualan::with(['detail.barang'])
             ->where('order_web', true)
-            ->where('created_by', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->where('created_by', $user->id);
 
-        return view('dashboard-pesanan', compact('orders'));
+        if ($request->filled('q')) {
+            $keyword = trim($request->q);
+            $query->where(function ($q) use ($keyword) {
+                $q->where('kode_penjualan', 'like', '%' . $keyword . '%')
+                    ->orWhere('nomor_pesanan', 'like', '%' . $keyword . '%')
+                    ->orWhereHas('detail.barang', function ($q) use ($keyword) {
+                        $q->where('nama_barang', 'like', '%' . $keyword . '%')
+                            ->orWhereHas('produk', function ($q) use ($keyword) {
+                                $q->where('nama_produk', 'like', '%' . $keyword . '%');
+                            });
+                    });
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('from')) {
+            $query->whereDate('tanggal', '>=', $request->from);
+        }
+
+        if ($request->filled('to')) {
+            $query->whereDate('tanggal', '<=', $request->to);
+        }
+
+        $orders = $query->orderBy('created_at', 'desc')->get();
+
+        $pembayarans = Pembayaran::whereIn('penjualan_id', $orders->pluck('id'))->get()->keyBy('penjualan_id');
+        $orders->each(function ($order) use ($pembayarans) {
+            $order->setRelation('pembayaran', $pembayarans->get($order->id));
+        });
+
+        return view('dashboard-pesanan', [
+            'orders' => $orders,
+            'filters' => $request->only(['q', 'status', 'from', 'to']),
+        ]);
     }
 
     public function pesananDetail($id)
@@ -62,12 +98,82 @@ class DashboardController extends Controller
             return redirect()->route('login');
         }
 
-        $order = Penjualan::with(['detail.barang', 'pembayaran', 'address', 'shipment'])
+        $order = Penjualan::with(['detail.barang', 'address', 'shipment'])
             ->where('order_web', true)
             ->where('created_by', Auth::id())
             ->findOrFail($id);
 
+        $order->setRelation('pembayaran', Pembayaran::where('penjualan_id', $order->id)->first());
+
         return view('dashboard-pesanan-detail', compact('order'));
+    }
+
+    public function pembayaran(Request $request)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $userId = Auth::id();
+
+        $query = Pembayaran::with([
+            'penjualanDraft' => fn ($q) => $q->with('items.barang.produk'),
+            'penjualan',
+        ])
+            ->where(function ($q) use ($userId) {
+                $q->whereHas('penjualanDraft', function ($q) use ($userId) {
+                    $q->where('created_by', $userId);
+                })->orWhereHas('penjualan', function ($q) use ($userId) {
+                    $q->where('created_by', $userId);
+                });
+            });
+
+        if ($request->filled('q')) {
+            $keyword = trim($request->q);
+            $query->where(function ($q) use ($keyword) {
+                $q->whereHas('penjualanDraft', function ($q) use ($keyword) {
+                    $q->where('kode_penjualan', 'like', '%' . $keyword . '%')
+                        ->orWhereHas('items', function ($q) use ($keyword) {
+                            $q->whereHas('barang', function ($q) use ($keyword) {
+                                $q->where('nama_barang', 'like', '%' . $keyword . '%')
+                                    ->orWhereHas('produk', function ($q) use ($keyword) {
+                                        $q->where('nama_produk', 'like', '%' . $keyword . '%');
+                                    });
+                            });
+                        });
+                })->orWhereHas('penjualan', function ($q) use ($keyword) {
+                    $q->where('kode_penjualan', 'like', '%' . $keyword . '%');
+                });
+            });
+        }
+
+        if ($request->filled('status')) {
+            if ($request->status === 'gagal') {
+                $query->whereIn('status', ['deny', 'cancel', 'expire', 'failure']);
+            } else {
+                $query->where('status', $request->status);
+            }
+        }
+
+        if ($request->filled('from')) {
+            $query->whereDate('created_at', '>=', $request->from);
+        }
+
+        if ($request->filled('to')) {
+            $query->whereDate('created_at', '<=', $request->to);
+        }
+
+        $payments = $query->orderByRaw(
+            "CASE WHEN status = 'pending' THEN 0 ELSE 1 END"
+        )->orderBy('created_at', 'desc')->get();
+
+        $pendingCount = $payments->where('status', 'pending')->count();
+
+        return view('dashboard-pembayaran', [
+            'payments' => $payments,
+            'pendingCount' => $pendingCount,
+            'filters' => $request->only(['q', 'status', 'from', 'to']),
+        ]);
     }
 
     public function wishlist()
@@ -108,9 +214,10 @@ class DashboardController extends Controller
             'district'      => 'required|string|max:100',
             'postal_code'   => 'required|string|max:10',
             'address'       => 'required|string',
+            'catatan'       => 'nullable|string|max:500',
         ]);
 
-        $data = $request->only(['label', 'receiver_name', 'phone', 'province', 'city', 'district', 'postal_code', 'address']);
+        $data = $request->only(['label', 'receiver_name', 'phone', 'province', 'city', 'district', 'postal_code', 'address', 'catatan']);
         $data['user_id'] = Auth::id();
 
         $hasAddresses = Auth::user()->addresses()->exists();
@@ -122,7 +229,10 @@ class DashboardController extends Controller
             $data['is_default'] = !$hasAddresses;
         }
 
-        $areaId = $this->lookupBiteshipArea($data['district'] ?? '', $data['city'], $data['province'], $data['postal_code']);
+        $areaId = $request->input('area_id');
+        if (!$areaId) {
+            $areaId = $this->lookupBiteshipArea($data['district'] ?? '', $data['city'], $data['province'], $data['postal_code']);
+        }
         if ($areaId) {
             $data['area_id'] = $areaId;
         }
@@ -145,16 +255,20 @@ class DashboardController extends Controller
             'district'      => 'required|string|max:100',
             'postal_code'   => 'required|string|max:10',
             'address'       => 'required|string',
+            'catatan'       => 'nullable|string|max:500',
         ]);
 
-        $data = $request->only(['label', 'receiver_name', 'phone', 'province', 'city', 'district', 'postal_code', 'address']);
+        $data = $request->only(['label', 'receiver_name', 'phone', 'province', 'city', 'district', 'postal_code', 'address', 'catatan']);
 
         if ($request->boolean('is_default')) {
             Auth::user()->addresses()->where('id', '!=', $id)->update(['is_default' => false]);
             $data['is_default'] = true;
         }
 
-        $areaId = $this->lookupBiteshipArea($data['district'] ?? '', $data['city'], $data['province'], $data['postal_code']);
+        $areaId = $request->input('area_id');
+        if (!$areaId) {
+            $areaId = $this->lookupBiteshipArea($data['district'] ?? '', $data['city'], $data['province'], $data['postal_code']);
+        }
         if ($areaId) {
             $data['area_id'] = $areaId;
         }
@@ -188,6 +302,277 @@ class DashboardController extends Controller
         $address->update(['is_default' => true]);
 
         return redirect()->route('dashboard.alamat')->with('success', 'Alamat utama berhasil diubah.');
+    }
+
+    public function geocodeAddress(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['results' => []], 401);
+        }
+
+        $q = trim((string) $request->input('q', ''));
+        if (mb_strlen($q) < 3) {
+            return response()->json(['results' => []]);
+        }
+
+        $places = $this->nominatimSearch($q);
+
+        return response()->json([
+            'results' => array_map(fn ($p) => $this->normalizeNominatimPlace($p), $places),
+        ]);
+    }
+
+    public function reverseGeocode(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $lat = (float) $request->input('lat');
+        $lng = (float) $request->input('lng');
+
+        if (abs($lat) > 90 || abs($lng) > 180) {
+            return response()->json(['error' => 'Koordinat tidak valid.'], 422);
+        }
+
+        $place = $this->nominatimReverse($lat, $lng);
+        if (!$place) {
+            return response()->json(['error' => 'Lokasi tidak ditemukan.'], 404);
+        }
+
+        return response()->json(['result' => $this->normalizeNominatimPlace($place)]);
+    }
+
+    public function resolveArea(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $area = $this->lookupBiteshipAreaDetails(
+            trim((string) $request->input('district', '')),
+            trim((string) $request->input('city', '')),
+            trim((string) $request->input('province', '')),
+            trim((string) $request->input('postal_code', ''))
+        );
+
+        return response()->json([
+            'area_id' => $area['id'] ?? null,
+            'area' => $area ? [
+                'province'    => $area['administrative_division_level_1_name'] ?? '',
+                'city'        => $area['administrative_division_level_2_name'] ?? '',
+                'district'    => $area['administrative_division_level_3_name'] ?? '',
+                'postal_code' => $area['postal_code'] ?? '',
+            ] : null,
+        ]);
+    }
+
+    private function nominatimSearch($query)
+    {
+        $url = 'https://nominatim.openstreetmap.org/search?'
+            . http_build_query([
+                'q' => $query,
+                'countrycodes' => 'id',
+                'format' => 'jsonv2',
+                'addressdetails' => 1,
+                'limit' => 8,
+            ]);
+
+        return $this->nominatimRequest($url);
+    }
+
+    private function nominatimReverse($lat, $lng)
+    {
+        $url = 'https://nominatim.openstreetmap.org/reverse?'
+            . http_build_query([
+                'lat' => $lat,
+                'lon' => $lng,
+                'format' => 'jsonv2',
+                'addressdetails' => 1,
+                'zoom' => 18,
+            ]);
+
+        $data = $this->nominatimRequest($url);
+
+        return is_array($data) && !empty($data['display_name']) ? $data : null;
+    }
+
+    private function nominatimRequest($url)
+    {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_USERAGENT => 'CHRISBALE-Web/1.0 (contact: store@chrisbale.id)',
+            CURLOPT_REFERER => 'https://christoperbale.id',
+            CURLOPT_TIMEOUT => 8,
+            CURLOPT_HTTPHEADER => ['Accept: application/json'],
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200 || !$response) {
+            return [];
+        }
+
+        $data = json_decode($response, true);
+
+        return is_array($data) ? $data : [];
+    }
+
+    private function normalizeNominatimPlace(array $place): array
+    {
+        $address = $place['address'] ?? [];
+        $display = (string) ($place['display_name'] ?? '');
+
+        $province = $this->provinceFromState($address['state'] ?? '');
+        if (!$province) {
+            $province = $this->provinceFromIso($address['ISO3166-2-lvl4'] ?? '');
+        }
+        if (!$province) {
+            $province = $this->provinceFromDisplay($display);
+        }
+
+        $city = $address['city'] ?? $address['town'] ?? $address['municipality'] ?? $address['county'] ?? '';
+
+        $district = $address['county'] ?? $address['city_district'] ?? $address['district'] ?? $address['suburb'] ?? $address['village'] ?? $address['neighbourhood'] ?? '';
+
+        $subdistrict = $address['suburb'] ?? $address['neighbourhood'] ?? '';
+
+        $postal = $address['postcode'] ?? '';
+
+        $streetParts = array_filter([
+            $address['house_number'] ?? null,
+            $address['road'] ?? null,
+        ]);
+        $street = trim(implode(' ', $streetParts));
+
+        if (!$district && $subdistrict) {
+            $district = $subdistrict;
+        }
+
+        $display = trim(preg_replace('/,\s*Indonesia\s*$/i', '', $display));
+
+        return [
+            'address'      => $display,
+            'street'       => $street,
+            'province'     => $province,
+            'city'         => $city,
+            'district'     => $district,
+            'subdistrict'  => $subdistrict,
+            'postal_code'  => $postal,
+            'lat'          => (float) ($place['lat'] ?? 0),
+            'lng'          => (float) ($place['lon'] ?? 0),
+            'osm_type'     => $place['osm_type'] ?? '',
+            'osm_id'       => $place['osm_id'] ?? '',
+        ];
+    }
+
+    private function provinceFromIso($iso)
+    {
+        $iso = strtoupper(trim((string) $iso));
+
+        $map = [
+            'ID-AC' => 'Aceh',
+            'ID-SU' => 'Sumatera Utara',
+            'ID-SB' => 'Sumatera Barat',
+            'ID-RI' => 'Riau',
+            'ID-JA' => 'Jambi',
+            'ID-SS' => 'Sumatera Selatan',
+            'ID-BE' => 'Bengkulu',
+            'ID-LA' => 'Lampung',
+            'ID-KB' => 'Kepulauan Bangka Belitung',
+            'ID-KR' => 'Kepulauan Riau',
+            'ID-JK' => 'DKI Jakarta',
+            'ID-JB' => 'Jawa Barat',
+            'ID-JT' => 'Jawa Tengah',
+            'ID-YO' => 'DI Yogyakarta',
+            'ID-JI' => 'Jawa Timur',
+            'ID-BT' => 'Banten',
+            'ID-BA' => 'Bali',
+            'ID-NB' => 'Nusa Tenggara Barat',
+            'ID-NT' => 'Nusa Tenggara Timur',
+            'ID-KB' => 'Kalimantan Barat',
+            'ID-KT' => 'Kalimantan Tengah',
+            'ID-KS' => 'Kalimantan Selatan',
+            'ID-KI' => 'Kalimantan Timur',
+            'ID-KU' => 'Kalimantan Utara',
+            'ID-SL' => 'Sulawesi Utara',
+            'ID-ST' => 'Sulawesi Tengah',
+            'ID-SG' => 'Sulawesi Selatan',
+            'ID-SR' => 'Sulawesi Barat',
+            'ID-SN' => 'Sulawesi Tenggara',
+            'ID-GO' => 'Gorontalo',
+            'ID-MA' => 'Maluku',
+            'ID-MU' => 'Maluku Utara',
+            'ID-PA' => 'Papua',
+            'ID-PB' => 'Papua Barat',
+        ];
+
+        return $map[$iso] ?? '';
+    }
+
+    private function provinceFromDisplay($display)
+    {
+        $parts = array_map('trim', explode(',', (string) $display));
+        if (count($parts) < 2) {
+            return '';
+        }
+
+        if (strtolower((string) end($parts)) === 'indonesia') {
+            array_pop($parts);
+        }
+
+        if ($parts && preg_match('/^\d{4,6}$/', (string) end($parts))) {
+            array_pop($parts);
+        }
+
+        if (!$parts) {
+            return '';
+        }
+
+        $province = $this->provinceFromState((string) end($parts));
+
+        return $province ?: (string) end($parts);
+    }
+
+    private function provinceFromState($state)
+    {
+        $state = trim((string) $state);
+        if (!$state) {
+            return '';
+        }
+
+        $map = [
+            'jakarta' => 'DKI Jakarta',
+            'daerah khusus ibukota jakarta' => 'DKI Jakarta',
+            'jawa barat' => 'Jawa Barat',
+            'jawa tengah' => 'Jawa Tengah',
+            'yogyakarta' => 'DI Yogyakarta',
+            'jawa timur' => 'Jawa Timur',
+            'banten' => 'Banten',
+            'bali' => 'Bali',
+            'sumatera utara' => 'Sumatera Utara',
+            'sumatera selatan' => 'Sumatera Selatan',
+            'kalimantan timur' => 'Kalimantan Timur',
+            'west java' => 'Jawa Barat',
+            'central java' => 'Jawa Tengah',
+            'east java' => 'Jawa Timur',
+            'north sumatra' => 'Sumatera Utara',
+            'south sumatra' => 'Sumatera Selatan',
+            'east kalimantan' => 'Kalimantan Timur',
+        ];
+
+        $key = mb_strtolower($state);
+
+        foreach ($map as $needle => $province) {
+            if (str_contains($key, $needle)) {
+                return $province;
+            }
+        }
+
+        return $state;
     }
 
     public function voucher()
@@ -345,6 +730,7 @@ class DashboardController extends Controller
             $varian = $item->barang->produkVarian->first();
             $item->varianSize = $varian?->size ?? '';
             $item->varianColor = $varian?->warna ?? '';
+            $item->stok = StokBarang::where('barang_id', $item->barang_id)->value('jumlah_stok') ?? 0;
         });
 
         return view('dashboard-keranjang', [
@@ -358,6 +744,27 @@ class DashboardController extends Controller
         $item = Cart::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         $item->delete();
         return response()->json(['ok' => true]);
+    }
+
+    public function updateCartItem(Request $request, $id)
+    {
+        $item = Cart::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+
+        $qty = max(1, min((int) $request->input('qty', 1), 99));
+        $stok = StokBarang::where('barang_id', $item->barang_id)->value('jumlah_stok') ?? 0;
+
+        if ($qty > $stok) {
+            return response()->json([
+                'ok' => false,
+                'message' => $stok <= 0
+                    ? 'Stok produk ini sedang habis.'
+                    : 'Stok tidak cukup. Stok tersedia: ' . $stok . '.',
+            ], 422);
+        }
+
+        $item->update(['qty' => $qty]);
+
+        return response()->json(['ok' => true, 'qty' => $qty]);
     }
 
     public function addToCart(Request $request)
@@ -378,9 +785,23 @@ class DashboardController extends Controller
             return response()->json(['ok' => false, 'message' => 'Varian tidak ditemukan.'], 404);
         }
 
+        $available = StokBarang::where('barang_id', $varian->barang_id)->value('jumlah_stok') ?? 0;
+
         $existing = Cart::where('user_id', Auth::id())
             ->where('barang_id', $varian->barang_id)
             ->first();
+
+        $existingQty = $existing->qty ?? 0;
+        $totalQty = $existingQty + $request->qty;
+
+        if ($available <= 0 || $totalQty > $available) {
+            return response()->json([
+                'ok' => false,
+                'message' => $available <= 0
+                    ? 'Stok produk ini habis.'
+                    : 'Stok tidak cukup. Sisa stok ' . $available . ($existingQty > 0 ? ' (sudah ' . $existingQty . ' di keranjang Anda)' : '') . '.',
+            ], 422);
+        }
 
         if ($existing) {
             $newQty = $existing->qty + $request->qty;
@@ -393,10 +814,21 @@ class DashboardController extends Controller
             ]);
         }
 
-        return response()->json(['ok' => true, 'message' => 'Produk ditambahkan ke keranjang.']);
+        return response()->json([
+            'ok' => true,
+            'message' => 'Produk ditambahkan ke keranjang.',
+            'cart_count' => Cart::where('user_id', Auth::id())->count(),
+        ]);
     }
 
     private function lookupBiteshipArea($district, $city, $province, $postalCode)
+    {
+        $area = $this->lookupBiteshipAreaDetails($district, $city, $province, $postalCode);
+
+        return $area['id'] ?? null;
+    }
+
+    private function lookupBiteshipAreaDetails($district, $city, $province, $postalCode)
     {
         $apiKey = PengaturanWeb::where('key', 'Api Key Biteship')->value('value');
         if (!$apiKey) {
@@ -429,7 +861,8 @@ class DashboardController extends Controller
             return null;
         }
 
-        $areaId = $data['areas'][0]['id'] ?? null;
+        $candidates = $this->pickBiteshipArea($data['areas'], $postalCode);
+        $areaId = $candidates['id'] ?? null;
         if (!$areaId) {
             return null;
         }
@@ -449,10 +882,28 @@ class DashboardController extends Controller
         curl_close($ch2);
 
         if ($httpCode2 !== 200) {
-            return $areaId;
+            return $candidates;
         }
 
         $data2 = json_decode($response2, true);
-        return $data2['areas'][0]['id'] ?? $areaId;
+        if (empty($data2['success']) || empty($data2['areas'])) {
+            return $candidates;
+        }
+
+        return $this->pickBiteshipArea($data2['areas'], $postalCode);
+    }
+
+    private function pickBiteshipArea(array $areas, $postalCode)
+    {
+        $postal = preg_replace('/\D/', '', (string) $postalCode);
+
+        foreach ($areas as $area) {
+            $areaPostal = preg_replace('/\D/', '', (string) ($area['postal_code'] ?? ''));
+            if ($postal && $areaPostal === $postal) {
+                return $area;
+            }
+        }
+
+        return $areas[0];
     }
 }

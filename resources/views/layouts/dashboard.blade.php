@@ -2133,6 +2133,22 @@
                             Pesanan Saya
                             <span class="dash-nav-badge">{{ $dashUser->penjualan()->where('order_web', true)->count() }}</span>
                         </a>
+                        @php
+                            $dashPendingPay = \App\Models\Pembayaran::where('status', 'pending')
+                                ->where('expired_at', '>', now())
+                                ->whereHas('penjualanDraft', fn ($q) => $q->where('created_by', $dashUser->id))
+                                ->count();
+                        @endphp
+                        <a href="{{ route('dashboard.pembayaran') }}" class="dash-nav-item {{ request()->routeIs('dashboard.pembayaran') ? 'active' : '' }}">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="2" y="5" width="20" height="14" rx="2" />
+                                <line x1="2" y1="10" x2="22" y2="10" />
+                            </svg>
+                            Pembayaran
+                            @if ($dashPendingPay > 0)
+                                <span class="dash-nav-badge">{{ $dashPendingPay }}</span>
+                            @endif
+                        </a>
                         <a href="{{ route('dashboard.keranjang') }}" class="dash-nav-item {{ request()->routeIs('dashboard.keranjang') ? 'active' : '' }}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>

@@ -9,18 +9,36 @@ class Pembayaran extends Model
     protected $table = 'pembayaran';
 
     protected $fillable = [
-        'order_id',
-        'payment_provider',
-        'payment_method',
+        'penjualan_id',
+        'penjualan_draft_id',
+        'order_id_midtrans',
         'transaction_id',
-        'gross_amount',
-        'payment_status',
+        'payment_method',
+        'payment_type',
+        'alasan_override_pembayaran',
+        'amount',
+        'status',
+        'snap_token',
         'paid_at',
         'expired_at',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'amount'     => 'decimal:2',
+            'paid_at'    => 'datetime',
+            'expired_at' => 'datetime',
+        ];
+    }
+
     public function penjualan()
     {
-        return $this->belongsTo(Penjualan::class, 'order_id');
+        return $this->belongsTo(Penjualan::class, 'penjualan_id');
+    }
+
+    public function penjualanDraft()
+    {
+        return $this->belongsTo(PenjualanDraft::class, 'penjualan_draft_id');
     }
 }

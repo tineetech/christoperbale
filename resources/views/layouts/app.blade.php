@@ -15,6 +15,8 @@
 </head>
 
 <body>
+
+    @include('components.chatbot')
     @if (Auth::check())
     <script>
         document.documentElement.className = "logged-in";

@@ -91,7 +91,18 @@
         .pd-actions .pd-add-cart:hover{background:var(--accent);color:#fff;}
         .pd-actions .pd-buy-now{background:var(--accent);color:#fff;border:1.5px solid var(--accent);}
         .pd-actions .pd-buy-now:hover{background:#a0780a;border-color:#a0780a;}
+        .pd-actions button .btn-icon{display:inline-flex;vertical-align:middle;}
+        .pd-actions button .btn-icon svg{width:16px;height:16px;}
+        .pd-actions button .btn-text{margin-left:8px;}
         .pd-wishlist{margin-bottom:24px;}
+        .pd-actions button:disabled{cursor:not-allowed;opacity:0.5;pointer-events:none;}
+        .pd-stock{display:flex;align-items:center;gap:8px;margin-top:14px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(46,125,50,0.05);font-size:12.5px;color:var(--ink-soft);}
+        .pd-stock .pd-stock-dot{width:9px;height:9px;border-radius:50%;background:var(--green);flex-shrink:0;}
+        .pd-stock.is-low{border-color:rgba(212,148,62,0.5);background:rgba(212,148,62,0.08);color:#8a6d1a;}
+        .pd-stock.is-low .pd-stock-dot{background:#d4943e;}
+        .pd-stock.is-out{border-color:rgba(192,57,43,0.4);background:rgba(192,57,43,0.06);color:var(--red);}
+        .pd-stock.is-out .pd-stock-dot{background:var(--red);}
+        .pd-stock .pd-stock-strong{font-weight:700;color:inherit;}
     </style>
 @endpush
 
@@ -229,14 +240,19 @@
                         <button class="qty-minus"
                             onclick="document.getElementById('qtyInput').stepDown();updateQty();">&#8722;</button>
                         <input type="number" id="qtyInput" value="1" min="1" max="99"
-                            onchange="updateQty();">
+                            oninput="updateQty();" onchange="updateQty();">
                         <button class="qty-plus"
                             onclick="document.getElementById('qtyInput').stepUp();updateQty();">&#43;</button>
                     </div>
 
+                    <div class="pd-stock" id="pdStockInfo">
+                        <span class="pd-stock-dot"></span>
+                        <span id="pdStockText">Memuat stok...</span>
+                    </div>
+
                     <div class="pd-actions">
-                        <div class="pd-action-wrap"><button class="pd-add-cart" onclick="authGuard(function(){ addToCart({{ $product['id'] ?? 'null' }}) })">Tambah ke Keranjang</button></div>
-                        <div class="pd-action-wrap"><button class="pd-buy-now" onclick="authGuard(function(){})">Beli Sekarang</button></div>
+                        <div class="pd-action-wrap"><button class="pd-add-cart" onclick="authGuard(function(){ addToCart({{ $product['id'] ?? 'null' }}) })"><span class="btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="btn-text">Tambah ke Keranjang</span></button></div>
+                        <div class="pd-action-wrap"><button class="pd-buy-now" onclick="authGuard(function(){ buyNow() })"><span class="btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span><span class="btn-text">Beli Sekarang</span></button></div>
                     </div>
                     <button class="pd-wishlist" onclick="authGuard(function(){})">
                         <svg viewBox="0 0 24 24">
@@ -348,6 +364,40 @@
             var i = document.getElementById('qtyInput');
             if (i.value < 1) i.value = 1;
             if (i.value > 99) i.value = 99;
+            updateStockInfo();
+        }
+
+        function updateStockInfo() {
+            var info = document.getElementById('pdStockInfo');
+            var text = document.getElementById('pdStockText');
+            var addBtn = document.querySelector('.pd-add-cart');
+            var buyBtn = document.querySelector('.pd-buy-now');
+            var qty = parseInt(document.getElementById('qtyInput').value, 10) || 1;
+            var match = getSelectedVariant();
+
+            if (!match) {
+                if (info) info.className = 'pd-stock is-out';
+                if (text) text.innerHTML = 'Pilih ukuran & warna untuk melihat stok.';
+                if (addBtn) addBtn.disabled = true;
+                if (buyBtn) buyBtn.disabled = true;
+                return;
+            }
+
+            var stok = match.stok;
+            if (stok <= 0) {
+                if (info) info.className = 'pd-stock is-out';
+                if (text) text.innerHTML = 'Stok produk ini <span class="pd-stock-strong">habis</span>.';
+            } else if (qty > stok) {
+                if (info) info.className = 'pd-stock is-low';
+                if (text) text.innerHTML = 'Stok tersedia hanya <span class="pd-stock-strong">' + stok + '</span>, jumlah dipesan ' + qty + ' melebihi stok.';
+            } else {
+                if (info) info.className = 'pd-stock';
+                if (text) text.innerHTML = '<span class="pd-stock-strong">' + stok + '</span> Stok tersedia.';
+            }
+
+            var insufficient = !match || stok < qty;
+            if (addBtn) addBtn.disabled = insufficient;
+            if (buyBtn) buyBtn.disabled = insufficient;
         }
         document.querySelectorAll('.pd-thumbs .thumb').forEach(function(t) {
             t.addEventListener('click', function() {
@@ -393,12 +443,14 @@
                 });
                 if (this.checked) this.closest('.pd-size-option').querySelector('label').style.borderColor =
                     'var(--accent)';
+                updateStockInfo();
             });
         });
         document.querySelectorAll('.pd-color-option input').forEach(function(r) {
             r.addEventListener('change', function() {
                 var name = this.value;
                 document.getElementById('selectedColorName').textContent = name;
+                updateStockInfo();
             });
         });
 
@@ -416,23 +468,83 @@
             }
         })();
 
+        updateStockInfo();
+
+        function getSelectedVariant() {
+            var sizeInput = document.querySelector('input[name=size]:checked');
+            var colorInput = document.querySelector('input[name=color]:checked');
+            var size = sizeInput ? sizeInput.value : '';
+            var color = colorInput ? colorInput.value : '';
+            var variants = @json($product['variants'] ?? []);
+            var match = null;
+            if (size && color) {
+                match = variants.find(function(v) { return v.size === size && v.color === color; });
+            } else if (size) {
+                match = variants.find(function(v) { return v.size === size; });
+            } else if (color) {
+                match = variants.find(function(v) { return v.color === color; });
+            }
+            return match;
+        }
+
+        function showSwal(icon, title, text) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: icon, title: title, text: text });
+            } else {
+                alert(title + ': ' + text);
+            }
+        }
+
+        function buyNow() {
+            var qty = parseInt(document.getElementById('qtyInput').value, 10) || 1;
+            var match = getSelectedVariant();
+            if (!match) {
+                showSwal('warning', 'Varian tidak ditemukan', 'Silakan pilih ukuran dan warna yang tersedia.');
+                return;
+            }
+            if (match.stok < qty) {
+                showSwal('error', 'Stok Tidak Cukup', 'Stok tersedia: ' + match.stok + '. Jumlah yang dipesan: ' + qty + '.');
+                return;
+            }
+            var params = new URLSearchParams();
+            params.set('nama_barang', match.nama);
+            params.set('qty', qty);
+            window.location.href = '/checkout?' + params.toString();
+        }
+
         function addToCart(produkId) {
             var btn = document.querySelector('.pd-add-cart');
             var orig = btn.textContent;
+            var qty = parseInt(document.getElementById('qtyInput').value, 10) || 1;
+            var match = getSelectedVariant();
+            if (!match) {
+                showSwal('warning', 'Varian tidak ditemukan', 'Silakan pilih ukuran dan warna yang tersedia.');
+                return;
+            }
+            if (match.stok < qty) {
+                showSwal('error', 'Stok Tidak Cukup', 'Stok tersedia: ' + match.stok + '. Jumlah yang dipesan: ' + qty + '.');
+                return;
+            }
             btn.disabled = true;
             btn.textContent = 'Memproses...';
-            var size = document.querySelector('input[name=size]:checked');
-            var color = document.querySelector('input[name=color]:checked');
-            var qty = document.getElementById('qtyInput').value;
+            var sizeInput = document.querySelector('input[name=size]:checked');
+            var colorInput = document.querySelector('input[name=color]:checked');
             fetch('/cart/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
-                body: JSON.stringify({ produk_id: produkId, size: size ? size.value : '', color: color ? color.value : '', qty: qty })
+                body: JSON.stringify({ produk_id: produkId, size: sizeInput ? sizeInput.value : '', color: colorInput ? colorInput.value : '', qty: qty })
             }).then(function(r) {
                 if (!r.ok) return r.json().then(function(d) { throw new Error(d.message || 'Gagal'); });
                 return r.json();
             }).then(function(d) {
                 if (d.ok) {
+                    if (d.cart_count !== undefined) {
+                        var badge = document.getElementById('cartCountBadge');
+                        if (badge) {
+                            badge.textContent = d.cart_count;
+                            badge.style.display = d.cart_count > 0 ? '' : 'none';
+                        }
+                    }
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Produk ditambahkan ke keranjang.', timer: 2000, showConfirmButton: false });
                     } else {
@@ -440,11 +552,7 @@
                     }
                 }
             }).catch(function(e) {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({ icon: 'error', title: 'Gagal', text: e.message });
-                } else {
-                    alert(e.message);
-                }
+                showSwal('error', 'Gagal', e.message);
             }).finally(function() {
                 btn.disabled = false;
                 btn.textContent = orig;

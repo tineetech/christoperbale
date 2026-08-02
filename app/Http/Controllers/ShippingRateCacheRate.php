@@ -4,18 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ShippingRateCacheItem extends Model
+class ShippingRateCacheRate extends Model
 {
+    protected $table = 'shipping_rate_cache_rates';
+
     protected $fillable = [
         'shipping_rate_cache_id',
-        'barang_id',
-        'quantity',
-        'weight',
-        'length',
-        'width',
-        'height',
-        'value',
+        'response_json',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'response_json' => 'array',
+        ];
+    }
 
     public function cache()
     {

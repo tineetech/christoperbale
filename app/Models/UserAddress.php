@@ -15,6 +15,7 @@ class UserAddress extends Model
         'province',
         'city',
         'district',
+        'catatan',
         'postal_code',
         'address',
         'label',
