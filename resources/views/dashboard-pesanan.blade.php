@@ -127,7 +127,7 @@
                         <div class="orders-full-list" id="ordersFullList">
                             @foreach ($orders as $order)
                             @php
-                                $orderId = $order->nomor_pesanan ?? $order->kode_penjualan ?? '#CB-ORD-' . $order->id;
+                                $orderId = $order->kode_penjualan ?? '#CB-ORD-' . $order->id;
                                 $orderDate = $order->tanggal ? \Carbon\Carbon::parse($order->tanggal)->format('d M Y') : $order->created_at->format('d M Y');
                                 $total = 'Rp' . number_format($order->total_harga, 0, ',', '.');
                                 $statusText = ucfirst($order->status);
@@ -195,6 +195,9 @@
                                             <div><span class="ofc-label">Pembayaran</span><span>Midtrans {{ $order->pembayaran->payment_method ? '— ' . $order->pembayaran->payment_method : '' }} · {{ ucfirst($order->pembayaran->status ?? 'Lunas') }}</span></div>
                                             @endif
                                             <div><span class="ofc-label">Alamat</span><span>{{ $order->address->address ?? '-' }}{{ $order->address ? ', ' . $order->address->city : '' }}</span></div>
+                                            @if ($order->shipment && $order->shipment->estimation_days)
+                                            <div><span class="ofc-label">Estimasi</span><span>{{ $order->shipment->estimation_days }} hari</span></div>
+                                            @endif
                                             <div class="ofc-total-row"><span class="ofc-label">Total Bayar</span><strong>Rp{{ number_format($order->total_harga, 0, ',', '.') }}</strong></div>
                                         </div>
                                         <div class="ofc-footer-actions">

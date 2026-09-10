@@ -8,11 +8,13 @@ use App\Models\Pembayaran;
 use App\Models\Penjualan;
 use App\Models\PengaturanWeb;
 use App\Models\Pengguna;
+use App\Models\Produk;
 use App\Models\ProdukVarian;
 use App\Models\StokBarang;
 use App\Models\UserAddress;
 use App\Models\UserVoucher;
 use App\Models\Voucher;
+use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -38,7 +40,32 @@ class DashboardController extends Controller
         $processing     = $orders->where('status', '!=', 'selesai')->count();
         $recentOrders   = $orders->take(5);
 
-        return view('dashboard', compact('totalOrders', 'completed', 'processing', 'recentOrders'));
+        $recommendedProducts = Produk::with(['brand', 'fotoUtama'])
+            ->where('status', 'aktif')
+            ->orderByDesc('is_popular')
+            ->orderByDesc('is_newproduct')
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+
+        $activeVouchers = \App\Models\Voucher::where('status', 'active')
+            ->where('start_at', '<=', now())
+            ->where('end_at', '>=', now())
+            ->where(function ($q) {
+                $q->whereNull('quota')->orWhereColumn('used_count', '<', 'quota');
+            })
+            ->orderBy('end_at')
+            ->take(2)
+            ->get();
+
+        return view('dashboard', compact(
+            'totalOrders',
+            'completed',
+            'processing',
+            'recentOrders',
+            'recommendedProducts',
+            'activeVouchers'
+        ));
     }
 
     public function pesanan(Request $request)
@@ -49,7 +76,7 @@ class DashboardController extends Controller
 
         $user = Auth::user();
 
-        $query = Penjualan::with(['detail.barang'])
+        $query = Penjualan::with(['detail.barang', 'shipment', 'address'])
             ->where('order_web', true)
             ->where('created_by', $user->id);
 
@@ -181,7 +208,88 @@ class DashboardController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-        return view('dashboard-wishlist');
+
+        $wishlistItems = Wishlist::with(['barang.produk.brand', 'barang.produk.fotoUtama', 'produk.brand', 'produk.fotoUtama'])
+            ->where('user_id', Auth::id())
+            ->where('status', 'aktif')
+            ->orderByDesc('created_at')
+            ->get()
+            ->unique('produk_id')
+            ->values();
+
+        return view('dashboard-wishlist', compact('wishlistItems'));
+    }
+
+    public function toggleWishlist(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['ok' => false, 'message' => 'Silakan login terlebih dahulu.'], 401);
+        }
+
+        $request->validate([
+            'produk_id' => 'required|integer',
+            'barang_id' => 'nullable|integer',
+        ]);
+
+        $produk = \App\Models\Produk::find($request->produk_id);
+        if (!$produk) {
+            return response()->json(['ok' => false, 'message' => 'Produk tidak ditemukan.'], 404);
+        }
+
+        // Cek apakah produk sudah ada di wishlist user (unique by produk_id)
+        $existingAktif = Wishlist::where('user_id', Auth::id())
+            ->where('produk_id', $request->produk_id)
+            ->where('status', 'aktif')
+            ->first();
+
+        if ($existingAktif) {
+            $existingAktif->update(['status' => 'nonaktif']);
+            $count = Wishlist::where('user_id', Auth::id())->where('status', 'aktif')->get()->unique('produk_id')->count();
+            return response()->json(['ok' => true, 'wishlisted' => false, 'message' => 'Dihapus dari wishlist.', 'count' => $count]);
+        }
+
+        // Double wishlist prevention: cek apakah ada record nonaktif untuk produk ini (reactivate)
+        $existingNonAktif = Wishlist::where('user_id', Auth::id())
+            ->where('produk_id', $request->produk_id)
+            ->where('status', 'nonaktif')
+            ->first();
+
+        // Ambil barang_id representative: pakai barang_id yang dikirim atau fallback ke barang pertama produk
+        $barangId = $request->barang_id;
+        if (!$barangId) {
+            $firstBarang = \App\Models\Barang::where('produk_id', $produk->id)->first();
+            $barangId = $firstBarang ? $firstBarang->id : null;
+        }
+
+        if (!$barangId) {
+            return response()->json(['ok' => false, 'message' => 'Varian produk tidak tersedia.'], 422);
+        }
+
+        if ($existingNonAktif) {
+            $existingNonAktif->update(['status' => 'aktif', 'barang_id' => $barangId]);
+            $count = Wishlist::where('user_id', Auth::id())->where('status', 'aktif')->get()->unique('produk_id')->count();
+            return response()->json([
+                'ok' => true,
+                'wishlisted' => true,
+                'message' => 'Ditambahkan ke wishlist.',
+                'count' => $count,
+            ]);
+        }
+
+        Wishlist::create([
+            'user_id' => Auth::id(),
+            'barang_id' => $barangId,
+            'produk_id' => $request->produk_id,
+            'status' => 'aktif',
+        ]);
+
+        $count = Wishlist::where('user_id', Auth::id())->where('status', 'aktif')->get()->unique('produk_id')->count();
+        return response()->json([
+            'ok' => true,
+            'wishlisted' => true,
+            'message' => 'Ditambahkan ke wishlist.',
+            'count' => $count,
+        ]);
     }
 
     public function profil()
@@ -214,10 +322,12 @@ class DashboardController extends Controller
             'district'      => 'required|string|max:100',
             'postal_code'   => 'required|string|max:10',
             'address'       => 'required|string',
+            'latitude'      => 'required|numeric|between:-90,90',
+            'longitude'     => 'required|numeric|between:-180,180',
             'catatan'       => 'nullable|string|max:500',
         ]);
 
-        $data = $request->only(['label', 'receiver_name', 'phone', 'province', 'city', 'district', 'postal_code', 'address', 'catatan']);
+        $data = $request->only(['label', 'receiver_name', 'phone', 'province', 'city', 'district', 'postal_code', 'address', 'latitude', 'longitude', 'catatan']);
         $data['user_id'] = Auth::id();
 
         $hasAddresses = Auth::user()->addresses()->exists();
@@ -255,10 +365,12 @@ class DashboardController extends Controller
             'district'      => 'required|string|max:100',
             'postal_code'   => 'required|string|max:10',
             'address'       => 'required|string',
+            'latitude'      => 'required|numeric|between:-90,90',
+            'longitude'     => 'required|numeric|between:-180,180',
             'catatan'       => 'nullable|string|max:500',
         ]);
 
-        $data = $request->only(['label', 'receiver_name', 'phone', 'province', 'city', 'district', 'postal_code', 'address', 'catatan']);
+        $data = $request->only(['label', 'receiver_name', 'phone', 'province', 'city', 'district', 'postal_code', 'address', 'latitude', 'longitude', 'catatan']);
 
         if ($request->boolean('is_default')) {
             Auth::user()->addresses()->where('id', '!=', $id)->update(['is_default' => false]);
@@ -315,11 +427,43 @@ class DashboardController extends Controller
             return response()->json(['results' => []]);
         }
 
+        $key = $this->googleMapsKey();
+        if ($key) {
+            $data = $this->googlePlaceAutocomplete($q);
+
+            return response()->json([
+                'provider' => 'google',
+                'results' => array_map(fn ($p) => $this->normalizeGooglePrediction($p), $data['predictions'] ?? []),
+            ]);
+        }
+
         $places = $this->nominatimSearch($q);
 
         return response()->json([
+            'provider' => 'nominatim',
             'results' => array_map(fn ($p) => $this->normalizeNominatimPlace($p), $places),
         ]);
+    }
+
+    public function placeDetails(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $placeId = trim((string) $request->input('place_id', ''));
+        $key = $this->googleMapsKey();
+
+        if (!$key || !$placeId) {
+            return response()->json(['error' => 'Lokasi tidak ditemukan.'], 404);
+        }
+
+        $place = $this->googlePlaceDetails($placeId);
+        if (!$place) {
+            return response()->json(['error' => 'Lokasi tidak ditemukan.'], 404);
+        }
+
+        return response()->json(['result' => $this->normalizeGooglePlace($place)]);
     }
 
     public function reverseGeocode(Request $request)
@@ -333,6 +477,16 @@ class DashboardController extends Controller
 
         if (abs($lat) > 90 || abs($lng) > 180) {
             return response()->json(['error' => 'Koordinat tidak valid.'], 422);
+        }
+
+        $key = $this->googleMapsKey();
+        if ($key) {
+            $place = $this->googleReverseGeocode($lat, $lng);
+            if (!$place) {
+                return response()->json(['error' => 'Lokasi tidak ditemukan.'], 404);
+            }
+
+            return response()->json(['result' => $this->normalizeGooglePlace($place)]);
         }
 
         $place = $this->nominatimReverse($lat, $lng);
@@ -365,6 +519,165 @@ class DashboardController extends Controller
                 'postal_code' => $area['postal_code'] ?? '',
             ] : null,
         ]);
+    }
+
+    private function googleMapsKey()
+    {
+        $key = config('services.google.maps_api_key');
+
+        if (!$key) {
+            $key = PengaturanWeb::where('key', 'Google Maps API Key')->value('value');
+        }
+
+        return $key ? trim((string) $key) : null;
+    }
+
+    private function googlePlaceAutocomplete($query)
+    {
+        $url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?'
+            . http_build_query([
+                'input' => $query,
+                'key' => $this->googleMapsKey(),
+                'components' => 'country:ID',
+                'language' => 'id',
+                'types' => 'address',
+            ]);
+
+        $data = $this->googleMapsRequest($url);
+
+        return is_array($data) && ($data['status'] ?? '') === 'OK' ? $data : [];
+    }
+
+    private function googlePlaceDetails($placeId)
+    {
+        $url = 'https://maps.googleapis.com/maps/api/place/details/json?'
+            . http_build_query([
+                'place_id' => $placeId,
+                'key' => $this->googleMapsKey(),
+                'fields' => 'formatted_address,geometry,address_component,name',
+                'language' => 'id',
+            ]);
+
+        $data = $this->googleMapsRequest($url);
+
+        return is_array($data) && ($data['status'] ?? '') === 'OK' ? ($data['result'] ?? null) : null;
+    }
+
+    private function googleReverseGeocode($lat, $lng)
+    {
+        $url = 'https://maps.googleapis.com/maps/api/geocode/json?'
+            . http_build_query([
+                'latlng' => $lat . ',' . $lng,
+                'key' => $this->googleMapsKey(),
+                'language' => 'id',
+            ]);
+
+        $data = $this->googleMapsRequest($url);
+
+        if (!is_array($data) || ($data['status'] ?? '') !== 'OK' || empty($data['results'])) {
+            return null;
+        }
+
+        return $data['results'][0];
+    }
+
+    private function googleMapsRequest($url)
+    {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_REFERER => 'https://christoperbale.id',
+            CURLOPT_TIMEOUT => 8,
+            CURLOPT_HTTPHEADER => ['Accept: application/json'],
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200 || !$response) {
+            return null;
+        }
+
+        return json_decode($response, true);
+    }
+
+    private function normalizeGooglePrediction(array $prediction): array
+    {
+        $structured = $prediction['structured_formatting'] ?? [];
+
+        return [
+            'provider' => 'google',
+            'place_id' => $prediction['place_id'] ?? null,
+            'address' => $prediction['description'] ?? '',
+            'main_text' => $structured['main_text'] ?? '',
+            'secondary_text' => $structured['secondary_text'] ?? '',
+        ];
+    }
+
+    private function normalizeGooglePlace(array $place): array
+    {
+        $components = $place['address_components'] ?? [];
+        $geo = (array) ($place['geometry'] ?? []);
+        $loc = $geo['location'] ?? [];
+
+        $parts = $this->mapGoogleComponents($components);
+
+        $streetNames = array_merge($parts['street_names']);
+        $street = implode(' ', array_slice($streetNames, 0, 2));
+
+        return [
+            'provider' => 'google',
+            'place_id' => $place['place_id'] ?? null,
+            'address' => $place['formatted_address'] ?? '',
+            'street' => $street,
+            'province' => $parts['province'],
+            'city' => $parts['city'],
+            'district' => $parts['district'],
+            'subdistrict' => $parts['subdistrict'],
+            'postal_code' => $parts['postal'],
+            'lat' => (float) ($location['lat'] ?? 0),
+            'lng' => (float) ($location['lng'] ?? 0),
+        ];
+    }
+
+    private function mapGoogleComponents(array $components): array
+    {
+        $out = [
+            'province' => '',
+            'city' => '',
+            'district' => '',
+            'subdistrict' => '',
+            'postal' => '',
+            'street_names' => [],
+        ];
+
+        foreach ($components as $c) {
+            $types = $c['types'] ?? [];
+            $name = $c['long_name'] ?? '';
+
+            if (in_array('postal_code', $types)) {
+                $out['postal'] = $name;
+            } elseif (in_array('administrative_area_level_1', $types)) {
+                $out['province'] = $name;
+            } elseif (in_array('administrative_area_level_2', $types)) {
+                $out['city'] = $name;
+            } elseif (in_array('administrative_area_level_3', $types)) {
+                $out['district'] = $name;
+            } elseif (in_array('administrative_area_level_4', $types)) {
+                $out['subdistrict'] = $name;
+            } elseif (in_array('locality', $types)) {
+                $out['city'] = $name;
+            } elseif (in_array('neighborhood', $types)) {
+                $out['subdistrict'] = $out['subdistrict'] ?: $name;
+            } elseif (in_array('street_number', $types) || in_array('route', $types)) {
+                $out['street_names'][] = $name;
+            }
+        }
+
+        $out['province'] = $this->provinceFromState($out['province']);
+
+        return $out;
     }
 
     private function nominatimSearch($query)
@@ -752,14 +1065,19 @@ class DashboardController extends Controller
 
         $qty = max(1, min((int) $request->input('qty', 1), 99));
         $stok = StokBarang::where('barang_id', $item->barang_id)->value('jumlah_stok') ?? 0;
+        $oldQty = (int) $item->qty;
 
         if ($qty > $stok) {
-            return response()->json([
-                'ok' => false,
-                'message' => $stok <= 0
-                    ? 'Stok produk ini sedang habis.'
-                    : 'Stok tidak cukup. Stok tersedia: ' . $stok . '.',
-            ], 422);
+            // Izinkan penurunan qty meski masih di atas stok (mis. 5→4 saat stok 3),
+            // tapi tolak penambahan/pertahankan qty yang melebihi stok.
+            if ($qty >= $oldQty) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => $stok <= 0
+                        ? 'Stok produk ini sedang habis.'
+                        : 'Stok tidak cukup. Stok tersedia: ' . $stok . '.',
+                ], 422);
+            }
         }
 
         $item->update(['qty' => $qty]);
@@ -816,6 +1134,118 @@ class DashboardController extends Controller
 
         return response()->json([
             'ok' => true,
+            'message' => 'Produk ditambahkan ke keranjang.',
+            'cart_count' => Cart::where('user_id', Auth::id())->count(),
+        ]);
+    }
+
+    public function addToCartSimple(Request $request)
+    {
+        $request->validate([
+            'produk_id' => 'required|integer',
+            'qty' => 'integer|min:1|max:99',
+        ]);
+
+        $qty = $request->qty ?? 1;
+
+        // Ambil varian pertama yang punya stok
+        $varian = ProdukVarian::where('produk_id', $request->produk_id)
+            ->whereHas('stok', function ($q) {
+                $q->where('jumlah_stok', '>', 0);
+            })
+            ->first();
+
+        if (!$varian) {
+            return response()->json(['ok' => false, 'message' => 'Produk tidak tersedia atau stok habis.'], 422);
+        }
+
+        $available = StokBarang::where('barang_id', $varian->barang_id)->value('jumlah_stok') ?? 0;
+
+        $existing = Cart::where('user_id', Auth::id())
+            ->where('barang_id', $varian->barang_id)
+            ->first();
+
+        $existingQty = $existing->qty ?? 0;
+        $totalQty = $existingQty + $qty;
+
+        if ($available <= 0 || $totalQty > $available) {
+            return response()->json([
+                'ok' => false,
+                'message' => $available <= 0
+                    ? 'Stok produk ini habis.'
+                    : 'Stok tidak cukup. Sisa stok ' . $available . ($existingQty > 0 ? ' (sudah ' . $existingQty . ' di keranjang Anda)' : '') . '.',
+            ], 422);
+        }
+
+        if ($existing) {
+            $newQty = $existing->qty + $qty;
+            $existing->update(['qty' => min($newQty, 99)]);
+        } else {
+            Cart::create([
+                'user_id' => Auth::id(),
+                'barang_id' => $varian->barang_id,
+                'qty' => $qty,
+            ]);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'success' => true,
+            'message' => 'Produk ditambahkan ke keranjang.',
+            'cart_count' => Cart::where('user_id', Auth::id())->count(),
+        ]);
+    }
+
+    public function addToCartFromWishlist(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['ok' => false, 'message' => 'Silakan login terlebih dahulu.'], 401);
+        }
+
+        $request->validate([
+            'barang_id' => 'required|integer',
+            'qty' => 'integer|min:1|max:99',
+        ]);
+
+        $qty = $request->qty ?? 1;
+
+        $barang = \App\Models\Barang::with('stok')->find($request->barang_id);
+        if (!$barang) {
+            return response()->json(['ok' => false, 'message' => 'Produk tidak ditemukan.'], 404);
+        }
+
+        $available = $barang->stok->jumlah_stok ?? 0;
+
+        $existing = Cart::where('user_id', Auth::id())
+            ->where('barang_id', $request->barang_id)
+            ->first();
+
+        $existingQty = $existing->qty ?? 0;
+        $totalQty = $existingQty + $qty;
+
+        if ($available <= 0 || $totalQty > $available) {
+            return response()->json([
+                'ok' => false,
+                'message' => $available <= 0
+                    ? 'Stok produk ini habis.'
+                    : 'Stok tidak cukup. Sisa stok ' . $available . ($existingQty > 0 ? ' (sudah ' . $existingQty . ' di keranjang Anda)' : '') . '.',
+            ], 422);
+        }
+
+        if ($existing) {
+            $newQty = $existing->qty + $qty;
+            $existing->update(['qty' => min($newQty, 99)]);
+        } else {
+            Cart::create([
+                'user_id' => Auth::id(),
+                'barang_id' => $request->barang_id,
+                'qty' => $qty,
+            ]);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'success' => true,
             'message' => 'Produk ditambahkan ke keranjang.',
             'cart_count' => Cart::where('user_id', Auth::id())->count(),
         ]);

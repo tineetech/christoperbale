@@ -409,6 +409,7 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const CLIENT_KEY = '{{ $clientKey }}';
         const SNAP_TOKEN = '{{ $snapToken ?? '' }}';
@@ -416,6 +417,18 @@
         // const SNAP_URL = '{{ $isProduction ? 'https://app.midtrans.com' : 'https://app.sandbox.midtrans.com' }}/snap/snap.js';
         let payTimer = null;
         let snapOpened = false;
+
+        function showSwalLoading() {
+            if (typeof Swal === 'undefined') return;
+            Swal.fire({
+                title: 'Memproses Pembayaran',
+                html: 'Mohon tunggu, kami sedang memverifikasi pembayaran Anda...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => { Swal.showLoading(); },
+                showConfirmButton: false,
+            });
+        }
 
         verifyWithMidtrans()
         async function verifyWithMidtrans() {
@@ -428,6 +441,7 @@
                 const statusData = await statusRes.json();
                 if (statusData.status === 'paid' && statusData.redirect) {
                     if (payTimer) clearInterval(payTimer);
+                    showSwalLoading();
                     window.location.href = statusData.redirect;
                     return true;
                 }
@@ -440,6 +454,7 @@
                 const data = await res.json();
                 if (data.status === 'paid' && data.redirect) {
                     if (payTimer) clearInterval(payTimer);
+                    showSwalLoading();
                     window.location.href = data.redirect;
                     return true;
                 }
@@ -463,6 +478,7 @@
 
             function stopPolling() {
                 clearInterval(payTimer);
+                if (typeof Swal !== 'undefined' && Swal.isVisible()) Swal.close();
                 const btn = document.getElementById('btnBayar');
                 if (btn) { btn.disabled = false; btn.textContent = 'Bayar Sekarang'; }
                 const st = document.getElementById('payStatus');
@@ -481,6 +497,7 @@
                     const data = await res.json();
                     if (data.status === 'paid' && data.redirect) {
                         clearInterval(payTimer);
+                        showSwalLoading();
                         window.location.href = data.redirect;
                     } else if (attempts >= 60) {
                         stopPolling();
@@ -503,6 +520,7 @@
                 btn.disabled = true;
                 btn.textContent = 'Menunggu Pembayaran...';
             }
+            showSwalLoading();
             pollPaymentStatus();
         }
 
@@ -541,11 +559,17 @@
                     showWaiting();
                 },
                 onError: function(result) {
+                    if (typeof Swal !== 'undefined' && Swal.isVisible()) Swal.close();
                     const btn = document.getElementById('btnBayar');
                     if (btn) { btn.disabled = false; btn.textContent = 'Bayar Sekarang'; }
-                    alert('Pembayaran gagal. Silakan coba lagi.');
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({ icon: 'error', title: 'Pembayaran gagal', text: 'Silakan coba lagi.', confirmButtonColor: '#B8860B' });
+                    } else {
+                        alert('Pembayaran gagal. Silakan coba lagi.');
+                    }
                 },
                 onClose: function() {
+                    if (typeof Swal !== 'undefined' && Swal.isVisible()) Swal.close();
                     const btn = document.getElementById('btnBayar');
                     if (btn) { btn.disabled = false; btn.textContent = 'Bayar Sekarang'; }
                 }
@@ -562,10 +586,12 @@
                     showWaiting();
                 },
                 onError: function(result) {
+                    if (typeof Swal !== 'undefined' && Swal.isVisible()) Swal.close();
                     const btn = document.getElementById('btnBayar');
                     if (btn) { btn.disabled = false; btn.textContent = 'Bayar Sekarang'; }
                 },
                 onClose: function() {
+                    if (typeof Swal !== 'undefined' && Swal.isVisible()) Swal.close();
                     const btn = document.getElementById('btnBayar');
                     if (btn) { btn.disabled = false; btn.textContent = 'Bayar Sekarang'; }
                 }

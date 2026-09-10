@@ -24,7 +24,7 @@
                             <div class="profile-avatar-row">
                                 <div class="profile-avatar-big">
                                     @if ($user->photo_profile)
-                                    <img src="{{ asset($user->photo_profile) }}" alt="Avatar">
+                                    <img src="{{ asset($user->photo_profile) }}" alt="Avatar" referrerpolicy="no-referrer">
                                     @else
                                     <div class="profile-avatar-initials">{{ $userInitials }}</div>
                                     @endif

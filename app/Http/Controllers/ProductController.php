@@ -7,7 +7,9 @@ use App\Models\DiscountProduct;
 use App\Models\PenjualanDetail;
 use App\Models\Produk;
 use App\Models\ProdukVarian;
+use App\Models\Wishlist;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -100,7 +102,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function show($slug)
+    public function show(Request $request, $slug)
     {
         $product = Produk::with(['brand', 'foto', 'fotoUtama', 'barang'])->where('slug', $slug)->firstOrFail();
 
@@ -175,8 +177,18 @@ class ProductController extends Controller
                 'nama' => $v->barang->nama_barang ?? '',
                 'available' => $v->barang && $v->barang->stok && $v->barang->stok->jumlah_stok >= 1,
                 'stok' => $v->barang && $v->barang->stok ? (int) $v->barang->stok->jumlah_stok : 0,
+                'barang_id' => $v->barang_id,
             ];
         })->values()->toArray();
+
+        // Wishlist status for authenticated user - product level (unique by produk_id)
+        $isWishlisted = false;
+        if (Auth::check()) {
+            $isWishlisted = Wishlist::where('user_id', Auth::id())
+                ->where('produk_id', $product->id)
+                ->where('status', 'aktif')
+                ->exists();
+        }
 
         // Review count: distinct penjualan that include this product
         $barangIds = $product->barang->pluck('id');
@@ -184,12 +196,15 @@ class ProductController extends Controller
             ->distinct('penjualan_id')
             ->count('penjualan_id');
 
-        $allProducts = Produk::with(['brand', 'fotoUtama'])
+        $perPage = 8;
+        $paginatedOther = Produk::with(['brand', 'fotoUtama'])
             ->where('status', 'aktif')
             ->where('id', '!=', $product->id)
-            ->take(8)
-            ->get()
-            ->map(function ($p) {
+            ->orderByDesc('created_at')
+            ->paginate($perPage);
+
+        // Transform collection to same format as before for card rendering
+        $mappedOther = $paginatedOther->getCollection()->map(function ($p) {
                 $disc = $this->productDiscount($p);
                 return [
                     'slug' => $p->slug,
@@ -201,8 +216,11 @@ class ProductController extends Controller
                     'img' => $p->fotoUtama ? env('BE_URL') . '/storage/' . $p->fotoUtama->foto : null,
                     'category' => '',
                 ];
-            })
-            ->toArray();
+            });
+        $paginatedOther->setCollection($mappedOther);
+
+        // Keep old variable for backwards compatibility (same paginated data as array)
+        $allProducts = $mappedOther->toArray();
 
         $productData = [
             'id' => $product->id,
@@ -222,6 +240,7 @@ class ProductController extends Controller
             'sizes' => $sizes,
             'colors' => $colors,
             'variants' => $variants,
+            'isWishlisted' => $isWishlisted,
             'sku' => '',
             'category' => '',
         ];
@@ -229,6 +248,7 @@ class ProductController extends Controller
         return view('product-detail', [
             'product' => $productData,
             'allProducts' => $allProducts,
+            'otherProducts' => $paginatedOther,
         ]);
     }
 }

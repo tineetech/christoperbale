@@ -49,22 +49,22 @@
 
         .dash-avatar {
             position: relative;
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             margin: 0 auto 14px;
         }
 
         .dash-avatar img {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             object-fit: cover;
             border: 2.5px solid var(--accent);
         }
 
         .dash-avatar-initials {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: var(--accent);
             color: #fff;
@@ -2063,6 +2063,36 @@
                 padding: 16px;
             }
         }
+
+        /* Product image placeholder (no photo) */
+        .prod-img-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #a8a8a8;
+            color: rgba(255, 255, 255, .45);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+        .reco-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #a8a8a8;
+            color: #525252;
+        }
+
+        .reco-placeholder i {
+            font-size: 16px;
+            line-height: 1;
+        }
     </style>
 @endpush
 
@@ -2082,7 +2112,7 @@
                     <div class="dash-profile-card">
                         <div class="dash-avatar">
                             @if ($dashUser->photo_profile)
-                            <img src="{{ asset($dashUser->photo_profile) }}" alt="{{ $dashName }}">
+                            <img src="{{ asset($dashUser->photo_profile) }}" alt="{{ $dashName }}" referrerpolicy="no-referrer">
                             @else
                             <div class="dash-avatar-initials">{{ $dashInitials }}</div>
                             @endif
@@ -2105,7 +2135,7 @@
                     </div>
 
                     <!-- Nav Toggle (mobile) -->
-                    <button class="dash-nav-toggle" onclick="toggleDashNav()" aria-label="Toggle menu">
+                    <button class="dash-nav-toggle " onclick="toggleDashNav()" aria-label="Toggle menu">
                         <span>Menu Navigasi</span>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -2114,7 +2144,7 @@
                     </button>
 
                     <!-- Nav Menu -->
-                    <nav class="dash-nav">
+                    <nav class="dash-nav collapsed">
                         <a href="{{ route('dashboard') }}" class="dash-nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                             <svg viewBox="0 0 24 24">
                                 <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -2131,7 +2161,12 @@
                                 <path d="M16 10a4 4 0 01-8 0" />
                             </svg>
                             Pesanan Saya
-                            <span class="dash-nav-badge">{{ $dashUser->penjualan()->where('order_web', true)->count() }}</span>
+                            @php
+                                $dashOrderCount = $dashUser->penjualan()->where('order_web', true)->count();
+                            @endphp
+                            @if ($dashOrderCount > 0)
+                                <span class="dash-nav-badge">{{ $dashOrderCount }}</span>
+                            @endif
                         </a>
                         @php
                             $dashPendingPay = \App\Models\Pembayaran::where('status', 'pending')
@@ -2155,7 +2190,12 @@
                                 <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
                             </svg>
                             Keranjang
-                            <span class="dash-nav-badge">{{ \App\Models\Cart::where('user_id', $dashUser->id)->count() }}</span>
+                            @php
+                                $dashCartCount = \App\Models\Cart::where('user_id', $dashUser->id)->count();
+                            @endphp
+                            @if ($dashCartCount > 0)
+                                <span class="dash-nav-badge">{{ $dashCartCount }}</span>
+                            @endif
                         </a>
                         <a href="{{ route('dashboard.wishlist') }}" class="dash-nav-item {{ request()->routeIs('dashboard.wishlist') ? 'active' : '' }}">
                             <svg viewBox="0 0 24 24">
@@ -2163,7 +2203,12 @@
                                     d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
                             </svg>
                             Wishlist
-                            <span class="dash-nav-badge">5</span>
+                            @php
+                                $dashWishlistCount = \App\Models\Wishlist::where('user_id', $dashUser->id)->where('status', 'aktif')->get()->unique('produk_id')->count();
+                            @endphp
+                            @if ($dashWishlistCount > 0)
+                                <span class="dash-nav-badge">{{ $dashWishlistCount }}</span>
+                            @endif
                         </a>
                         <a href="{{ route('dashboard.profil') }}" class="dash-nav-item {{ request()->routeIs('dashboard.profil') ? 'active' : '' }}">
                             <svg viewBox="0 0 24 24">
@@ -2448,5 +2493,73 @@
                 document.getElementById('orderModal').classList.remove('open');
             }
         });
+
+        // -- Add to Cart from Dashboard Rekomendasi --
+        function addToCartFromDashboard(produkId, event) {
+            if (event) event.stopPropagation();
+
+            var btn = event ? event.target : null;
+            if (btn && btn.classList.contains('dash-reco-btn')) {
+                var originalText = btn.textContent;
+                btn.textContent = 'Menambah...';
+                btn.disabled = true;
+            }
+
+            fetch('/dashboard/keranjang/tambah', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ produk_id: produkId, qty: 1 })
+            })
+                .then(function(res) {
+                    return res.json();
+                })
+                .then(function(data) {
+                    if (data.success) {
+                        if (btn) {
+                            btn.textContent = '✓ Ditambah';
+                            btn.style.background = 'var(--green)';
+                            btn.style.borderColor = 'var(--green)';
+                            setTimeout(function() {
+                                btn.textContent = originalText;
+                                btn.style.background = '';
+                                btn.style.borderColor = '';
+                                btn.disabled = false;
+                            }, 1500);
+                        }
+                        // Update cart count badge if exists
+                        var cartBadge = document.querySelector('.dash-nav-item[href*="keranjang"] .dash-nav-badge');
+                        if (cartBadge && data.cart_count !== undefined) {
+                            cartBadge.textContent = data.cart_count;
+                        }
+                    } else {
+                        if (btn) {
+                            btn.textContent = originalText;
+                            btn.disabled = false;
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: data.message || 'Gagal menambah ke keranjang',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(function() {
+                    if (btn) {
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Terjadi kesalahan koneksi',
+                        confirmButtonText: 'OK'
+                    });
+                });
+        }
     </script>
 @endpush

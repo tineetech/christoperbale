@@ -4,33 +4,39 @@
 
 @section('content')
 
-<!-- ABOUT HERO -->
-<section class="about-hero">
-  <div class="about-hero-bg">
-    <div class="about-hero-bg-half">
-      <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&q=80&auto=format&fit=crop" alt="">
-    </div>
-    <div class="about-hero-bg-half">
-      <img src="https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=900&q=80&auto=format&fit=crop" alt="">
-    </div>
-  </div>
-  <div class="about-hero-overlay"></div>
-  <div class="about-hero-content">
-    <span class="about-hero-tag">&#9679; Berdiri 2022 — Jakarta, Indonesia</span>
-    <h1>Kami Membuat <em>Alas Kaki</em><br>yang Bergerak Bersama<br>Cerita Anda</h1>
-    <p>Lahir dari passion untuk desain modern yang berakar pada kriya tradisional — setiap pasang sepatu CHRISBALE dibuat untuk dikenakan bertahun-tahun, bukan sekadar musiman.</p>
-    <div class="about-hero-actions">
-      <a href="#story" class="btn-primary">
-        Temukan Cerita Kami
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
-      <a href="/products" class="btn-outline-hero">Beli Koleksi</a>
-    </div>
-  </div>
-</section>
+    <!-- ABOUT HERO -->
+    <section class="about-hero">
+        <div class="about-hero-bg">
+            <div class="about-hero-bg-half">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTE-Vu5vOjdjNewrHHWxDn2ibcYl1mep47Y12ojjtkRmLhamzqE65VdM6M&s=10?w=900&q=80&auto=format&fit=crop"
+                    alt="">
+            </div>
+            <div class="about-hero-bg-half">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQwQ2JrQTV8ems5XIU3TuPjNJwt2gAGsoYZrMeIyinQykoPwubq44j5dbM&s=10?w=900&q=80&auto=format&fit=crop"
+                    alt="">
+            </div>
+        </div>
+        <div class="about-hero-overlay"></div>
+        <div class="about-hero-content">
+            <span class="about-hero-tag">&#9679; Berdiri 2022 — Jakarta, Indonesia</span>
+            <h1>Kami Membuat <em>Alas Kaki</em><br>yang Bergerak Bersama<br>Cerita Anda</h1>
+            <p>Lahir dari passion untuk desain modern yang berakar pada kriya tradisional — setiap pasang sepatu CHRISBALE
+                dibuat untuk dikenakan bertahun-tahun, bukan sekadar musiman.</p>
+            <div class="about-hero-actions">
+                <a href="#story" class="btn-primary">
+                    Temukan Cerita Kami
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                </a>
+                <a href="/products" class="btn-outline-hero">Beli Koleksi</a>
+            </div>
+        </div>
+    </section>
 
-<!-- MARQUEE -->
-{{-- <div class="marquee">
+    <!-- MARQUEE -->
+    {{-- <div class="marquee">
   <div class="marquee-inner marquee-animate">
     <span>Berdiri di Jakarta</span><span class="sep">✦</span>
     <span>Keahlian Premium</span><span class="sep">✦</span>
@@ -47,60 +53,73 @@
   </div>
 </div> --}}
 
-<!-- STATS BAR -->
-<div class="stats-bar">
-  <div class="wrap">
-    <div class="stats-bar-inner">
-      <div class="stat-cell reveal">
-        <div class="num" data-count="5000">0</div>
-        <div class="label">Pelanggan Puas</div>
-      </div>
-      <div class="stat-cell reveal reveal-delay-1">
-        <div class="num" data-count="200">0</div>
-        <div class="label">Model Dirilis</div>
-      </div>
-      <div class="stat-cell reveal reveal-delay-2">
-        <div class="num" data-count="15">0</div>
-        <div class="label">Negara Tujuan</div>
-      </div>
-      <div class="stat-cell reveal reveal-delay-3">
-        <div class="num">2yr</div>
-        <div class="label">Garansi Produk</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- OUR STORY -->
-<section class="section" id="story">
-  <div class="wrap">
-    <div class="story-grid reveal">
-      <div class="story-img-wrap">
-        <img src="https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=800&q=80&auto=format&fit=crop" alt="CHRISBALE Story">
-        <div class="story-img-badge">
-          <div class="badge-label">Berdiri</div>
-          <div class="badge-val">2022</div>
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+        <div class="wrap">
+            <div class="stats-bar-inner">
+                <div class="stat-cell reveal">
+                    <div class="num" data-count="5000">0</div>
+                    <div class="label">Pelanggan Puas</div>
+                </div>
+                <div class="stat-cell reveal reveal-delay-1">
+                    <div class="num" data-count="200">0</div>
+                    <div class="label">Model Dirilis</div>
+                </div>
+                <div class="stat-cell reveal reveal-delay-2">
+                    <div class="num" data-count="15">0</div>
+                    <div class="label">Negara Tujuan</div>
+                </div>
+                <div class="stat-cell reveal reveal-delay-3">
+                    <div class="num">2yr</div>
+                    <div class="label">Garansi Produk</div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="story-text">
-        <div class="eyebrow">Cerita Kami</div>
-        <h2>Merek yang Lahir dari<br>Kecintaan pada Kriya</h2>
-        <p>CHRISBALE didirikan dengan keyakinan sederhana — bahwa sepatu berkualitas tidak harus mengorbankan kenyamanan demi gaya. Berawal dari proyek kecil di Jakarta, kini telah menjadi merek alas kaki yang dipercaya ribuan orang di seluruh Asia Tenggara dan sekitarnya.</p>
-        <p>Setiap pasang dirancang sendiri dan diproduksi dalam jumlah terbatas menggunakan kulit full-grain, suede premium, dan bahan berkelanjutan dari penyamak kulit terpercaya. Kami percaya pada slow fashion — membuat lebih sedikit, namun lebih baik.</p>
-        <div class="value-pills">
-          <span class="value-pill"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Slow Fashion</span>
-          <span class="value-pill"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Bahan Etis</span>
-          <span class="value-pill"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Produksi Terbatas</span>
-          <span class="value-pill"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Tahan Lama</span>
-        </div>
-        <div class="signature">— Tim CHRISBALE</div>
-      </div>
     </div>
-  </div>
-</section>
 
-<!-- INTERACTIVE TABS — Our Values -->
-{{-- <section class="tabs-section">
+    <!-- OUR STORY -->
+    <section class="section" id="story">
+        <div class="wrap">
+            <div class="story-grid reveal">
+                <div class="story-img-wrap">
+                    <img src="https://down-id.img.susercontent.com/file/id-11134207-7r98s-lzyg2opu06gdc5?w=800&q=80&auto=format&fit=crop"
+                        alt="CHRISBALE Story">
+                    <div class="story-img-badge">
+                        <div class="badge-label">Berdiri</div>
+                        <div class="badge-val">2022</div>
+                    </div>
+                </div>
+                <div class="story-text">
+                    <div class="eyebrow">Cerita Kami</div>
+                    <h2>Merek yang Lahir dari<br>Kecintaan pada Kriya</h2>
+                    <p>CHRISBALE didirikan dengan keyakinan sederhana — bahwa sepatu berkualitas tidak harus mengorbankan
+                        kenyamanan demi gaya. Berawal dari proyek kecil di Jakarta, kini telah menjadi merek alas kaki yang
+                        dipercaya ribuan orang di seluruh Asia Tenggara dan sekitarnya.</p>
+                    <p>Setiap pasang dirancang sendiri dan diproduksi dalam jumlah terbatas menggunakan kulit full-grain,
+                        suede premium, dan bahan berkelanjutan dari penyamak kulit terpercaya. Kami percaya pada slow
+                        fashion — membuat lebih sedikit, namun lebih baik.</p>
+                    <div class="value-pills">
+                        <span class="value-pill"><svg viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>Slow Fashion</span>
+                        <span class="value-pill"><svg viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>Bahan Etis</span>
+                        <span class="value-pill"><svg viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>Produksi Terbatas</span>
+                        <span class="value-pill"><svg viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>Tahan Lama</span>
+                    </div>
+                    <div class="signature">— Tim CHRISBALE</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- INTERACTIVE TABS — Our Values -->
+    {{-- <section class="tabs-section">
   <div class="wrap">
     <div class="section-head reveal" style="margin-bottom:0;">
       <div>
@@ -185,8 +204,8 @@
   </div>
 </section> --}}
 
-<!-- OUR CRAFT — Story Block 2 -->
-{{-- <section class="section">
+    <!-- OUR CRAFT — Story Block 2 -->
+    {{-- <section class="section">
   <div class="wrap">
     <div class="story-grid reverse reveal">
       <div class="story-img-wrap">
@@ -211,160 +230,163 @@
   </div>
 </section> --}}
 
-<!-- TESTIMONIALS -->
-<section class="section" style="padding-top:0;">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <div>
-        <span class="eyebrow">Testimoni</span>
-        <h2>Dipakai & Disukai</h2>
-      </div>
-    </div>
-    <div class="testi-scroll">
-      <div class="testi-card">
-        <div class="stars"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-        <blockquote>"Kualitasnya tak tertandingi. Saya sudah lama mencari sepatu premium yang benar-benar awet — CHRISBALE jawabannya."</blockquote>
-        <div class="author">Alex M. <span>&#10003; Pembeli Terverifikasi</span></div>
-      </div>
-      <div class="testi-card">
-        <div class="stars"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-        <blockquote>"Membeli Gold Leather Loafers untuk pernikahan saya. Keahlian yang sungguh menakjubkan. Sangat direkomendasikan!"</blockquote>
-        <div class="author">Sarah J. <span>&#10003; Pembeli Terverifikasi</span></div>
-      </div>
-      <div class="testi-card">
-        <div class="stars"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-        <blockquote>"Combat Boots sangat nyaman langsung dari kotak. Tidak perlu masa penyesuaian. Ini sepatu yang benar-benar berkualitas."</blockquote>
-        <div class="author">Marcus T. <span>&#10003; Pembeli Terverifikasi</span></div>
-      </div>
-      <div class="testi-card">
-        <div class="stars"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-        <blockquote>"Akhirnya merek alas kaki yang terlihat premium tanpa harga yang berlebihan. Pesan dua kali, dipakai setiap hari, tidak ada keluhan."</blockquote>
-        <div class="author">Diana K. <span>&#10003; Pembeli Terverifikasi</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FAQ ACCORDION -->
-<section class="section" style="padding-top:0;">
-  <div class="wrap">
-    <div class="section-head reveal" style="margin-bottom:32px;">
-      <div>
-        <span class="eyebrow">FAQ</span>
-        <h2>Pertanyaan Umum</h2>
-      </div>
-    </div>
-    <div class="accordion reveal">
-      <div class="accordion-item">
-        <button class="accordion-btn" data-acc>
-          Di mana sepatu CHRISBALE dibuat?
-          <svg class="accordion-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-        <div class="accordion-body">
-          <div class="accordion-body-inner">Sepatu kami dirancang di Jakarta dan dibuat dengan tangan di workshop mitra kami di Bandung, Jawa Barat — atelier keluarga dengan pengalaman lebih dari 30 tahun dalam pembuatan sepatu.</div>
+    <!-- FAQ ACCORDION -->
+    <section class="section" style="padding-top:0;">
+        <div class="wrap">
+            <div class="section-head reveal" style="margin-bottom:32px;">
+                <div>
+                    <span class="eyebrow">FAQ</span>
+                    <h2>Pertanyaan Umum</h2>
+                </div>
+            </div>
+            <div class="accordion reveal">
+                <div class="accordion-item">
+                    <button class="accordion-btn" data-acc>
+                        Di mana sepatu CHRISBALE dibuat?
+                        <svg class="accordion-icon" viewBox="0 0 24 24">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-body-inner">Sepatu kami dirancang di Jakarta dan dibuat dengan tangan di
+                            workshop mitra kami di Bandung, Jawa Barat — atelier keluarga dengan pengalaman lebih dari 30
+                            tahun dalam pembuatan sepatu.</div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-btn" data-acc>
+                        Bahan apa yang Anda gunakan?
+                        <svg class="accordion-icon" viewBox="0 0 24 24">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-body-inner">Kami menggunakan kulit full-grain dan suede premium dari penyamak
+                            bersertifikat di Italia dan Amerika Selatan. Insole dilengkapi lapisan memory foam khas kami
+                            untuk kenyamanan instan. Semua bahan diperoleh secara etis.</div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-btn" data-acc>
+                        Berapa lama pengiriman?
+                        <svg class="accordion-icon" viewBox="0 0 24 24">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-body-inner">Pesanan domestik (Indonesia) tiba dalam 2–4 hari kerja. Pesanan
+                            internasional dikirim ke 15+ negara dan biasanya memakan waktu 7–14 hari kerja. Gratis ongkir
+                            untuk pembelian di atas Rp2.000.000.</div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-btn" data-acc>
+                        Apakah Anda menerima retur atau penukaran?
+                        <svg class="accordion-icon" viewBox="0 0 24 24">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-body-inner">Ya — kami menawarkan kebijakan retur dan penukaran tanpa ribet
+                            selama 30 hari. Barang harus tidak dipakai dan dalam kemasan asli. Hubungi kami di
+                            hello@chrisbale.com untuk memulai pengembalian.</div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-btn" data-acc>
+                        Apa saja yang dicakup garansi 2 tahun?
+                        <svg class="accordion-icon" viewBox="0 0 24 24">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-body-inner">Garansi 2 tahun kami mencakup cacat produksi termasuk pemisahan
+                            sol, kegagalan jahitan, dan masalah aksesori. Keausan normal atau kerusakan akibat
+                            penyalahgunaan tidak dicakup. Kami juga menawarkan layanan perbaikan berbayar untuk pasangan di
+                            luar garansi.</div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="accordion-item">
-        <button class="accordion-btn" data-acc>
-          Bahan apa yang Anda gunakan?
-          <svg class="accordion-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-        <div class="accordion-body">
-          <div class="accordion-body-inner">Kami menggunakan kulit full-grain dan suede premium dari penyamak bersertifikat di Italia dan Amerika Selatan. Insole dilengkapi lapisan memory foam khas kami untuk kenyamanan instan. Semua bahan diperoleh secara etis.</div>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <button class="accordion-btn" data-acc>
-          Berapa lama pengiriman?
-          <svg class="accordion-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-        <div class="accordion-body">
-          <div class="accordion-body-inner">Pesanan domestik (Indonesia) tiba dalam 2–4 hari kerja. Pesanan internasional dikirim ke 15+ negara dan biasanya memakan waktu 7–14 hari kerja. Gratis ongkir untuk pembelian di atas Rp2.000.000.</div>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <button class="accordion-btn" data-acc>
-          Apakah Anda menerima retur atau penukaran?
-          <svg class="accordion-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-        <div class="accordion-body">
-          <div class="accordion-body-inner">Ya — kami menawarkan kebijakan retur dan penukaran tanpa ribet selama 30 hari. Barang harus tidak dipakai dan dalam kemasan asli. Hubungi kami di hello@chrisbale.com untuk memulai pengembalian.</div>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <button class="accordion-btn" data-acc>
-          Apa saja yang dicakup garansi 2 tahun?
-          <svg class="accordion-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-        <div class="accordion-body">
-          <div class="accordion-body-inner">Garansi 2 tahun kami mencakup cacat produksi termasuk pemisahan sol, kegagalan jahitan, dan masalah aksesori. Keausan normal atau kerusakan akibat penyalahgunaan tidak dicakup. Kami juga menawarkan layanan perbaikan berbayar untuk pasangan di luar garansi.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 
 @endsection
 
-@push('scripts')
-<script>
-/* ── SCROLL REVEAL ── */
-const reveals = document.querySelectorAll('.reveal');
-const revealObs = new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});
-},{threshold:0.12});
-reveals.forEach(el=>revealObs.observe(el));
+@push('scripts')  
+    <script>
+        /* ── SCROLL REVEAL ── */
+        const reveals = document.querySelectorAll('.reveal');
+        const revealObs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.12
+        });
+        reveals.forEach(el => revealObs.observe(el));
 
-/* ── COUNT-UP ANIMATION ── */
-function countUp(el,target,duration){
-  let start=0;
-  const step = Math.ceil(target/60);
-  const suffix = target>=1000?'+':'';
-  const timer = setInterval(()=>{
-    start+=step;
-    if(start>=target){start=target;clearInterval(timer);}
-    el.textContent = start.toLocaleString()+suffix;
-  },duration/60);
-}
-const statObs = new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      const el=e.target;
-      const val=parseInt(el.dataset.count);
-      if(val) countUp(el,val,1200);
-      statObs.unobserve(el);
-    }
-  });
-},{threshold:0.5});
-document.querySelectorAll('[data-count]').forEach(el=>statObs.observe(el));
+        /* ── COUNT-UP ANIMATION ── */
+        function countUp(el, target, duration) {
+            let start = 0;
+            const step = Math.ceil(target / 60);
+            const suffix = target >= 1000 ? '+' : '';
+            const timer = setInterval(() => {
+                start += step;
+                if (start >= target) {
+                    start = target;
+                    clearInterval(timer);
+                }
+                el.textContent = start.toLocaleString() + suffix;
+            }, duration / 60);
+        }
+        const statObs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    const el = e.target;
+                    const val = parseInt(el.dataset.count);
+                    if (val) countUp(el, val, 1200);
+                    statObs.unobserve(el);
+                }
+            });
+        }, {
+            threshold: 0.5
+        });
+        document.querySelectorAll('[data-count]').forEach(el => statObs.observe(el));
 
-/* ── TABS ── */
-const tabBtns   = document.querySelectorAll('.tab-btn');
-const tabPanels = document.querySelectorAll('.tab-panel');
-tabBtns.forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const target = btn.dataset.tab;
-    tabBtns.forEach(b=>b.classList.remove('active'));
-    tabPanels.forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelector(`[data-panel="${target}"]`).classList.add('active');
-  });
-});
+        /* ── TABS ── */
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.dataset.tab;
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabPanels.forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelector(`[data-panel="${target}"]`).classList.add('active');
+            });
+        });
 
-/* ── ACCORDION ── */
-document.querySelectorAll('[data-acc]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const body = btn.nextElementSibling;
-    const isOpen = btn.classList.contains('open');
-    document.querySelectorAll('[data-acc]').forEach(b=>{
-      b.classList.remove('open');
-      b.nextElementSibling.classList.remove('open');
-    });
-    if(!isOpen){
-      btn.classList.add('open');
-      body.classList.add('open');
-    }
-  });
-});
-</script>
+        /* ── ACCORDION ── */
+        document.querySelectorAll('[data-acc]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const body = btn.nextElementSibling;
+                const isOpen = btn.classList.contains('open');
+                document.querySelectorAll('[data-acc]').forEach(b => {
+                    b.classList.remove('open');
+                    b.nextElementSibling.classList.remove('open');
+                });
+                if (!isOpen) {
+                    btn.classList.add('open');
+                    body.classList.add('open');
+                }
+            });
+        });
+    </script>
 @endpush

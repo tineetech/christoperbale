@@ -101,9 +101,66 @@
         .pd-stock.is-low{border-color:rgba(212,148,62,0.5);background:rgba(212,148,62,0.08);color:#8a6d1a;}
         .pd-stock.is-low .pd-stock-dot{background:#d4943e;}
         .pd-stock.is-out{border-color:rgba(192,57,43,0.4);background:rgba(192,57,43,0.06);color:var(--red);}
-        .pd-stock.is-out .pd-stock-dot{background:var(--red);}
+.pd-stock.is-out .pd-stock-dot{background:var(--red);}
         .pd-stock .pd-stock-strong{font-weight:700;color:inherit;}
-    </style>
+
+        .pd-wishlist{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;letter-spacing:0.05em;cursor:pointer;transition:all .2s;text-transform:uppercase;font-family:'Inter',sans-serif;line-height:1;background:transparent;color:var(--ink);border:1.5px solid var(--line);user-select:none;}
+        .pd-wishlist:hover{border-color:var(--accent);color:var(--accent);background:rgba(184,134,11,0.05);}
+        .pd-wishlist svg{width:20px;height:20px;flex-shrink:0;transition:all .2s;}
+        .pd-wishlist svg path{fill:none;stroke:currentColor;stroke-width:1.5;transition:all .2s;}
+        .pd-wishlist svg.filled path{fill:var(--accent);stroke:var(--accent);}
+        .pd-wishlist:disabled{cursor:not-allowed;opacity:0.5;pointer-events:none;}
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        .pagination button {
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            border: 1.5px solid var(--line);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--ink-soft);
+            background: var(--bg-card);
+            cursor: pointer;
+            transition: all .2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .pagination button:hover:not(:disabled):not(.active) {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .pagination button.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #fff;
+        }
+        .pagination button:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+        .pagination .page-info {
+            font-size: 13px;
+            color: var(--ink-muted);
+            padding: 0 8px;
+            white-space: nowrap;
+        }
+        @media(max-width:600px) {
+            .pagination button {
+                min-width: 36px;
+                height: 36px;
+                font-size: 12px;
+                padding: 0 8px;
+            }
+        }
+</style>
 @endpush
 
 @section('content')
@@ -254,12 +311,13 @@
                         <div class="pd-action-wrap"><button class="pd-add-cart" onclick="authGuard(function(){ addToCart({{ $product['id'] ?? 'null' }}) })"><span class="btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="btn-text">Tambah ke Keranjang</span></button></div>
                         <div class="pd-action-wrap"><button class="pd-buy-now" onclick="authGuard(function(){ buyNow() })"><span class="btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span><span class="btn-text">Beli Sekarang</span></button></div>
                     </div>
-                    <button class="pd-wishlist" onclick="authGuard(function(){})">
-                        <svg viewBox="0 0 24 24">
+                    @php $isWishlisted = $product['isWishlisted'] ?? false; @endphp
+                    <button class="pd-wishlist" id="wishlistBtn" data-produk-id="{{ $product['id'] }}" onclick="authGuard(function(){ toggleWishlist() })">
+                        <svg id="wishlistIcon" viewBox="0 0 24 24" class="{{ $isWishlisted ? 'filled' : '' }}">
                             <path
                                 d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                         </svg>
-                        Simpan ke Wishlist
+                        <span id="wishlistText">{{ $isWishlisted ? 'Di Wishlist' : 'Simpan ke Wishlist' }}</span>
                     </button>
 
                     @if (!empty($product['desc']))
@@ -297,63 +355,119 @@
         </div>
     </section>
 
-    @if (!empty($allProducts))
-        @php
-            $related = collect($allProducts)->where('slug', '!=', $product['slug'])->take(4);
-        @endphp
-        @if ($related->count() > 0)
-            <section class="related-section">
-                <div class="wrap">
-                    <h2>Produk Terkait</h2>
-                    <div class="grid-related">
-                        @foreach ($related as $rp)
-                            <a href="/product/{{ $rp['slug'] }}" class="prod-card">
-                                @if ($rp['badge'])
-                                    <span class="badge-tag badge-{{ $rp['badge'] }}">
-                                        @switch($rp['badge'])
-                                            @case('new')
-                                                Baru
-                                            @break
-
-                                            @case('sale')
-                                                @if ($rp['old'] && $rp['old'] > $rp['price'])
-                                                    -{{ round((1 - $rp['price'] / $rp['old']) * 100) }}%
-                                                @else
-                                                    Sale
-                                                @endif
-                                            @break
-
-                                            @case('hot')
-                                                Populer
-                                            @break
-                                        @endswitch
-                                    </span>
-                                @endif
-                                <div class="prod-img-wrap">
-                                    @if ($rp['img'])
-                                        <img src="{{ $rp['img'] }}" alt="{{ $rp['name'] }}" loading="lazy">
-                                    @else
-                                        <div class="img-placeholder">{{ $rp['brand'] }}</div>
-                                    @endif
-                                    <span class="badge-brand">{{ $rp['brand'] }}</span>
-                                    <div class="prod-overlay"><span class="add-btn">+ Keranjang</span></div>
-                                </div>
-                                <div class="prod-info">
-                                    <h3>{{ $rp['name'] }}</h3>
-                                    <div class="price-row">
-                                        <span class="current">Rp{{ number_format($rp['price'], 0, ',', '.') }}</span>
-                                        @if ($rp['old'])
-                                            <span class="old">Rp{{ number_format($rp['old'], 0, ',', '.') }}</span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </a>
-                        @endforeach
-                    </div>
+    <section class="section" id="produk-lainnya" style="padding-top:32px;">
+        <div class="wrap">
+            <div class="section-head">
+                <div>
+                    <h2>Produk Lainnya</h2>
+                    <p>Jelajahi koleksi lainnya yang mungkin kamu suka.</p>
                 </div>
-            </section>
-        @endif
-    @endif
+            </div>
+
+            @if ($otherProducts->count() > 0)
+                <div class="grid-prod" id="otherProductGrid">
+                    @foreach ($otherProducts as $rp)
+                        <article class="prod-card" data-name="{{ strtolower($rp['name']) }}" data-brand="{{ $rp['brand'] }}" data-price="{{ $rp['price'] }}" onclick="window.location='/product/{{ $rp['slug'] }}'">
+                            @if ($rp['badge'])
+                                <span class="badge-tag badge-{{ $rp['badge'] }}">
+                                    @switch($rp['badge'])
+                                        @case('new')
+                                            Baru
+                                        @break
+
+                                        @case('sale')
+                                            @if ($rp['old'] && $rp['old'] > $rp['price'])
+                                                -{{ round((1 - $rp['price'] / $rp['old']) * 100) }}%
+                                            @else
+                                                Sale
+                                            @endif
+                                        @break
+
+                                        @case('hot')
+                                            Populer
+                                        @break
+                                    @endswitch
+                                </span>
+                            @endif
+                            <div class="prod-img-wrap">
+                                @if ($rp['img'])
+                                    <img src="{{ $rp['img'] }}" alt="{{ $rp['name'] }}" loading="lazy">
+                                @else
+                                    <div class="img-placeholder">{{ $rp['brand'] }}</div>
+                                @endif
+                                <span class="badge-brand">{{ $rp['brand'] }}</span>
+                                <div class="prod-overlay"><button class="add-btn" onclick="event.stopPropagation(); window.location='/product/{{ $rp['slug'] }}'">+ Keranjang</button></div>
+                            </div>
+                            <div class="prod-info">
+                                <h3>{{ $rp['name'] }}</h3>
+                                <div class="price-row">
+                                    <span class="current">Rp{{ number_format($rp['price'], 0, ',', '.') }}</span>
+                                    @if ($rp['old'])
+                                        <span class="old">Rp{{ number_format($rp['old'], 0, ',', '.') }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+
+                @if ($otherProducts->hasPages())
+                    <div class="pagination" id="otherPagination">
+                        {{-- Prev --}}
+                        @if ($otherProducts->onFirstPage())
+                            <button disabled>‹</button>
+                        @else
+                            <a href="{{ $otherProducts->previousPageUrl() }}#produk-lainnya"><button>‹</button></a>
+                        @endif
+
+                        @php
+                            $current = $otherProducts->currentPage();
+                            $last = $otherProducts->lastPage();
+                            $start = max(1, $current - 2);
+                            $end = min($last, $current + 2);
+                            if ($end - $start < 4) {
+                                $start = max(1, $end - 4);
+                                $end = min($last, $start + 4);
+                            }
+                        @endphp
+
+                        @if ($start > 1)
+                            <a href="{{ $otherProducts->url(1) }}#produk-lainnya"><button>1</button></a>
+                            @if ($start > 2)
+                                <span class="page-info">…</span>
+                            @endif
+                        @endif
+
+                        @for ($i = $start; $i <= $end; $i++)
+                            @if ($i == $current)
+                                <button class="active">{{ $i }}</button>
+                            @else
+                                <a href="{{ $otherProducts->url($i) }}#produk-lainnya"><button>{{ $i }}</button></a>
+                            @endif
+                        @endfor
+
+                        @if ($end < $last)
+                            @if ($end < $last - 1)
+                                <span class="page-info">…</span>
+                            @endif
+                            <a href="{{ $otherProducts->url($last) }}#produk-lainnya"><button>{{ $last }}</button></a>
+                        @endif
+
+                        {{-- Next --}}
+                        @if ($otherProducts->hasMorePages())
+                            <a href="{{ $otherProducts->nextPageUrl() }}#produk-lainnya"><button>›</button></a>
+                        @else
+                            <button disabled>›</button>
+                        @endif
+                    </div>
+                @endif
+            @else
+                <div style="text-align:center;padding:40px 20px;color:var(--ink-muted);">
+                    <p>Belum ada produk lainnya.</p>
+                </div>
+            @endif
+        </div>
+    </section>
 
 @endsection
 
@@ -558,5 +672,58 @@
                 btn.textContent = orig;
             });
         }
+
+        // Toggle wishlist - product level (cover all variants)
+        function toggleWishlist() {
+            var btn = document.getElementById('wishlistBtn');
+            var icon = document.getElementById('wishlistIcon');
+            var text = document.getElementById('wishlistText');
+            var produkId = parseInt(btn.dataset.produkId, 10);
+            var match = getSelectedVariant();
+            var barangId = match && match.barang_id ? match.barang_id : null;
+            var isCurrentlyWishlisted = icon.classList.contains('filled');
+
+            btn.disabled = true;
+            var origText = text.textContent;
+            text.textContent = isCurrentlyWishlisted ? 'Menghapus...' : 'Menyimpan...';
+
+            fetch('/wishlist/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                },
+                body: JSON.stringify({ produk_id: produkId, barang_id: barangId })
+            })
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.ok) {
+                        if (d.wishlisted) {
+                            icon.classList.add('filled');
+                            text.textContent = 'Di Wishlist';
+                            showSwal('success', 'Berhasil', d.message);
+                        } else {
+                            icon.classList.remove('filled');
+                            text.textContent = 'Simpan ke Wishlist';
+                            showSwal('success', 'Berhasil', d.message);
+                        }
+                    } else {
+                        showSwal('error', 'Gagal', d.message);
+                    }
+                })
+                .catch(function(e) {
+                    showSwal('error', 'Error', 'Terjadi kesalahan');
+                })
+                .finally(function() {
+                    btn.disabled = false;
+                    if (!icon.classList.contains('filled') && text.textContent === 'Menyimpan...') {
+                        text.textContent = origText;
+                    }
+                });
+        }
+
+        // Wishlist is product-level - no variant matching needed
+        // Icon already set correctly on page load via PHP isWishlisted
+        // No need to update on variant change
     </script>
 @endpush

@@ -15,7 +15,7 @@
 @section('content')
 
 <section class="page-head parallax-head">
-  <div class="parallax-bg"><img src="https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?w=1400&q=80&auto=format&fit=crop" alt="" id="parallaxImg"></div>
+  <div class="parallax-bg"><img src="https://down-id.img.susercontent.com/file/id-11134207-822wp-mmvjdftw8miu2ad?w=1400&q=80&auto=format&fit=crop" alt="" id="parallaxImg"></div>
   <div class="parallax-overlay"></div>
   <div class="wrap" style="position:relative;z-index:2;">
     <h1>Hubungi Kami</h1>

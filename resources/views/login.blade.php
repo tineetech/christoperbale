@@ -796,7 +796,7 @@
             <!-- LEFT SIDE - IMAGE -->
             <div class="login-left">
                 <div class="login-left-bg">
-                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&q=80&auto=format&fit=crop"
+                    <img src="https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/029280cbc678421b83dce1f2c766ce31~tplv-aphluv4xwc-white-pad-v1:500:500.jpeg?w=900&q=80&auto=format&fit=crop"
                         alt="CHRISBALE Premium Footwear">
                 </div>
                 <div class="login-left-overlay"></div>

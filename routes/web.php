@@ -43,10 +43,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/pesanan/{id}', [DashboardController::class, 'pesananDetail'])->name('dashboard.pesanan.detail');
     Route::get('/dashboard/pembayaran', [DashboardController::class, 'pembayaran'])->name('dashboard.pembayaran');
     Route::get('/dashboard/keranjang', [DashboardController::class, 'keranjang'])->name('dashboard.keranjang');
+    Route::post('/dashboard/keranjang/tambah', [DashboardController::class, 'addToCartSimple'])->name('dashboard.keranjang.tambah');
     Route::patch('/dashboard/keranjang/{id}', [DashboardController::class, 'updateCartItem'])->name('dashboard.keranjang.update');
     Route::delete('/dashboard/keranjang/{id}', [DashboardController::class, 'deleteCartItem'])->name('dashboard.keranjang.delete');
     Route::post('/cart/add', [DashboardController::class, 'addToCart'])->name('cart.add');
     Route::get('/dashboard/wishlist', [DashboardController::class, 'wishlist'])->name('dashboard.wishlist');
+    Route::post('/wishlist/toggle', [DashboardController::class, 'toggleWishlist'])->name('wishlist.toggle');
+    Route::post('/wishlist/add-to-cart', [DashboardController::class, 'addToCartFromWishlist'])->name('wishlist.add-to-cart');
     Route::get('/dashboard/profil', [DashboardController::class, 'profil'])->name('dashboard.profil');
     Route::post('/dashboard/profil', [DashboardController::class, 'updateProfile'])->name('dashboard.profil.update');
     Route::post('/dashboard/profil/password', [DashboardController::class, 'updatePassword'])->name('dashboard.profil.password');
@@ -58,6 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/alamat/geocode', [DashboardController::class, 'geocodeAddress'])->name('dashboard.alamat.geocode');
     Route::post('/dashboard/alamat/reverse', [DashboardController::class, 'reverseGeocode'])->name('dashboard.alamat.reverse');
     Route::post('/dashboard/alamat/area', [DashboardController::class, 'resolveArea'])->name('dashboard.alamat.area');
+    Route::post('/dashboard/alamat/details', [DashboardController::class, 'placeDetails'])->name('dashboard.alamat.details');
     Route::get('/dashboard/voucher', [DashboardController::class, 'voucher'])->name('dashboard.voucher');
     Route::get('/dashboard/voucher/{id}', [DashboardController::class, 'voucherDetail'])->name('dashboard.voucher.detail');
     Route::post('/dashboard/voucher/claim', [DashboardController::class, 'claimVoucher'])->name('dashboard.voucher.claim');
@@ -67,6 +71,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout/payment/{id}/status', [CheckoutController::class, 'paymentStatus'])->name('checkout.payment.status');
     Route::get('/checkout/payment/{id}/sync', [CheckoutController::class, 'paymentSync'])->name('checkout.payment.sync');
     Route::get('/checkout/success/{id}', [CheckoutController::class, 'success'])->name('checkout.success');
+    Route::get('/checkout/transfer/{id}', [CheckoutController::class, 'transfer'])->name('checkout.transfer');
+    Route::post('/checkout/transfer/{id}/confirm', [CheckoutController::class, 'transferConfirm'])->name('checkout.transfer.confirm');
 
     Route::get('/logout', function () {
         Auth::guard('web')->logout();

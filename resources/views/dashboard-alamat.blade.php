@@ -5,62 +5,6 @@
 @push('styles')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <style>
-        .addr-autocomplete {
-            position: relative;
-        }
-
-        .addr-suggestions {
-            display: none;
-            position: absolute;
-            top: calc(100% + 4px);
-            left: 0;
-            right: 0;
-            background: var(--bg-card);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-sm);
-            box-shadow: 0 12px 32px rgba(17, 16, 14, 0.18);
-            z-index: 1200;
-            max-height: 220px;
-            overflow-y: auto;
-        }
-
-        .addr-suggestions.show {
-            display: block;
-        }
-
-        .addr-suggestion-item {
-            padding: 10px 14px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--line-soft);
-        }
-
-        .addr-suggestion-item:last-child {
-            border-bottom: none;
-        }
-
-        .addr-suggestion-item:hover,
-        .addr-suggestion-item.active {
-            background: rgba(184, 134, 11, 0.08);
-        }
-
-        .addr-suggestion-item .asi-main {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--ink);
-        }
-
-        .addr-suggestion-item .asi-sub {
-            font-size: 11px;
-            color: var(--ink-muted);
-            margin-top: 2px;
-        }
-
-        .addr-suggestion-empty {
-            padding: 14px;
-            font-size: 12.5px;
-            color: var(--ink-muted);
-        }
-
         .addr-geo-hint {
             font-size: 11px;
             color: var(--ink-muted);
@@ -83,7 +27,7 @@
 
 @section('dashboard-content')
                     <div class="dash-panel" id="panel-address">
-                        <h2 class="dash-section-title" style="margin-bottom:28px;">Alamat Pengiriman</h2>
+                        <h2 class="dash-section-title " style="margin-bottom:28px;">Alamat Pengiriman</h2>
 
                         @if (session('success'))
                         <div class="dash-alert" style="border-color:var(--green);background:rgba(46,125,50,0.06);margin-bottom:20px;">
@@ -236,22 +180,20 @@
                         <label for="addr_catatan">Catatan <span style="color:var(--ink-muted);font-weight:400;">(opsional)</span></label>
                         <textarea id="addr_catatan" name="catatan" style="height:54px;" placeholder="Contoh: dekat warung Bu Indah, pagar hijau, patokan lainnya..."></textarea>
                     </div>
-                    <div class="form-group addr-autocomplete" id="addrAutocomplete">
+                    <div class="form-group">
                         <label for="addr_address">Alamat Lengkap <span style="color:var(--red);">*</span></label>
-                        <input type="text" id="addr_address" name="address" placeholder="Ketik alamat... contoh: gg buni asih, Jakarta" autocomplete="off" required>
-                        <div class="addr-suggestions" id="addrSuggestions"></div>
-                        <div class="addr-geo-hint">Ketik minimal 3 huruf lalu pilih hasil yang muncul.</div>
+                        <textarea id="addr_address" name="address" style="height:80px;" placeholder="Jl. Nama Jalan No.xx, RT/RW, Kelurahan, dsb. (ketik alamat lengkap)" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Peta Lokasi</label>
+                        <label>Peta Lokasi <span style="color:var(--red);">*</span></label>
                         <div class="addr-map-wrap">
                             <div id="addrMap" class="addr-map"></div>
                         </div>
-                        <div class="addr-geo-hint" id="addrGeoHint">Geser marker atau klik peta untuk memilih lokasi.</div>
+                        <div class="addr-geo-hint" id="addrGeoHint">Klik peta atau geser marker untuk menentukan titik lokasi. Titik lokasi wajib diisi sebelum menyimpan.</div>
                     </div>
                     <input type="hidden" name="area_id" id="addr_area_id">
-                    <input type="hidden" name="lat" id="addr_lat">
-                    <input type="hidden" name="lng" id="addr_lng">
+                    <input type="hidden" name="latitude" id="addr_lat">
+                    <input type="hidden" name="longitude" id="addr_lng">
                     <div style="display:flex;gap:12px;margin-top:8px;">
                         <button type="submit" class="btn-submit" id="addressSubmitBtn">Simpan Alamat</button>
                         <button type="button" class="btn-outline-light" style="padding:12px 24px;border-radius:var(--radius-sm);font-size:13px;" onclick="closeAddressModal()">Batal</button>
@@ -270,6 +212,7 @@
     var addrGeocodeUrl = '{{ route('dashboard.alamat.geocode') }}';
     var addrReverseUrl = '{{ route('dashboard.alamat.reverse') }}';
     var addrAreaUrl = '{{ route('dashboard.alamat.area') }}';
+    var addrDetailsUrl = '{{ route('dashboard.alamat.details') }}';
     var csrfToken = document.querySelector('meta[name=csrf-token]') ? document.querySelector('meta[name=csrf-token]').content : '';
 
     // ---------- MAP ----------
@@ -278,7 +221,7 @@
 
     function ensureMap() {
         if (map) return;
-        map = L.map('addrMap', { scrollWheelZoom: false }).setView([-2.5489, 118.0149], 5);
+        map = L.map('addrMap', { scrollWheelZoom: false }).setView([-6.5950, 106.8166], 13);
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -320,14 +263,14 @@
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
             body: JSON.stringify({ lat: lat, lng: lng })
         }).then(function(r) { return r.json(); }).then(function(res) {
-            hint.textContent = 'Geser marker atau klik peta untuk memilih lokasi.';
+            hint.textContent = 'Klik peta atau geser marker untuk menentukan titik lokasi.';
             if (res.error) {
                 Swal.fire({ icon: 'warning', title: 'Lokasi tidak ditemukan', text: res.error });
                 return;
             }
             applyPlace(res.result);
         }).catch(function() {
-            hint.textContent = 'Geser marker atau klik peta untuk memilih lokasi.';
+            hint.textContent = 'Klik peta untuk menentukan titik lokasi.';
         });
     }
 
@@ -389,6 +332,18 @@
         });
     });
 
+    function fetchPlaceDetails(placeId, cb) {
+        fetch(addrDetailsUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+            body: JSON.stringify({ place_id: placeId })
+        }).then(function(r) { return r.json(); }).then(function(res) {
+            cb(res.result || null);
+        }).catch(function() {
+            cb(null);
+        });
+    }
+
     function placeMarkerFromStored(addr) {
         var q = [addr.address, addr.district, addr.city, addr.province, addr.postal_code].filter(Boolean).join(', ');
         var hint = document.getElementById('addrGeoHint');
@@ -396,110 +351,23 @@
         fetch(addrGeocodeUrl + '?q=' + encodeURIComponent(q), { headers: { 'X-CSRF-TOKEN': csrfToken } })
             .then(function(r) { return r.json(); })
             .then(function(res) {
-                hint.textContent = 'Geser marker atau klik peta untuk memilih lokasi.';
+                hint.textContent = 'Klik peta atau geser marker untuk menentukan titik lokasi.';
                 var first = (res.results || [])[0];
-                if (first && first.lat && first.lng) {
+                if (!first) { hint.textContent = 'Klik peta untuk menentukan titik lokasi.'; return; }
+                if (first.place_id) {
+                    fetchPlaceDetails(first.place_id, function(detail) {
+                        if (detail && detail.lat && detail.lng) {
+                            setMarker(detail.lat, detail.lng);
+                        }
+                    });
+                } else if (first.lat && first.lng) {
                     setMarker(first.lat, first.lng);
                 }
             })
             .catch(function() {
-                hint.textContent = 'Geser marker atau klik peta untuk memilih lokasi.';
+                hint.textContent = 'Klik peta untuk menentukan titik lokasi.';
             });
     }
-
-    // ---------- AUTOCOMPLETE ----------
-    var addrInput = document.getElementById('addr_address');
-    var addrDropdown = document.getElementById('addrSuggestions');
-    var addrTimer = null;
-    var addrItems = [];
-    var addrActive = -1;
-
-    function escapeHtml(s) {
-        var d = document.createElement('div');
-        d.textContent = s;
-        return d.innerHTML;
-    }
-
-    addrInput.addEventListener('input', function() {
-        var q = addrInput.value.trim();
-        if (q.length < 3) {
-            closeDropdown();
-            return;
-        }
-        clearTimeout(addrTimer);
-        addrTimer = setTimeout(function() { searchAddress(q); }, 500);
-    });
-
-    addrInput.addEventListener('keydown', function(e) {
-        if (!addrDropdown.classList.contains('show')) return;
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            addrActive = Math.min(addrActive + 1, addrItems.length - 1);
-            renderDropdown();
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            addrActive = Math.max(addrActive - 1, 0);
-            renderDropdown();
-        } else if (e.key === 'Enter') {
-            if (addrActive >= 0 && addrItems[addrActive]) {
-                e.preventDefault();
-                selectSuggestion(addrItems[addrActive]);
-            }
-        } else if (e.key === 'Escape') {
-            closeDropdown();
-        }
-    });
-
-    function searchAddress(q) {
-        fetch(addrGeocodeUrl + '?q=' + encodeURIComponent(q), { headers: { 'X-CSRF-TOKEN': csrfToken } })
-            .then(function(r) { return r.json(); })
-            .then(function(res) {
-                addrItems = res.results || [];
-                addrActive = -1;
-                renderDropdown();
-            })
-            .catch(function() { closeDropdown(); });
-    }
-
-    function renderDropdown() {
-        if (!addrItems.length) {
-            addrDropdown.innerHTML = '<div class="addr-suggestion-empty">Tidak ditemukan. Ketik ulang atau klik peta untuk memilih lokasi.</div>';
-            addrDropdown.classList.add('show');
-            return;
-        }
-        var html = '';
-        addrItems.forEach(function(p, i) {
-            var sub = [p.district, p.city, p.province, p.postal_code].filter(Boolean).join(', ');
-            html += '<div class="addr-suggestion-item' + (i === addrActive ? ' active' : '') + '" data-i="' + i + '">'
-                + '<div class="asi-main">' + escapeHtml(p.address || '') + '</div>'
-                + '<div class="asi-sub">' + escapeHtml(sub) + '</div>'
-                + '</div>';
-        });
-        addrDropdown.innerHTML = html;
-        addrDropdown.classList.add('show');
-        addrDropdown.querySelectorAll('.addr-suggestion-item').forEach(function(el) {
-            el.addEventListener('click', function() {
-                selectSuggestion(addrItems[parseInt(el.dataset.i)]);
-            });
-        });
-    }
-
-    function selectSuggestion(p) {
-        addrInput.value = p.address || '';
-        closeDropdown();
-        applyPlace(p);
-    }
-
-    function closeDropdown() {
-        addrDropdown.innerHTML = '';
-        addrDropdown.classList.remove('show');
-    }
-
-    document.addEventListener('click', function(e) {
-        if (!document.getElementById('addrAutocomplete').contains(e.target)) {
-            closeDropdown();
-        }
-    });
 
     // ---------- MODAL ----------
     function openAddressModal(id) {
@@ -525,8 +393,8 @@
             document.getElementById('addr_catatan').value = addr.catatan || '';
             document.getElementById('addr_address').value = addr.address || '';
             document.getElementById('addr_area_id').value = addr.area_id || '';
-            document.getElementById('addr_lat').value = '';
-            document.getElementById('addr_lng').value = '';
+            document.getElementById('addr_lat').value = addr.latitude || '';
+            document.getElementById('addr_lng').value = addr.longitude || '';
             document.getElementById('addr_is_default').checked = addr.is_default ? true : false;
         } else {
             title.textContent = 'Tambah Alamat Baru';
@@ -538,7 +406,6 @@
             document.getElementById('addr_lat').value = '';
             document.getElementById('addr_lng').value = '';
             removeMarker();
-            document.getElementById('addrGeoHint').textContent = 'Geser marker atau klik peta untuk memilih lokasi.';
         }
 
         ensureMap();
@@ -548,7 +415,11 @@
         }, 300);
 
         if (id && addr) {
-            placeMarkerFromStored(addr);
+            if (addr.latitude && addr.longitude) {
+                setMarker(parseFloat(addr.latitude), parseFloat(addr.longitude));
+            } else {
+                placeMarkerFromStored(addr);
+            }
         }
     }
 
@@ -558,8 +429,21 @@
 
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-            closeDropdown();
             closeAddressModal();
+        }
+    });
+
+    // Marker wajib sebelum menyimpan
+    document.getElementById('addressForm').addEventListener('submit', function(e) {
+        var lat = document.getElementById('addr_lat').value;
+        var lng = document.getElementById('addr_lng').value;
+        if (!lat || !lng) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Pilih Titik Lokasi',
+                text: 'Silakan klik peta atau geser marker untuk menentukan titik lokasi sebelum menyimpan alamat.'
+            });
         }
     });
 

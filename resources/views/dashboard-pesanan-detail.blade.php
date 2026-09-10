@@ -4,7 +4,7 @@
 
 @section('dashboard-content')
 @php
-    $orderId = $order->nomor_pesanan ?? $order->kode_penjualan ?? '#CB-ORD-' . $order->id;
+    $orderId = $order->kode_penjualan ?? '#CB-ORD-' . $order->id;
     $orderDate = $order->tanggal ? \Carbon\Carbon::parse($order->tanggal)->format('d M Y') : $order->created_at->format('d M Y');
     $statusText = ucfirst($order->status);
 
@@ -93,6 +93,12 @@
                 <span class="info-label">Ongkir</span>
                 <span class="info-value">Rp{{ number_format($order->shipment->shipping_cost ?? 0, 0, ',', '.') }}</span>
             </div>
+            @if ($order->shipment->estimation_days)
+            <div class="info-row">
+                <span class="info-label">Estimasi</span>
+                <span class="info-value">{{ $order->shipment->estimation_days }} hari</span>
+            </div>
+            @endif
             @endif
             <div class="info-row">
                 <span class="info-label">Alamat</span>

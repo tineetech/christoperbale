@@ -382,7 +382,7 @@
                 @foreach ($payments as $p)
                     @php
                         $draft = $p->penjualanDraft;
-                        $orderCode = $p->order_id_midtrans ?? '#CB-PAY-' . $p->id;
+                        $orderCode = $p->order_id_midtrans ?? ($draft->kode_penjualan ?? '#CB-PAY-' . $p->id);
                         $payDate = $p->created_at ? $p->created_at->format('d M Y H:i') : '-';
 
                         if ($p->status === 'paid') {
@@ -394,15 +394,23 @@
                         } elseif ($p->status === 'pending') {
                             $badgeText = 'Belum Dibayar';
                             $badgeClass = 'pay-badge--pending';
+                        } elseif ($p->status === 'paid_confirmation') {
+                            $badgeText = 'Konfirmasi Admin';
+                            $badgeClass = 'pay-badge--other';
                         } else {
                             $badgeText = ucfirst($p->status);
                             $badgeClass = 'pay-badge--other';
                         }
 
-                        $isPending = $p->status === 'pending';
-                        $targetUrl = ($isPending || !$p->penjualan_id)
-                            ? route('checkout.payment', $p->id)
-                            : route('checkout.success', $p->penjualan_id);
+                        $isPending = $p->status === 'pending' || $p->status === 'paid_confirmation';
+
+                        if ($p->status === 'paid_confirmation' || ($p->payment_method === 'bank_transfer' && $isPending)) {
+                            $targetUrl = route('checkout.transfer', $p->id);
+                        } elseif ($p->status === 'pending' || !$p->penjualan_id) {
+                            $targetUrl = route('checkout.payment', $p->id);
+                        } else {
+                            $targetUrl = route('checkout.success', $p->penjualan_id);
+                        }
 
                         $items = $draft && $draft->items ? $draft->items->take(3) : collect();
                     @endphp
@@ -430,7 +438,9 @@
                             </div>
                             <div class="pay-amount">
                                 <div class="pa-total">Rp{{ number_format($p->amount, 0, ',', '.') }}</div>
-                                @if ($isPending)
+                                @if ($p->status === 'paid_confirmation')
+                                    <div class="pa-action">Lihat Status</div>
+                                @elseif ($isPending)
                                     <div class="pay-expiry">Berlaku hingga {{ $p->expired_at ? $p->expired_at->format('d M Y H:i') : '-' }}</div>
                                 @else
                                     <div class="pa-action">{{ $isPending ? 'Bayar Sekarang' : 'Lihat Detail' }}</div>

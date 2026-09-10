@@ -167,7 +167,7 @@
 @section('content')
     <section class="page-head parallax-head">
         <div class="parallax-bg"><img
-                src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=1400&q=80&auto=format&fit=crop"
+                src="https://down-id.img.susercontent.com/file/id-11134207-7r98o-lzyg2optyrvx4e?w=1400&q=80&auto=format&fit=crop"
                 alt="" id="parallaxImg"></div>
         <div class="parallax-overlay"></div>
         <div class="wrap" style="position:relative;z-index:2;">

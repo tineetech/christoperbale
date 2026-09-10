@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
+use App\Models\Notifikasi;
 use App\Models\Pembayaran;
 use App\Models\Penjualan;
 use App\Models\PenjualanAddress;
@@ -54,11 +55,63 @@ class MidtransController extends Controller
             $this->finalize($pembayaran, $paymentType, $transactionId);
         } elseif (in_array($transactionStatus, ['deny', 'cancel', 'expire', 'failure'])) {
             $pembayaran->update(['status' => $transactionStatus]);
+            $this->notifyPaymentFailed($pembayaran, $transactionStatus);
         } elseif ($transactionStatus === 'pending') {
             $pembayaran->update(['status' => 'pending']);
         }
 
         return response()->json(['status' => 'ok']);
+    }
+
+    private function notifyPaymentFailed(Pembayaran $pembayaran, string $status)
+    {
+        $draft = PenjualanDraft::with('creator')
+            ->where('id', $pembayaran->penjualan_draft_id)
+            ->first();
+
+        if (!$draft) {
+            return;
+        }
+
+        $exists = Notifikasi::where('tipe', 'pembayaran')
+            ->where('payload->pembayaran_id', $pembayaran->id)
+            ->where('payload->status', $status)
+            ->exists();
+
+        if ($exists) {
+            return;
+        }
+
+        $buyer = $draft->creator;
+        $buyerName = $buyer->full_name ?: $buyer->nama ?? 'Customer';
+        $buyerPhone = $buyer->phone ?? '-';
+        $buyerEmail = $buyer->email ?? '-';
+
+        $statusLabel = [
+            'deny'    => 'ditolak',
+            'cancel'  => 'dibatalkan',
+            'expire'  => 'kadaluarsa',
+            'failure' => 'gagal',
+        ][$status] ?? 'gagal';
+
+        Notifikasi::create([
+            'judul' => 'Pembayaran Gagal / ' . ucfirst($statusLabel),
+            'isi' => 'Pembayaran untuk pesanan ' . $draft->kode_penjualan . ' berstatus ' . $statusLabel . ' pada ' . now()->translatedFormat('l, d F Y H:i:s') . '. Pembeli: ' . $buyerName . ' (' . $buyerPhone . ') - ' . $buyerEmail . '. Total: Rp' . number_format((float) $pembayaran->amount, 0, ',', '.'),
+            'tipe' => 'pembayaran',
+            'link' => route('dashboard.pembayaran'),
+            'payload' => [
+                'kode_penjualan' => $draft->kode_penjualan,
+                'pembayaran_id' => $pembayaran->id,
+                'penjualan_draft_id' => $draft->id,
+                'status' => $status,
+                'pembeli' => [
+                    'nama' => $buyerName,
+                    'no_hp' => $buyerPhone,
+                    'email' => $buyerEmail,
+                ],
+            ],
+            'created_by' => $draft->created_by,
+        ]);
     }
 
     public function syncStatus(Pembayaran $pembayaran)
@@ -104,6 +157,7 @@ class MidtransController extends Controller
 
         if (in_array($transactionStatus, ['deny', 'cancel', 'expire', 'failure'])) {
             $pembayaran->update(['status' => $transactionStatus]);
+            $this->notifyPaymentFailed($pembayaran, $transactionStatus);
         }
 
         return false;
@@ -215,6 +269,15 @@ class MidtransController extends Controller
                     ->whereIn('id', $cartIds)
                     ->delete();
             }
+
+            Notifikasi::create([
+                'judul' => 'Pembayaran Diterima',
+                'isi' => 'Pembayaran untuk nomor pesanan ' . $penjualan->kode_penjualan . ' dari website telah dibayar pada ' . now()->translatedFormat('l, d F Y H:i:s') . '.',
+                'tipe' => 'pembayaran',
+                'link' => route('checkout.success', $penjualan->id),
+                'payload' => ['kode_penjualan' => $penjualan->kode_penjualan, 'penjualan_id' => $penjualan->id, 'pembayaran_id' => $locked->id],
+                'created_by' => $draft->created_by,
+            ]);
 
             $draft->delete();
             PenjualanDraftItem::where('penjualan_draft_id', $draft->id)->delete();

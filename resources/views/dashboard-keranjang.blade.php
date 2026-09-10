@@ -460,7 +460,7 @@ if (cartList) {
             return;
         }
 
-        if (qty > stok) {
+        if (delta > 0 && qty > stok) {
             Swal.fire({ icon: 'warning', title: 'Stok Tidak Cukup', text: stok <= 0 ? 'Stok produk ini sedang habis.' : 'Stok tersedia: ' + stok + '.' });
             return;
         }

@@ -614,6 +614,38 @@
             margin-left: 6px;
         }
 
+        .option-card .opt-logos {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .option-card .opt-logos img {
+            height: 20px;
+            width: auto;
+            display: block;
+        }
+
+        .option-card .opt-courier-logo {
+            width: 46px;
+            height: auto;
+            max-height: 34px;
+            object-fit: contain;
+            flex-shrink: 0;
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .option-card .opt-logos img {
+                height: 16px;
+            }
+
+            .option-card .opt-logos {
+                gap: 4px;
+            }
+        }
+
         /* Notes */
         .checkout-notes textarea {
             width: 100%;
@@ -1054,16 +1086,26 @@
                             @php
                                 $val = $opt['courier_code'] . '-' . $opt['courier_service_code'];
                                 $durationText = str_replace(['days', 'day'], ['hari', 'hari'], $opt['duration']);
+                                $courierLogoPath = 'images/shipping/' . $opt['courier_code'] . '.png';
+                                $hasCourierLogo = file_exists(public_path($courierLogoPath));
+                                $estimationDays = 0;
+                                if (preg_match_all('/\d+/', $opt['duration'] ?? '', $m)) $estimationDays = (int) max($m[0]);
+                                if (!$estimationDays && !empty($opt['shipment_duration_range']) && preg_match_all('/\d+/', $opt['shipment_duration_range'], $m2)) $estimationDays = (int) max($m2[0]);
                             @endphp
                             <label class="option-card">
                                 <input type="radio" name="shipping" value="{{ $val }}"
-                                    data-price="{{ $opt['price'] }}" {{ $i === 0 ? 'checked' : '' }}
+                                    data-price="{{ $opt['price'] }}" data-estimation="{{ $estimationDays }}" {{ $i === 0 ? 'checked' : '' }}
                                     onchange="updateSummary()">
 
-                                <span class="opt-icon">
-                                    <span
-                                        class="opt-courier-code">{{ strtoupper(substr($opt['courier_code'], 0, 2)) }}</span>
-                                </span>
+                                @if ($hasCourierLogo)
+                                    <img class="opt-courier-logo" src="{{ asset($courierLogoPath) }}"
+                                        alt="{{ $opt['courier_name'] }}" title="{{ $opt['courier_name'] }}">
+                                @else
+                                    <span class="opt-icon">
+                                        <span
+                                            class="opt-courier-code">{{ strtoupper(substr($opt['courier_code'], 0, 2)) }}</span>
+                                    </span>
+                                @endif
 
                                 <span class="opt-body">
                                     <span class="opt-name">
@@ -1099,8 +1141,13 @@
                                     <line x1="1" y1="10" x2="23" y2="10" />
                                 </svg></span>
                             <span class="opt-body">
-                                <span class="opt-name">Transfer & E-Wallet</span>
-                                <span class="opt-desc">Virtual Account, QRIS, GoPay, ShopeePay, dan lainnya</span>
+                                <span class="opt-name">E-Wallet</span>
+                                <span class="opt-desc">GoPay, DANA, QRIS, dan lainnya</span>
+                            </span>
+                            <span class="opt-logos">
+                                <img src="{{ asset('images/payment/qris.png') }}" alt="QRIS" title="QRIS">
+                                <img src="{{ asset('images/payment/gopay.png') }}" alt="GoPay" title="GoPay">
+                                <img src="{{ asset('images/payment/dana.png') }}" alt="DANA" title="DANA">
                             </span>
                         </label>
                         <label class="option-card">
@@ -1112,6 +1159,9 @@
                             <span class="opt-body">
                                 <span class="opt-name">Transfer Bank BCA</span>
                                 <span class="opt-desc">Konfirmasi manual pembayaran ke admin WA</span>
+                            </span>
+                            <span class="opt-logos">
+                                <img src="{{ asset('images/payment/bca.png') }}" alt="BCA" title="BCA">
                             </span>
                         </label>
                     </div>
@@ -1303,6 +1353,7 @@
                 address_id: addressId,
                 shipping_code: shippingInput.value,
                 shipping_price: parseFloat(shippingInput.dataset.price),
+                estimation_days: parseInt(shippingInput.dataset.estimation || 0) || null,
                 payment_method: paymentInput ? paymentInput.value : 'ewallet',
                 catatan: catatan,
                 voucher_id: voucherId,

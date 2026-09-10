@@ -15,12 +15,14 @@ class UserAddress extends Model
         'province',
         'city',
         'district',
-        'catatan',
         'postal_code',
         'address',
+        'catatan',
+        'latitude',
+        'longitude',
         'label',
-        'area_id',
         'is_default',
+        'area_id',
     ];
 
     protected function casts(): array

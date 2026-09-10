@@ -15,6 +15,7 @@ class PenjualanShipment extends Model
         'service',
         'tracking_number',
         'shipping_cost',
+        'estimation_days',
     ];
 
     public function penjualan()

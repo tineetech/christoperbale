@@ -64,7 +64,7 @@
                         <div class="dash-alert">
                             <div class="dash-alert-dot"></div>
                             <div class="dash-alert-content">
-                                <strong>Pesanan #{{ $activeOrder->nomor_pesanan ?? $activeOrder->kode_penjualan }}</strong> sedang dalam proses
+                                <strong>Pesanan #{{ $activeOrder->kode_penjualan ?? $activeOrder->kode_penjualan }}</strong> sedang dalam proses
                                 @if ($activeOrder->status === 'dikirim')
                                 — estimasi tiba sesuai jadwal pengiriman
                                 @endif
@@ -108,7 +108,7 @@
                                 $firstDetail = $order->detail->first();
                                 $productName = $firstDetail->barang->nama_barang ?? 'Produk';
                                 $itemCount = $order->detail->count();
-                                $orderId = $order->nomor_pesanan ?? $order->kode_penjualan ?? '#CB-ORD-' . $order->id;
+                                $orderId = $order->kode_penjualan ?? '#CB-ORD-' . $order->id;
                                 $orderDate = $order->tanggal ? \Carbon\Carbon::parse($order->tanggal)->format('d M Y') : $order->created_at->format('d M Y');
                                 $total = 'Rp' . number_format($order->total_harga, 0, ',', '.');
                                 $statusText = ucfirst($order->status);
@@ -154,44 +154,47 @@
                                     <h2 class="dash-section-title">Rekomendasi Untukmu</h2>
                                 </div>
                                 <div class="dash-reco-list">
-                                    <div class="dash-reco-item">
-                                        <div class="dash-reco-img">
-                                            <img src="https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=200&q=80&auto=format&fit=crop"
-                                                alt="Slip On">
+                                    @forelse ($recommendedProducts as $product)
+                                        <div class="dash-reco-item">
+                                            <div class="dash-reco-img" @if (!$product->fotoUtama) style="display:flex;align-items:center;justify-content:center;background:var(--bg);" @endif>
+                                                @if ($product->fotoUtama)
+                                                    <img src="{{ env('BE_URL') . '/storage/' . $product->fotoUtama->foto }}"
+                                                        alt="{{ $product->nama_produk }}" loading="lazy">
+                                                @else
+                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ink-muted)" stroke-width="1.2" style="opacity:0.4;">
+                                                        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                                                        <line x1="3" y1="6" x2="21" y2="6" />
+                                                        <path d="M16 10a4 4 0 01-8 0" />
+                                                    </svg>
+                                                @endif
+                                            </div>
+                                            <div class="dash-reco-info">
+                                                <span class="dash-reco-name">{{ $product->nama_produk }}</span>
+                                                @php
+                                                    $barang = $product->barang->first();
+                                                    $harga = $barang->harga_1 ?? $product->harga_normal ?? 0;
+                                                    $diskon = $product->harga_diskon;
+                                                @endphp
+                                                <span class="dash-reco-price">
+                                                    Rp{{ number_format($harga, 0, ',', '.') }}
+                                                    @if ($diskon && $diskon < $harga)
+                                                        <del style="font-size:11px;color:var(--ink-muted);font-weight:400;">Rp{{ number_format($harga, 0, ',', '.') }}</del>
+                                                    @endif
+                                                </span>
+                                                @if ($product->is_popular)
+                                                    <span class="badge-tag badge-hot"
+                                                        style="position:static;display:inline-block;margin-top:4px;font-size:9px;">Populer</span>
+                                                @elseif ($product->is_newproduct)
+                                                    <span class="badge-tag badge-new"
+                                                        style="position:static;display:inline-block;margin-top:4px;font-size:9px;">Baru</span>
+                                                @endif
+                                            </div>
+                                            <button class="dash-reco-btn"
+                                                onclick="addToCartFromDashboard({{ $product->id }}, event)">+ Keranjang</button>
                                         </div>
-                                        <div class="dash-reco-info">
-                                            <span class="dash-reco-name">Classic Slip-On Putih</span>
-                                            <span class="dash-reco-price">Rp1.490.000 <del
-                                                    style="font-size:11px;color:var(--ink-muted);font-weight:400;">Rp2.130.000</del></span>
-                                            <span class="badge-tag badge-sale"
-                                                style="position:static;display:inline-block;margin-top:4px;font-size:9px;">-30%</span>
-                                        </div>
-                                        <button class="dash-reco-btn">+ Keranjang</button>
-                                    </div>
-                                    <div class="dash-reco-item">
-                                        <div class="dash-reco-img">
-                                            <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=200&q=80&auto=format&fit=crop"
-                                                alt="Canvas">
-                                        </div>
-                                        <div class="dash-reco-info">
-                                            <span class="dash-reco-name">Canvas High Top</span>
-                                            <span class="dash-reco-price">Rp1.890.000</span>
-                                        </div>
-                                        <button class="dash-reco-btn">+ Keranjang</button>
-                                    </div>
-                                    <div class="dash-reco-item">
-                                        <div class="dash-reco-img">
-                                            <img src="https://images.unsplash.com/photo-1603487742131-4160ec999306?w=200&q=80&auto=format&fit=crop"
-                                                alt="Red Sandal">
-                                        </div>
-                                        <div class="dash-reco-info">
-                                            <span class="dash-reco-name">Red Strap Sandal</span>
-                                            <span class="dash-reco-price">Rp980.000</span>
-                                            <span class="badge-tag badge-new"
-                                                style="position:static;display:inline-block;margin-top:4px;font-size:9px;">Baru</span>
-                                        </div>
-                                        <button class="dash-reco-btn">+ Keranjang</button>
-                                    </div>
+                                    @empty
+                                        <p style="padding:16px;text-align:center;color:var(--ink-muted);">Belum ada produk rekomendasi.</p>
+                                    @endforelse
                                 </div>
                             </div>
 
@@ -202,33 +205,40 @@
                                     <a class="dash-section-link" href="{{ route('dashboard.voucher') }}">Semua</a>
                                 </div>
                                 <div class="dash-vouchers">
-                                    <div class="dash-voucher-card">
-                                        <div class="dash-voucher-left">
-                                            <div class="dash-voucher-amount">15% OFF</div>
-                                            <div class="dash-voucher-code">CHRISBALE15</div>
+                                    @forelse ($activeVouchers as $voucher)
+                                        @php
+                                            $isShipping = $voucher->type === 'shipping';
+                                            $amountLabel = $isShipping
+                                                ? 'GRATIS ONGKIR'
+                                                : ($voucher->type === 'percent'
+                                                    ? (int) $voucher->value . '% OFF'
+                                                    : 'Rp' . number_format($voucher->value, 0, ',', '.') . ' OFF');
+                                            $leftBg = $isShipping ? 'background:linear-gradient(135deg,#1A3A2A,#2E7D32);' : '';
+                                        @endphp
+                                        <div class="dash-voucher-card">
+                                            <div class="dash-voucher-left" style="{{ $leftBg }}">
+                                                <div class="dash-voucher-amount">{{ $amountLabel }}</div>
+                                                <div class="dash-voucher-code">{{ $voucher->code }}</div>
+                                            </div>
+                                            <div class="dash-voucher-divider"></div>
+                                            <div class="dash-voucher-right">
+                                                <p>{{ $voucher->name }}</p>
+                                                <span>Berlaku hingga {{ $voucher->end_at ? $voucher->end_at->format('d M Y') : '-' }}</span>
+                                                <button class="dash-copy-btn" onclick="copyCode('{{ $voucher->code }}',this)">Salin
+                                                    Kode</button>
+                                            </div>
                                         </div>
-                                        <div class="dash-voucher-divider"></div>
-                                        <div class="dash-voucher-right">
-                                            <p>Diskon 15% untuk semua produk baru</p>
-                                            <span>Berlaku hingga 31 Jan 2025</span>
-                                            <button class="dash-copy-btn" onclick="copyCode('CHRISBALE15',this)">Salin
-                                                Kode</button>
+                                    @empty
+                                        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:28px 16px;text-align:center;">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--ink-muted)" stroke-width="1.3" style="opacity:.45;">
+                                                <path d="M3 8h18v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                                                <path d="M7 8V6a5 5 0 015-5v0a5 5 0 015 5v2" />
+                                                <circle cx="9" cy="12" r="1.2" fill="var(--ink-muted)" stroke="none" />
+                                                <circle cx="15" cy="12" r="1.2" fill="var(--ink-muted)" stroke="none" />
+                                            </svg>
+                                            <p style="margin:0;font-size:13px;color:var(--ink-muted);">Belum ada voucher aktif.</p>
                                         </div>
-                                    </div>
-                                    <div class="dash-voucher-card">
-                                        <div class="dash-voucher-left"
-                                            style="background:linear-gradient(135deg,#1A3A2A,#2E7D32);">
-                                            <div class="dash-voucher-amount">GRATIS ONGKIR</div>
-                                            <div class="dash-voucher-code">FREESHIPCB</div>
-                                        </div>
-                                        <div class="dash-voucher-divider"></div>
-                                        <div class="dash-voucher-right">
-                                            <p>Gratis ongkir untuk semua pesanan</p>
-                                            <span>Berlaku hingga 20 Jan 2025</span>
-                                            <button class="dash-copy-btn" onclick="copyCode('FREESHIPCB',this)">Salin
-                                                Kode</button>
-                                        </div>
-                                    </div>
+                                    @endforelse
                                 </div>
                             </div>
                         </div>

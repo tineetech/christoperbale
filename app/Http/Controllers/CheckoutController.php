@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use App\Models\DiscountProduct;
+use App\Models\Notifikasi;
 use App\Models\Pembayaran;
 use App\Models\Penjualan;
 use App\Models\PenjualanAddress;
@@ -185,6 +186,7 @@ class CheckoutController extends Controller
                 'address_id' => 'required|integer',
                 'shipping_code' => 'required|string',
                 'shipping_price' => 'required|numeric|min:0',
+                'estimation_days' => 'nullable|integer|min:1|max:30',
                 'payment_method' => 'required|string',
                 'catatan' => 'nullable|string|max:200',
                 'voucher_id' => 'nullable|integer',
@@ -195,8 +197,10 @@ class CheckoutController extends Controller
             ], 422);
         }
 
-        $pendingPayments = \App\Models\Pembayaran::where('status', 'pending')
-            ->where('expired_at', '>', now())
+        $pendingPayments = \App\Models\Pembayaran::whereIn('status', ['pending', 'paid_confirmation'])
+            ->where(function ($q) {
+                $q->whereNull('expired_at')->orWhere('expired_at', '>', now());
+            })
             ->whereHas('penjualanDraft', function ($q) {
                 $q->where('created_by', Auth::id());
             })
@@ -220,7 +224,9 @@ class CheckoutController extends Controller
                         })->values() : [],
                         'amount' => (float) $p->amount,
                         'expired_at' => optional($p->expired_at)->format('d M Y H:i'),
-                        'payment_url' => route('checkout.payment', $p->id),
+                        'payment_url' => $p->payment_method === 'bank_transfer'
+                            ? route('checkout.transfer', $p->id)
+                            : route('checkout.payment', $p->id),
                     ];
                 })->values(),
             ], 422);
@@ -299,6 +305,7 @@ class CheckoutController extends Controller
 
         $shippingCost = (float) $request->shipping_price;
         [$shippingCourier, $shippingService] = array_pad(explode('-', $request->shipping_code, 2), 2, '');
+        $estimationDays = $request->filled('estimation_days') ? (int) $request->estimation_days : null;
 
         $voucherDiscount = 0;
         $activeVoucher = null;
@@ -383,8 +390,8 @@ class CheckoutController extends Controller
             'postal_code' => $address->postal_code,
             'address' => $address->address,
             'label' => $address->label,
-            'latitude' => null,
-            'longitude' => null,
+            'latitude' => $address->latitude,
+            'longitude' => $address->longitude,
         ]);
 
         PenjualanShipment::create([
@@ -393,14 +400,64 @@ class CheckoutController extends Controller
             'service' => $shippingService,
             'tracking_number' => null,
             'shipping_cost' => $shippingCost,
+            'estimation_days' => $estimationDays,
         ]);
+
+        $isBankTransfer = strtolower(trim((string) $request->payment_method)) === 'bca';
 
         $pembayaran = Pembayaran::create([
             'penjualan_draft_id' => $draft->id,
-            'payment_method' => $request->payment_method,
+            'payment_method' => $isBankTransfer ? 'bank_transfer' : $request->payment_method,
+            'payment_type' => $isBankTransfer ? 'bank_transfer' : null,
             'amount' => $total,
             'status' => 'pending',
             'expired_at' => now()->addHours(24),
+        ]);
+
+        if ($isBankTransfer) {
+            Notifikasi::create([
+                'judul' => 'Pesanan Baru Dari Website',
+                'isi' => 'Pesanan ' . $kode . ' dari website telah dibuat pada ' . now()->translatedFormat('l, d F Y H:i:s') . ' dengan pembayaran transfer bank (BCA) dan akan dikonfirmasi oleh admin. Total: Rp' . number_format($total, 0, ',', '.'),
+                'tipe' => 'pesanan',
+                'link' => route('checkout.transfer', $pembayaran->id),
+                'payload' => [
+                    'kode_penjualan' => $kode,
+                    'total' => $total,
+                    'penjualan_draft_id' => $draft->id,
+                    'pembayaran_id' => $pembayaran->id,
+                    'metode' => 'bank_transfer',
+                ],
+                'created_by' => Auth::id(),
+            ]);
+
+            return response()->json(['redirect' => route('checkout.transfer', $pembayaran->id)]);
+        }
+
+        Notifikasi::create([
+            'judul' => 'Pesanan Baru Dari Website',
+            'isi' => 'Pesanan ' . $kode . ' dari website telah dibuat pada ' . now()->translatedFormat('l, d F Y H:i:s') . '. Total: Rp' . number_format($total, 0, ',', '.'),
+            'tipe' => 'pesanan',
+            'link' => route('checkout.payment', $pembayaran->id),
+            'payload' => ['kode_penjualan' => $kode, 'total' => $total, 'penjualan_draft_id' => $draft->id],
+            'created_by' => Auth::id(),
+        ]);
+
+        Notifikasi::create([
+            'judul' => 'Pembayaran Dibuat',
+            'isi' => 'Pembayaran untuk pesanan ' . $kode . ' telah dibuat pada ' . now()->translatedFormat('l, d F Y H:i:s') . '. Metode pembayaran: ' . $request->payment_method . '. Total: Rp' . number_format($total, 0, ',', '.') . '. Pembeli: ' . ($address->receiver_name ?: Auth::user()->full_name ?? Auth::user()->nama) . ' (' . ($address->phone ?: Auth::user()->phone) . ').',
+            'tipe' => 'pembayaran',
+            'link' => route('checkout.payment', $pembayaran->id),
+            'payload' => [
+                'kode_penjualan' => $kode,
+                'total' => $total,
+                'pembayaran_id' => $pembayaran->id,
+                'penjualan_draft_id' => $draft->id,
+                'pembeli' => [
+                    'nama' => $address->receiver_name ?: Auth::user()->full_name ?? Auth::user()->nama,
+                    'no_hp' => $address->phone ?: Auth::user()->phone,
+                ],
+            ],
+            'created_by' => Auth::id(),
         ]);
 
         $snap = $this->createMidtransSnap($draft, $pembayaran);
@@ -413,6 +470,93 @@ class CheckoutController extends Controller
         }
 
         return response()->json(['redirect' => route('checkout.payment', $pembayaran->id)]);
+    }
+
+    public function transfer($id)
+    {
+        $pembayaran = Pembayaran::find($id);
+        if (!$pembayaran) {
+            return response()->view('errors.not-found', [], 404);
+        }
+
+        $draft = PenjualanDraft::with('items.barang.produk')
+            ->where('id', $pembayaran->penjualan_draft_id)
+            ->first();
+
+        $belongsToUser = false;
+        if ($draft) {
+            $belongsToUser = (int) $draft->created_by === Auth::id();
+        } elseif ($pembayaran->penjualan_id) {
+            $belongsToUser = (int) Penjualan::where('id', $pembayaran->penjualan_id)->value('created_by') === Auth::id();
+        }
+
+        if (!$belongsToUser) {
+            return response()->view('errors.not-found', [], 404);
+        }
+
+        if ($pembayaran->status === 'paid') {
+            return redirect()->route('checkout.success', $pembayaran->penjualan_id);
+        }
+
+        $confirmed = $pembayaran->status !== 'pending';
+
+        $shipment = $draft ? PenjualanShipment::where('penjualan_draft_id', $draft->id)->first() : null;
+        $noRekening = PengaturanWeb::where('key', 'no_rekening')->value('value') ?? '';
+
+        return view('checkout-transfer', [
+            'pembayaran' => $pembayaran,
+            'draft' => $draft,
+            'shipment' => $shipment,
+            'noRekening' => $noRekening,
+            'confirmed' => $confirmed,
+        ]);
+    }
+
+    public function transferConfirm(Request $request, $id)
+    {
+        $pembayaran = Pembayaran::find($id);
+        if (!$pembayaran) {
+            return response()->view('errors.not-found', [], 404);
+        }
+
+        $belongsToUser = false;
+        if ($pembayaran->penjualan_draft_id) {
+            $belongsToUser = (int) PenjualanDraft::where('id', $pembayaran->penjualan_draft_id)->value('created_by') === Auth::id();
+        } elseif ($pembayaran->penjualan_id) {
+            $belongsToUser = (int) Penjualan::where('id', $pembayaran->penjualan_id)->value('created_by') === Auth::id();
+        }
+
+        if (!$belongsToUser) {
+            return response()->view('errors.not-found', [], 404);
+        }
+
+        if ($pembayaran->status !== 'pending') {
+            return redirect()->route('checkout.transfer', $pembayaran->id);
+        }
+
+        try {
+            $request->validate([
+                'proof_img' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+            ], [
+                'proof_img.required' => 'Bukti transfer wajib diunggah.',
+                'proof_img.image' => 'File harus berupa gambar.',
+                'proof_img.mimes' => 'Format gambar harus jpg, jpeg, png, atau webp.',
+                'proof_img.max' => 'Ukuran gambar maksimal 5MB.',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()
+                ->withInput()
+                ->withErrors($e->errors());
+        }
+
+        $path = $request->file('proof_img')->store('proofs', 'public');
+
+        $pembayaran->update([
+            'status' => 'paid_confirmation',
+            'proof_img' => $path,
+        ]);
+
+        return redirect()->route('checkout.transfer', $pembayaran->id);
     }
 
     public function payment($id)
@@ -769,20 +913,34 @@ class CheckoutController extends Controller
 
     private function fetchShippingRates($originAreaId, $destinationAreaId, $cartItems)
     {
-        $cartBarangIds = $cartItems->pluck('barang_id')->sort()->values()->toArray();
+        // Build map per barang_id => quantity (global, tidak per user) untuk pencocokan cache yang akurat
+        $cartMap = $cartItems->mapWithKeys(fn($it) => [
+            (int) ($it->barang_id ?? $it['barang_id'] ?? 0) => (int) ($it->qty ?? $it->quantity ?? 0)
+        ])->sortKeys()->toArray();
+        $cartCount = count($cartMap);
 
+        // Cari cache global per rute yang barang & quantity-nya identik dengan checkout saat ini
         $existingCache = ShippingRateCache::where('origin_area_id', $originAreaId)
             ->where('destination_area_id', $destinationAreaId)
+            ->with(['items', 'rates'])
             ->get()
-            ->first(function ($cache) use ($cartBarangIds) {
-                $cachedBarangIds = $cache->items->pluck('barang_id')->sort()->values()->toArray();
-                return $cachedBarangIds === $cartBarangIds;
+            ->first(function ($cache) use ($cartMap, $cartCount) {
+                if ($cache->items->count() !== $cartCount) {
+                    return false;
+                }
+                $cachedMap = $cache->items->mapWithKeys(fn($i) => [
+                    (int) $i->barang_id => (int) $i->quantity
+                ])->sortKeys()->toArray();
+                return $cachedMap === $cartMap;
             });
 
         if ($existingCache) {
             $rate = $existingCache->rates->first();
-            if ($rate && $rate->response_json) {
-                return json_decode($rate->response_json, true) ?: [];
+            if ($rate && !empty($rate->response_json)) {
+                $decoded = json_decode($rate->response_json, true);
+                if (is_array($decoded) && !empty($decoded)) {
+                    return $decoded;
+                }
             }
         }
 
@@ -800,10 +958,10 @@ class CheckoutController extends Controller
                 'name' => $nama,
                 'description' => $desc,
                 'value' => (int) ($item->finalPrice ?? 0),
-                'weight' => 900,
-                'length' => 25,
-                'width' => 7,
-                'height' => 2.5,
+                'weight' => $item->barang->produk->berat_gram,
+                'length' => $item->barang->produk->panjang_cm,
+                'width' => $item->barang->produk->lebar_cm,
+                'height' => $item->barang->produk->tinggi_cm,
                 'quantity' => (int) $item->qty,
             ];
         }

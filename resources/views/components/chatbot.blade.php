@@ -13,7 +13,7 @@
                 <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
         </div>
-        <span class="cb-faq-trigger-label">Tanya FAQ</span>
+        <span class="cb-faq-trigger-label"></span>
         <span class="cb-faq-pulse-dot"></span>
     </button>
 
@@ -53,11 +53,23 @@
 
         <!-- Quick Action Chips (Above Typing Input) -->
         <div class="cb-faq-chips-bar" id="cb-faq-chips">
-            <button type="button" class="cb-chip-item" data-topic="checkout">Cara Order</button>
-            <button type="button" class="cb-chip-item" data-topic="pembayaran">Metode Bayar</button>
-            <button type="button" class="cb-chip-item" data-topic="tracking">Lacak Paket</button>
-            <button type="button" class="cb-chip-item" data-topic="retur">Syarat Retur</button>
-            <button type="button" class="cb-chip-item" data-topic="cs">Hubungi CS</button>
+            @php
+                $quickFaqs = $chatbotFaqs
+                    ->filter(fn ($f) => $f->quick_question)
+                    ->sortBy(fn ($f) => $f->quick_question_order ?? 999)
+                    ->values();
+            @endphp
+            @if ($quickFaqs->isNotEmpty())
+                @foreach ($quickFaqs as $faq)
+                    <button type="button" class="cb-chip-item" data-topic="db-{{ $faq->id }}">{{ $faq->pertanyaan }}</button>
+                @endforeach
+            @else
+                <button type="button" class="cb-chip-item" data-topic="checkout">Cara Order</button>
+                <button type="button" class="cb-chip-item" data-topic="pembayaran">Metode Bayar</button>
+                <button type="button" class="cb-chip-item" data-topic="tracking">Lacak Paket</button>
+                <button type="button" class="cb-chip-item" data-topic="retur">Syarat Retur</button>
+                <button type="button" class="cb-chip-item" data-topic="cs">Hubungi CS</button>
+            @endif
         </div>
 
         <!-- Footer Manual Input -->
@@ -786,6 +798,48 @@ Semua pesanan dikirim langsung dari gudang utama kami di Indonesia dengan pengem
         }
     ];
 
+    // -----------------------------------------------------------------
+    // Data FAQ dari tabel chatbot_faq (database)
+    // - Dipakai untuk matching keyword & pertanyaan.
+    // - Jika pertanyaan chatbot_faq sama dengan data manual, pakai data
+    //   dari chatbot_faq. Sebaliknya data manual tetap dipertahankan.
+    // -----------------------------------------------------------------
+    @php
+        $dbFaqJson = $chatbotFaqs->map(function ($f) {
+            return [
+                'id' => 'db-' . $f->id,
+                'pertanyaan' => $f->pertanyaan,
+                'jawaban' => $f->jawaban,
+                'keywords' => is_array($f->keywords) ? $f->keywords : [],
+            ];
+        })->values();
+    @endphp
+    const dbFaqList = @json($dbFaqJson);
+
+    dbFaqList.forEach(function (db) {
+        var matched = false;
+        for (var i = 0; i < faqDataset.length; i++) {
+            if (faqDataset[i].question && String(faqDataset[i].question).toLowerCase().trim() === String(db.pertanyaan).toLowerCase().trim()) {
+                faqDataset[i].title = db.pertanyaan;
+                faqDataset[i].question = db.pertanyaan;
+                faqDataset[i].answer = db.jawaban;
+                faqDataset[i].keywords = (db.keywords && db.keywords.length) ? db.keywords.concat([db.pertanyaan]) : [db.pertanyaan];
+                faqDataset[i].dbId = db.id;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            faqDataset.push({
+                id: db.id,
+                title: db.pertanyaan,
+                question: db.pertanyaan,
+                answer: db.jawaban,
+                keywords: (db.keywords && db.keywords.length) ? db.keywords.concat([db.pertanyaan]) : [db.pertanyaan]
+            });
+        }
+    });
+
     const fallbackAnswer = "Maaf, pertanyaan Anda belum ada di data template kami. Silakan pilih dari opsi pertanyaan yang tersedia di bawah ini atau hubungi Customer Service kami untuk bantuan lebih lanjut.";
 
     // DOM Elements
@@ -1002,7 +1056,7 @@ Semua pesanan dikirim langsung dari gudang utama kami di Indonesia dengan pengem
 
     // Handle Selecting a Template Topic
     function handleSelectTopic(topicId) {
-        const item = faqDataset.find(d => d.id === topicId);
+        const item = faqDataset.find(d => d.id === topicId || d.dbId === topicId);
         if (!item) return;
 
         appendUserMessage(item.question);
