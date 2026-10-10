@@ -299,22 +299,21 @@
 @section('dashboard-content')
     <div class="dash-panel active" id="panel-cart">
         <div class="dash-panel-head" style="display:flex;justify-content:space-between;align-items:flex-start;">
-            <div>
+            <div style="margin-bottom: 20px">
                 <h2>Keranjang</h2>
-                <p>Kelola produk yang akan Anda beli.</p>
+                {{-- <p>Kelola produk yang akan Anda beli.</p> --}}
             </div>
             <a href="/products" style="font-size:12px;color:var(--accent);text-decoration:none;white-space:nowrap;margin-top:4px;">+ Tambah Barang</a>
         </div>
 
         @if ($items->isEmpty())
-            <div class="cart-empty">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--ink-muted)"
-                    stroke-width="1.2">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;width:100%;min-height:500px;padding:48px 20px;color:var(--ink-muted);background:var(--bg-card);border-radius:var(--radius);border:1px solid var(--line);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="margin-bottom:16px;opacity:0.4;">
                     <circle cx="9" cy="21" r="1" />
                     <circle cx="20" cy="21" r="1" />
                     <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" />
                 </svg>
-                <p>Keranjang Anda masih kosong.</p>
+                <p style="font-size:14px;">Keranjang Anda masih kosong.</p>
             </div>
         @else
             <div class="cart-list" id="cartList">

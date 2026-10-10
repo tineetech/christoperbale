@@ -4,13 +4,14 @@
 
 @push('styles')
     <style>
+        /* Toolbar with clean white background */
         .pay-toolbar {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             align-items: center;
             margin-bottom: 20px;
-            background: var(--bg-card);
+            background: #ffffff;
             border: 1px solid var(--line);
             border-radius: var(--radius);
             padding: 14px;
@@ -24,7 +25,7 @@
             font-size: 12.5px;
             font-family: 'Inter', sans-serif;
             color: var(--ink);
-            background: var(--bg);
+            background: #ffffff;
             outline: none;
             transition: border-color 0.18s;
         }
@@ -72,6 +73,7 @@
             color: var(--ink);
         }
 
+        /* Stats Cards with clean white background */
         .pay-stats-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -80,7 +82,7 @@
         }
 
         .pay-stat {
-            background: var(--bg-card);
+            background: #ffffff;
             border: 1px solid var(--line);
             border-radius: var(--radius);
             padding: 18px;
@@ -120,164 +122,16 @@
             stroke-width: 1.8;
         }
 
-        .ps-icon--gold { background: rgba(212, 148, 62, 0.15); }
-        .ps-icon--gold svg { stroke: #D4943E; }
+        .ps-icon--gold  { background: rgba(212, 148, 62, 0.15); }
+        .ps-icon--gold svg  { stroke: #D4943E; }
         .ps-icon--green { background: rgba(46, 125, 50, 0.15); }
         .ps-icon--green svg { stroke: #2E7D32; }
-        .ps-icon--red { background: rgba(192, 57, 43, 0.15); }
-        .ps-icon--red svg { stroke: #C0392B; }
-        .ps-icon--blue { background: rgba(25, 118, 210, 0.15); }
-        .ps-icon--blue svg { stroke: #1976D2; }
+        .ps-icon--red   { background: rgba(192, 57, 43, 0.15); }
+        .ps-icon--red svg   { stroke: #C0392B; }
+        .ps-icon--blue  { background: rgba(25, 118, 210, 0.15); }
+        .ps-icon--blue svg  { stroke: #1976D2; }
 
-        .pay-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .pay-card {
-            background: var(--bg-card);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            overflow: hidden;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-            transition: box-shadow 0.2s, border-color 0.2s, transform 0.1s;
-        }
-
-        .pay-card:hover {
-            box-shadow: var(--shadow-hover);
-            border-color: var(--accent);
-        }
-
-        .pay-card:active {
-            transform: scale(0.995);
-        }
-
-        .pay-card.is-pending {
-            border-color: rgba(212, 148, 62, 0.55);
-            background: linear-gradient(180deg, rgba(212, 148, 62, 0.06), rgba(212, 148, 62, 0.02) 55%, var(--bg-card));
-        }
-
-        .pay-card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 14px 18px;
-            border-bottom: 1px solid var(--line-soft);
-            flex-wrap: wrap;
-        }
-
-        .pay-card-header .pch-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 0;
-        }
-
-        .pay-code {
-            font-family: monospace;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--ink);
-            letter-spacing: 0.04em;
-        }
-
-        .pay-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 11px;
-            border-radius: 999px;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            width: fit-content;
-        }
-
-        .pay-badge--pending {
-            background: rgba(212, 148, 62, 0.15);
-            color: #B8860B;
-            border: 1px solid rgba(212, 148, 62, 0.35);
-        }
-
-        .pay-badge--paid {
-            background: rgba(46, 125, 50, 0.12);
-            color: var(--green);
-        }
-
-        .pay-badge--failed {
-            background: rgba(192, 57, 43, 0.1);
-            color: var(--red);
-        }
-
-        .pay-badge--other {
-            background: rgba(25, 118, 210, 0.1);
-            color: #1565C0;
-        }
-
-        .pay-date {
-            font-size: 12px;
-            color: var(--ink-muted);
-        }
-
-        .pay-card-body {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            padding: 14px 18px;
-            flex-wrap: wrap;
-        }
-
-        .pay-products {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .pay-prod-row {
-            font-size: 12.5px;
-            color: var(--ink-soft);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .pay-prod-row strong {
-            color: var(--ink);
-            font-weight: 500;
-        }
-
-        .pay-expiry {
-            font-size: 11px;
-            color: var(--red);
-        }
-
-        .pay-amount {
-            text-align: right;
-            flex-shrink: 0;
-        }
-
-        .pay-amount .pa-total {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--accent);
-        }
-
-        .pay-amount .pa-action {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--ink-muted);
-            margin-top: 3px;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-
+        /* Empty State */
         .pay-empty {
             display: flex;
             flex-direction: column;
@@ -285,12 +139,285 @@
             justify-content: center;
             text-align: center;
             width: 100%;
-            min-height: 200px;
+            min-height: 220px;
             padding: 48px 20px;
             color: var(--ink-muted);
-            background: var(--bg-card);
+            background: #ffffff;
             border-radius: var(--radius);
             border: 1px solid var(--line);
+        }
+
+        /* ===== LIST CARD PEMBAYARAN SIMPLE (WHITE BACKGROUND) ===== */
+        .pay-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .pay-card {
+            background: #ffffff !important;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            transition: box-shadow 0.22s, transform 0.18s, border-color 0.18s;
+            cursor: pointer;
+        }
+
+        .pay-card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transform: translateY(-1px);
+            border-color: var(--accent);
+        }
+
+        /* Left indicator border based on status */
+        .pay-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .pay-card[data-status="pending"]::before      { background: #D97706; }
+        .pay-card[data-status="confirmation"]::before { background: #2563EB; }
+        .pay-card[data-status="paid"]::before         { background: #16A34A; }
+        .pay-card[data-status="failed"]::before       { background: #DC2626; }
+
+        /* Card Header: Store + ID + Date + Badge */
+        .pay-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px 12px 24px;
+            border-bottom: 1px solid var(--line-soft);
+            gap: 12px;
+            flex-wrap: wrap;
+            background: #ffffff;
+        }
+
+        .pay-head-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pay-code {
+            font-size: 12px;
+            color: var(--ink-muted);
+            font-family: monospace;
+            letter-spacing: 0.03em;
+        }
+
+        .pay-head-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pay-date {
+            font-size: 11.5px;
+            color: var(--ink-muted);
+        }
+
+        /* Solid Badge with Center Dot */
+        .pay-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10);
+            width: fit-content;
+        }
+
+        .pay-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: #ffffff;
+        }
+
+        .pay-badge--pending {
+            background: #D97706;
+            color: #ffffff;
+        }
+
+        .pay-badge--confirmation {
+            background: #2563EB;
+            color: #ffffff;
+        }
+
+        .pay-badge--paid {
+            background: #16A34A;
+            color: #ffffff;
+        }
+
+        .pay-badge--failed {
+            background: #DC2626;
+            color: #ffffff;
+        }
+
+        /* Simplified Card Main Content */
+        .pay-card-main {
+            padding: 16px 20px 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            background: #ffffff;
+        }
+
+        .pay-main-left {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 180px;
+        }
+
+        .pay-amount-label {
+            font-size: 11px;
+            color: var(--ink-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .pay-amount-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1.2;
+        }
+
+        .pay-method-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11.5px;
+            color: var(--ink-soft);
+            margin-top: 3px;
+        }
+
+        .pay-method-tag i {
+            font-size: 14px;
+            color: var(--ink-muted);
+        }
+
+        .pay-main-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* Expiry Box */
+        .pay-expiry-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(230, 81, 0, 0.06);
+            border: 1px solid rgba(230, 81, 0, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 6px 12px;
+        }
+
+        .pay-expiry-box i {
+            font-size: 18px;
+            color: #E65100;
+        }
+
+        .pay-expiry-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 600;
+            color: #E65100;
+        }
+
+        .pay-expiry-val {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        /* Paid Box */
+        .pay-paid-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(22, 163, 74, 0.06);
+            border: 1px solid rgba(22, 163, 74, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 6px 12px;
+        }
+
+        .pay-paid-box i {
+            font-size: 18px;
+            color: #16A34A;
+        }
+
+        .pay-paid-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 600;
+            color: #16A34A;
+        }
+
+        .pay-paid-val {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        /* CTA Button */
+        .pay-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            padding: 8px 18px;
+            transition: all 0.18s;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .pay-cta--primary {
+            background: var(--accent);
+            color: #ffffff;
+            border: 1.5px solid var(--accent);
+        }
+
+        .pay-cta--primary:hover {
+            background: var(--accent-dark);
+            border-color: var(--accent-dark);
+        }
+
+        .pay-cta--outline {
+            background: none;
+            color: var(--accent);
+            border: 1.5px solid var(--accent);
+        }
+
+        .pay-cta--outline:hover {
+            background: var(--accent);
+            color: #ffffff;
         }
     </style>
 @endpush
@@ -349,7 +476,7 @@
         </div>
 
         <form class="pay-toolbar" method="GET" action="{{ route('dashboard.pembayaran') }}">
-            <input class="pt-input pt-search" type="text" name="q" placeholder="Cari kode pesanan / nama produk..."
+            <input class="pt-input pt-search" type="text" name="q" placeholder="Cari kode pesanan / pembayaran..."
                 value="{{ $filters['q'] ?? '' }}">
 
             <select class="pt-input" name="status">
@@ -371,35 +498,52 @@
 
         @if ($payments->isEmpty())
             <div class="pay-empty">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="margin-bottom:16px;opacity:0.4;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="margin-bottom:16px;opacity:0.35;">
                     <rect x="2" y="5" width="20" height="14" rx="2" />
                     <line x1="2" y1="10" x2="22" y2="10" />
                 </svg>
-                <p style="font-size:14px;">Belum ada data pembayaran.</p>
+                <p style="font-size:14px;font-weight:500;margin:0 0 4px;">Belum ada data pembayaran</p>
+                <p style="font-size:12px;margin:0;">Tagihan pembayaran pesanan Anda akan muncul di sini.</p>
             </div>
         @else
             <div class="pay-list">
                 @foreach ($payments as $p)
                     @php
                         $draft = $p->penjualanDraft;
-                        $orderCode = $p->order_id_midtrans ?? ($draft->kode_penjualan ?? '#CB-PAY-' . $p->id);
+                        $penjualan = $p->penjualan;
+
+                        $orderCode = $p->order_id_midtrans
+                            ?? ($penjualan?->kode_penjualan
+                            ?? ($draft?->kode_penjualan
+                            ?? '#CB-PAY-' . $p->id));
+
                         $payDate = $p->created_at ? $p->created_at->format('d M Y H:i') : '-';
 
                         if ($p->status === 'paid') {
                             $badgeText = 'Lunas';
                             $badgeClass = 'pay-badge--paid';
+                            $dataStatus = 'paid';
                         } elseif (in_array($p->status, ['deny', 'cancel', 'expire', 'failure'])) {
-                            $badgeText = ucfirst($p->status);
+                            $badgeText = match($p->status) {
+                                'expire' => 'Kedaluwarsa',
+                                'cancel' => 'Dibatalkan',
+                                'deny'   => 'Ditolak',
+                                default  => 'Gagal',
+                            };
                             $badgeClass = 'pay-badge--failed';
+                            $dataStatus = 'failed';
                         } elseif ($p->status === 'pending') {
                             $badgeText = 'Belum Dibayar';
                             $badgeClass = 'pay-badge--pending';
+                            $dataStatus = 'pending';
                         } elseif ($p->status === 'paid_confirmation') {
                             $badgeText = 'Konfirmasi Admin';
-                            $badgeClass = 'pay-badge--other';
+                            $badgeClass = 'pay-badge--confirmation';
+                            $dataStatus = 'confirmation';
                         } else {
                             $badgeText = ucfirst($p->status);
-                            $badgeClass = 'pay-badge--other';
+                            $badgeClass = 'pay-badge--pending';
+                            $dataStatus = 'pending';
                         }
 
                         $isPending = $p->status === 'pending' || $p->status === 'paid_confirmation';
@@ -412,39 +556,76 @@
                             $targetUrl = route('checkout.success', $p->penjualan_id);
                         }
 
-                        $items = $draft && $draft->items ? $draft->items->take(3) : collect();
+                        // Payment method detail text
+                        $methodText = $p->payment_method
+                            ? ucfirst(str_replace('_', ' ', $p->payment_method))
+                            : ($p->payment_type ? ucfirst(str_replace('_', ' ', $p->payment_type)) : 'Midtrans');
                     @endphp
-                    <a class="pay-card {{ $isPending ? 'is-pending' : '' }}" href="{{ $targetUrl }}">
-                        <div class="pay-card-header">
-                            <div class="pch-left">
+
+                    <a class="pay-card" data-status="{{ $dataStatus }}" href="{{ $targetUrl }}">
+                        {{-- Head: Store + Order/Pay Code + Date + Status Badge --}}
+                        <div class="pay-card-head">
+                            <div class="pay-head-left">
+                                <i class='bx bx-store-alt oc-store-icon'></i>
+                                <span class="oc-store-name">CHRISBALE</span>
                                 <span class="pay-code">{{ $orderCode }}</span>
+                            </div>
+                            <div class="pay-head-right">
+                                <span class="pay-date">{{ $payDate }}</span>
                                 <span class="pay-badge {{ $badgeClass }}">{{ $badgeText }}</span>
                             </div>
-                            <span class="pay-date">{{ $payDate }}</span>
                         </div>
-                        <div class="pay-card-body">
-                            <div class="pay-products">
-                                @forelse ($items as $it)
-                                    <div class="pay-prod-row">
-                                        <strong>{{ $it->barang->produk->nama_produk ?? $it->barang->nama_barang ?? 'Produk' }}</strong>
-                                        <span style="color:var(--ink-muted);">x{{ $it->qty }}</span>
-                                    </div>
-                                @empty
-                                    <div class="pay-prod-row">Pesanan</div>
-                                @endforelse
-                                @if ($draft && $draft->items && $draft->items->count() > 3)
-                                    <div class="pay-prod-row" style="color:var(--ink-muted);">+{{ $draft->items->count() - 3 }} produk lainnya</div>
-                                @endif
+
+                        {{-- Main Body: Ringkasan Singkat (Harga, Metode, Status Expired/Lunas, & Tombol Aksi) --}}
+                        <div class="pay-card-main">
+                            <div class="pay-main-left">
+                                <div class="pay-amount-label">Total Tagihan</div>
+                                <div class="pay-amount-value">Rp{{ number_format($p->amount, 0, ',', '.') }}</div>
+                                <div class="pay-method-tag">
+                                    <i class='bx bx-credit-card'></i>
+                                    <span>{{ $methodText }}</span>
+                                </div>
                             </div>
-                            <div class="pay-amount">
-                                <div class="pa-total">Rp{{ number_format($p->amount, 0, ',', '.') }}</div>
-                                @if ($p->status === 'paid_confirmation')
-                                    <div class="pa-action">Lihat Status</div>
-                                @elseif ($isPending)
-                                    <div class="pay-expiry">Berlaku hingga {{ $p->expired_at ? $p->expired_at->format('d M Y H:i') : '-' }}</div>
-                                @else
-                                    <div class="pa-action">{{ $isPending ? 'Bayar Sekarang' : 'Lihat Detail' }}</div>
+
+                            <div class="pay-main-right">
+                                {{-- Info Tambahan: Expired / Tanggal Bayar --}}
+                                @if ($isPending && $p->expired_at)
+                                    <div class="pay-expiry-box">
+                                        <i class='bx bx-time-five'></i>
+                                        <div>
+                                            <div class="pay-expiry-label">Batas Waktu Bayar</div>
+                                            <div class="pay-expiry-val">{{ $p->expired_at->format('d M Y H:i') }}</div>
+                                        </div>
+                                    </div>
+                                @elseif ($p->status === 'paid' && $p->paid_at)
+                                    <div class="pay-paid-box">
+                                        <i class='bx bx-check-circle'></i>
+                                        <div>
+                                            <div class="pay-paid-label">Waktu Lunas</div>
+                                            <div class="pay-paid-val">{{ $p->paid_at->format('d M Y H:i') }}</div>
+                                        </div>
+                                    </div>
                                 @endif
+
+                                {{-- CTA Button --}}
+                                <div>
+                                    @if ($isPending)
+                                        <span class="pay-cta pay-cta--primary">
+                                            Bayar Sekarang
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                                        </span>
+                                    @elseif ($p->status === 'paid_confirmation')
+                                        <span class="pay-cta pay-cta--outline">
+                                            Cek Status
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                                        </span>
+                                    @else
+                                        <span class="pay-cta pay-cta--outline">
+                                            Lihat Detail
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </a>

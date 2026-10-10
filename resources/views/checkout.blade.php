@@ -3,6 +3,34 @@
 @section('title', 'Checkout — CHRISBALE')
 
 @push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+    <style>
+        .select2-container { width: 100% !important; font-family: 'Inter', sans-serif; }
+        .select2-container .select2-selection--single {
+            height: auto;
+            border: 1.5px solid var(--line);
+            border-radius: 10px;
+            background: #fff;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            font-size: 13px;
+            color: var(--ink);
+            padding: 9px 12px;
+            line-height: 1.4;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow { height: 100%; }
+        .select2-container--default.select2-container--focus .select2-selection--single { border-color: var(--accent); }
+        .select2-container--default.select2-container--disabled .select2-selection--single { background: #f3f4f6; color: #9ca3af; }
+        .select2-dropdown { border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; }
+        .select2-search--dropdown .select2-search__field {
+            border: 1.5px solid var(--line);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+        }
+        .select2-results__option { font-size: 13px; padding: 8px 12px; }
+    </style>
     <style>
         .checkout-wrap * {
             font-family: 'Inter', sans-serif;
@@ -308,6 +336,91 @@
             padding: 16px 24px 24px;
         }
 
+        .pform-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .na-form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .na-yn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .na-yn-btn {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1.5px solid var(--line);
+            border-radius: 10px;
+            background: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink-muted);
+            cursor: pointer;
+            transition: all .15s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .na-yn-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .na-yn-btn.is-active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(184, 134, 11, 0.08);
+        }
+
+        @media (max-width: 600px) {
+            #newAddressModal {
+                padding: 12px;
+                align-items: flex-end;
+            }
+
+            #newAddressModal .modal-content {
+                width: 100%;
+                max-height: 94vh;
+                border-radius: 16px 16px 0 0;
+            }
+
+            #newAddressModal .modal-head {
+                padding: 16px;
+            }
+
+            #newAddressModal .modal-head h3 {
+                font-size: 14px;
+            }
+
+            #newAddressModal .modal-body {
+                padding: 14px 16px 18px;
+            }
+
+            #newAddressModal .pform-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            #newAddressModal #naMap {
+                height: 180px;
+            }
+
+            #newAddressModal .na-form-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            #newAddressModal .na-form-actions button {
+                width: 100%;
+            }
+        }
+
         .modal-address-item {
             text-decoration: none;
             color: inherit;
@@ -334,6 +447,58 @@
 
         .modal-add-addr:hover {
             border-color: var(--accent);
+        }
+
+        /* New Address Modal Styles */
+        #newAddressModal .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #newAddressModal .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 6px;
+        }
+
+        #newAddressModal .form-group input,
+        #newAddressModal .form-group select,
+        #newAddressModal .form-group textarea {
+            width: 100%;
+            border: 1.5px solid var(--line);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            color: var(--ink);
+            background: #fff;
+            transition: border-color .15s;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        #newAddressModal .form-group input:focus,
+        #newAddressModal .form-group select:focus,
+        #newAddressModal .form-group textarea:focus {
+            border-color: var(--accent);
+        }
+
+        /* Toast animation */
+        @keyframes toastSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .toast-animate {
+            animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         /* Voucher selector */
@@ -1011,7 +1176,11 @@
                                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                                     <circle cx="12" cy="10" r="3" />
                                 </svg> Alamat Pengiriman</span>
-                            <button type="button" class="h2-action" onclick="openAddressModal()">Pilih alamat lain</button>
+                            @if ($defaultAddress)
+                                <button type="button" class="h2-action" onclick="openAddressModal()">Pilih alamat lain</button>
+                            @else
+                                <button type="button" class="h2-action" onclick="openNewAddressFormModal()">+ Tambah alamat baru</button>
+                            @endif
                         </h2>
                         @if ($defaultAddress)
                             <div class="address-card is-selected">
@@ -1026,8 +1195,7 @@
                                 </div>
                             </div>
                         @else
-                            <p class="addr-empty">Belum ada alamat. <a href="{{ route('dashboard.alamat') }}">Tambah
-                                    alamat</a></p>
+                            <p class="addr-empty">Belum ada alamat pengiriman. <a href="javascript:void(0)" onclick="openNewAddressFormModal()">+ Tambah alamat sekarang</a></p>
                         @endif
                     </div>
 
@@ -1251,7 +1419,6 @@
             </div>
         </div>
     </div>
-@endsection
 
 {{-- Modal Pilih Alamat --}}
 <div class="modal-overlay" id="addressModal">
@@ -1261,23 +1428,118 @@
             <button type="button" class="modal-close" onclick="closeAddressModal()">&times;</button>
         </div>
         <div class="modal-body">
-            @forelse($allAddresses as $addr)
-                <a href="{{ route('checkout', array_merge(request()->query(), ['address_id' => $addr->id])) }}"
-                    class="address-card modal-address-item {{ $addr->id === $defaultAddress?->id ? 'is-selected' : '' }}">
-                    <div>
-                        <div class="addr-label">{{ $addr->label ?? $addr->receiver_name }} — {{ $addr->phone }}
+            <div id="addressListContainer">
+                @forelse($allAddresses as $addr)
+                    <a href="{{ route('checkout', array_merge(request()->query(), ['address_id' => $addr->id])) }}"
+                        class="address-card modal-address-item {{ $addr->id === $defaultAddress?->id ? 'is-selected' : '' }}">
+                        <div>
+                            <div class="addr-label">{{ $addr->label ?? $addr->receiver_name }} — {{ $addr->phone }}
+                            </div>
+                            <div class="addr-text">{{ $addr->address }}, {{ $addr->city }}, {{ $addr->province }}
+                                {{ $addr->postal_code }}</div>
+                            @if ($addr->is_default)
+                                <span class="addr-tag">Utama</span>
+                            @endif
                         </div>
-                        <div class="addr-text">{{ $addr->address }}, {{ $addr->city }}, {{ $addr->province }}
-                            {{ $addr->postal_code }}</div>
-                        @if ($addr->is_default)
-                            <span class="addr-tag">Utama</span>
-                        @endif
+                    </a>
+                @empty
+                    <p class="addr-empty" id="noAddressText">Belum ada alamat.</p>
+                @endforelse
+            </div>
+            <button type="button" class="modal-add-addr" onclick="openNewAddressFormModal()">+ Tambah alamat baru</button>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Form Tambah Alamat Baru (Checkout) --}}
+<div class="modal-overlay" id="newAddressModal" style="z-index:10000;">
+    <div class="modal-content" style="width:min(560px,96vw);max-height:92vh;">
+        <div class="modal-head">
+            <h3>Tambah Alamat Baru</h3>
+            <button type="button" class="modal-close" onclick="closeNewAddressModal()">&times;</button>
+        </div>
+        <div class="modal-body" style="padding:20px 24px 24px;">
+            <div id="newAddrError" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;"></div>
+            <div class="pform-grid">
+                <div class="form-group">
+                    <label for="na_label">Label Alamat <span style="color:var(--red);">*</span></label>
+                    <input type="text" id="na_label" placeholder="Rumah / Kantor / Lainnya">
+                </div>
+                <div class="form-group">
+                    <label for="na_receiver_name">Nama Penerima <span style="color:var(--red);">*</span></label>
+                    <input type="text" id="na_receiver_name" placeholder="Nama lengkap">
+                </div>
+                <div class="form-group">
+                    <label for="na_phone">Nomor Telepon <span style="color:var(--red);">*</span></label>
+                    <input type="tel" id="na_phone" placeholder="08xx-xxxx-xxxx">
+                </div>
+                <div class="form-group">
+                    <label for="na_province">Provinsi <span style="color:var(--red);">*</span></label>
+                    <select id="na_province">
+                        <option value="">Memuat provinsi...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="na_city">Kota/Kabupaten <span style="color:var(--red);">*</span></label>
+                    <select id="na_city" disabled>
+                        <option value="">Pilih provinsi terlebih dahulu</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="na_district">Kecamatan <span style="color:var(--red);">*</span></label>
+                    <select id="na_district" disabled>
+                        <option value="">Pilih kota terlebih dahulu</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="na_postal_code">Kode Pos <span style="color:var(--red);">*</span></label>
+                    <select id="na_postal_code" disabled>
+                        <option value="">Pilih kecamatan terlebih dahulu</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Jadikan alamat utama?</label>
+                    <div class="na-yn-group" id="naDefaultGroup">
+                        <button type="button" class="na-yn-btn is-active" data-value="0" onclick="setNaDefault(0)">Tidak</button>
+                        <button type="button" class="na-yn-btn" data-value="1" onclick="setNaDefault(1)">Ya</button>
                     </div>
-                </a>
-            @empty
-                <p class="addr-empty">Belum ada alamat.</p>
-            @endforelse
-            <a href="{{ route('dashboard.alamat') }}" class="modal-add-addr">+ Tambah alamat baru</a>
+                    <input type="hidden" id="na_is_default" value="0">
+                </div>
+            </div>
+            <div class="form-group" style="margin-top:14px;">
+                <label for="na_catatan">Catatan <span style="color:var(--ink-muted);font-weight:400;">(opsional)</span></label>
+                <textarea id="na_catatan" style="width:100%;height:54px;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;font-family:'Inter',sans-serif;resize:vertical;" placeholder="Contoh: dekat warung Bu Indah, pagar hijau..."></textarea>
+            </div>
+            <div class="form-group" style="margin-top:14px;">
+                <label for="na_address">Alamat Lengkap <span style="color:var(--red);">*</span></label>
+                <textarea id="na_address" style="width:100%;height:80px;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;font-family:'Inter',sans-serif;resize:vertical;" placeholder="Jl. Nama Jalan No.xx, RT/RW, Kelurahan, dsb."></textarea>
+            </div>
+            <div style="font-size:11px;color:var(--ink-muted);margin-top:14px;line-height:1.6;">Isi wilayah secara bertahap: provinsi &rarr; kota &rarr; kecamatan &rarr; kode pos. Pastikan titik di peta <strong>sama persis</strong> dengan alamat yang Anda ketik.</div>
+            <div class="form-group" style="margin-top:10px;">
+                <label>Peta Lokasi <span style="color:var(--red);">*</span></label>
+                <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;">
+                    <div id="naMap" style="height:220px;width:100%;z-index:0;"></div>
+                </div>
+                <div style="font-size:11px;color:var(--ink-muted);margin-top:6px;" id="naGeoHint">Klik peta atau geser marker untuk menentukan titik lokasi. Wajib diisi. Pastikan titiknya sama persis dengan alamat yang Anda ketik di form.</div>
+            </div>
+            <input type="hidden" id="na_area_id">
+            <input type="hidden" id="na_lat">
+            <input type="hidden" id="na_lng">
+            <div class="na-form-actions">
+                <button type="button" id="naSaveBtn" onclick="submitNewAddress()" style="flex:1;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;">Simpan Alamat</button>
+                <button type="button" onclick="closeNewAddressModal()" style="padding:13px 20px;background:none;border:1.5px solid var(--line);border-radius:var(--radius-sm);font-size:13px;cursor:pointer;">Batal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Toast Notification --}}
+<div id="checkoutToast" style="position:fixed;bottom:28px;right:28px;z-index:99999;display:none;min-width:280px;max-width:380px;">
+    <div style="background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);padding:16px 20px;display:flex;align-items:center;gap:14px;border-left:4px solid var(--accent);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg>
+        <div>
+            <div style="font-size:14px;font-weight:600;color:#111;" id="toastTitle">Berhasil</div>
+            <div style="font-size:12px;color:#6b7280;margin-top:2px;" id="toastMsg"></div>
         </div>
     </div>
 </div>
@@ -1320,14 +1582,21 @@
         </div>
     </div>
 </div>
+@endsection
 
 @push('scripts')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const SUBTOTAL = {{ (float) $subtotal }};
         const CHECKOUT_SOURCE = @json($checkoutSource);
-        const CHECKOUT_ADDRESS_ID = {{ $defaultAddress?->id ?? 'null' }};
+        let CHECKOUT_ADDRESS_ID = {{ $defaultAddress?->id ?? 'null' }};
         let discount = 0;
+
+        const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
 
         async function submitCheckout(btn) {
             const addressId = CHECKOUT_ADDRESS_ID;
@@ -1368,7 +1637,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        'X-CSRF-TOKEN': CSRF_TOKEN
                     },
                     body: JSON.stringify(payload)
                 });
@@ -1399,7 +1668,6 @@
                     return;
                 }
 
-                console.log(data)
                 Swal.fire({
                     icon: 'warning',
                     title: 'Checkout gagal',
@@ -1510,5 +1778,568 @@
         document.getElementById('addressModal')?.addEventListener('click', function(e) {
             if (e.target === this) closeAddressModal();
         });
+
+        // =============================================
+        // NEW ADDRESS FORM MODAL (from checkout)
+        // =============================================
+        var naMap = null, naMarker = null;
+        var naStoreUrl = '{{ route("dashboard.alamat.store.ajax") }}';
+        var naAreaUrl = '{{ route("dashboard.alamat.area") }}';
+        var naWilayahProvincesUrl = '{{ route("dashboard.wilayah.provinces") }}';
+        var naWilayahRegenciesBaseUrl = '{{ url("/dashboard/wilayah/regencies") }}';
+        var naWilayahDistrictsBaseUrl = '{{ url("/dashboard/wilayah/districts") }}';
+        var naWilayahPostalsBaseUrl = '{{ route("dashboard.wilayah.postals") }}';
+        var naProvinceCodeByName = {};
+        var naCityCodeByName = {};
+        var naProvincesLoaded = false;
+        var naProvinceFallback = ['DKI Jakarta','Jawa Barat','Jawa Tengah','DI Yogyakarta','Jawa Timur','Banten','Bali','Sumatera Utara','Sumatera Selatan','Riau','Lampung','Kalimantan Timur','Sulawesi Selatan','Aceh','Papua'];
+
+        function openNewAddressFormModal() {
+            closeAddressModal();
+            // Reset form
+            ['na_label','na_receiver_name','na_phone','na_catatan','na_address'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            setNaDefault(0);
+            document.getElementById('na_area_id').value = '';
+            document.getElementById('na_lat').value = '';
+            document.getElementById('na_lng').value = '';
+            naResetRegionSelects();
+            naEnsureProvinces();
+            document.getElementById('naGeoHint').textContent = 'Klik peta atau geser marker untuk menentukan titik lokasi. Wajib diisi. Pastikan titiknya sama persis dengan alamat yang Anda ketik di form.';
+            var errEl = document.getElementById('newAddrError');
+            if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+            if (naMarker && naMap) { naMap.removeLayer(naMarker); naMarker = null; }
+
+            document.getElementById('newAddressModal').classList.add('show');
+            setTimeout(function() {
+                if (!naMap) {
+                    naMap = L.map('naMap', { scrollWheelZoom: false }).setView([-6.5950, 106.8166], 13);
+                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    }).addTo(naMap);
+                    naMap.on('click', function(e) {
+                        // Pin hanya mengisi koordinat; isian form TIDAK ditimpa.
+                        naSetMarker(e.latlng.lat, e.latlng.lng);
+                    });
+                }
+                naMap.invalidateSize();
+            }, 320);
+        }
+
+        function closeNewAddressModal() {
+            document.getElementById('newAddressModal').classList.remove('show');
+        }
+
+        function setNaDefault(val) {
+            var v = val ? 1 : 0;
+            document.getElementById('na_is_default').value = v;
+            document.querySelectorAll('#naDefaultGroup .na-yn-btn').forEach(function(b) {
+                b.classList.toggle('is-active', parseInt(b.dataset.value, 10) === v);
+            });
+        }
+
+        document.getElementById('newAddressModal')?.addEventListener('click', function(e) {
+            if (e.target === this) closeNewAddressModal();
+        });
+
+        function naSetMarker(lat, lng) {
+            if (!naMap) return;
+            if (naMarker) {
+                naMarker.setLatLng([lat, lng]);
+            } else {
+                naMarker = L.marker([lat, lng], { draggable: true }).addTo(naMap);
+                naMarker.on('dragend', function() {
+                    var p = naMarker.getLatLng();
+                    naSetMarker(p.lat, p.lng);
+                });
+            }
+            naMap.setView([lat, lng], 16);
+            document.getElementById('na_lat').value = lat;
+            document.getElementById('na_lng').value = lng;
+            document.getElementById('naGeoHint').textContent = 'Titik lokasi sudah ditentukan (' + Number(lat).toFixed(5) + ', ' + Number(lng).toFixed(5) + '). Pastikan posisinya sama persis dengan alamat yang Anda ketik di form. Geser marker untuk mengubah.';
+        }
+
+        // =============================================
+        // Wilayah bertahap via proxy wilayah.id (mirror form dashboard)
+        // =============================================
+        function naHasSelect2() {
+            return (typeof window.jQuery !== 'undefined') && !!window.jQuery.fn.select2;
+        }
+
+        function naSortAbjad(a, b) {
+            return String(a).localeCompare(String(b), 'id');
+        }
+
+        function naModalContent() {
+            return window.jQuery('#newAddressModal .modal-content');
+        }
+
+        function naAppendOption(selId, text, selected) {
+            var sel = document.getElementById(selId);
+            var opt = document.createElement('option');
+            opt.value = text;
+            opt.textContent = text;
+            if (selected) opt.selected = true;
+            sel.appendChild(opt);
+        }
+
+        function naSetCityEnabled(enabled) {
+            var s = document.getElementById('na_city');
+            s.disabled = !enabled;
+            if (naHasSelect2()) window.jQuery(s).prop('disabled', !enabled);
+        }
+
+        function naSetDistrictEnabled(enabled) {
+            var s = document.getElementById('na_district');
+            s.disabled = !enabled;
+            if (naHasSelect2()) window.jQuery(s).prop('disabled', !enabled);
+        }
+
+        function naSetPostalEnabled(enabled) {
+            var s = document.getElementById('na_postal_code');
+            s.disabled = !enabled;
+            if (naHasSelect2()) window.jQuery(s).prop('disabled', !enabled);
+        }
+
+        function naCitySelect2Opts() {
+            return {
+                placeholder: 'Pilih/ketik kota',
+                tags: true,
+                width: '100%',
+                dropdownParent: naModalContent(),
+                language: {
+                    noResults: function() { return 'Tidak ditemukan — tekan Enter untuk memakai ketikan Anda'; },
+                    searching: function() { return 'Mencari...'; }
+                }
+            };
+        }
+
+        function naDistrictSelect2Opts() {
+            return {
+                placeholder: 'Pilih/ketik kecamatan',
+                tags: true,
+                width: '100%',
+                dropdownParent: naModalContent(),
+                language: {
+                    noResults: function() { return 'Tidak ditemukan — tekan Enter untuk memakai ketikan Anda'; },
+                    searching: function() { return 'Mencari...'; }
+                }
+            };
+        }
+
+        function naPostalSelect2Opts() {
+            return {
+                placeholder: 'Pilih/ketik kode pos',
+                tags: true,
+                width: '100%',
+                dropdownParent: naModalContent(),
+                language: {
+                    noResults: function() { return 'Tidak ditemukan — tekan Enter untuk memakai ketikan Anda'; },
+                    searching: function() { return 'Mencari...'; }
+                }
+            };
+        }
+
+        var naSelect2Ready = {};
+
+        function naInitSelect2() {
+            if (!naHasSelect2() || naInitSelect2.done) return;
+            naInitSelect2.done = true;
+            window.jQuery('#na_province').select2({
+                placeholder: 'Pilih Provinsi',
+                width: '100%',
+                dropdownParent: naModalContent()
+            });
+            naSelect2Ready['na_province'] = true;
+            window.jQuery('#na_city').select2(naCitySelect2Opts());
+            naSelect2Ready['na_city'] = true;
+            window.jQuery('#na_district').select2(naDistrictSelect2Opts());
+            naSelect2Ready['na_district'] = true;
+            window.jQuery('#na_postal_code').select2(naPostalSelect2Opts());
+            naSelect2Ready['na_postal_code'] = true;
+        }
+
+        function naQuietSyncSelect(selId, optsFn) {
+            if (!naHasSelect2() || !naSelect2Ready[selId]) return;
+            var $s = window.jQuery('#' + selId);
+            $s.select2('destroy');
+            $s.select2(optsFn());
+        }
+
+        function naFillProvinceOptions(names) {
+            var sel = document.getElementById('na_province');
+            sel.innerHTML = '<option value="">Pilih Provinsi</option>';
+            names.slice().sort(naSortAbjad).forEach(function(name) {
+                var opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                sel.appendChild(opt);
+            });
+        }
+
+        function naResetRegionSelects() {
+            var prov = document.getElementById('na_province');
+            var city = document.getElementById('na_city');
+            var dist = document.getElementById('na_district');
+            var post = document.getElementById('na_postal_code');
+            prov.value = '';
+            city.innerHTML = '<option value="">Pilih provinsi terlebih dahulu</option>';
+            dist.innerHTML = '<option value="">Pilih kota terlebih dahulu</option>';
+            post.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
+            naQuietSyncSelect('na_province', function() { return { placeholder: 'Pilih Provinsi', width: '100%', dropdownParent: naModalContent() }; });
+            naQuietSyncSelect('na_city', naCitySelect2Opts);
+            naQuietSyncSelect('na_district', naDistrictSelect2Opts);
+            naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
+            naSetCityEnabled(false);
+            naSetDistrictEnabled(false);
+            naSetPostalEnabled(false);
+        }
+
+        function naResetAndResolveArea() {
+            document.getElementById('na_area_id').value = '';
+            naResolveArea();
+        }
+
+        var naResolveTimer = null;
+        function naResolveAreaDebounced() {
+            document.getElementById('na_area_id').value = '';
+            if (naResolveTimer) clearTimeout(naResolveTimer);
+            naResolveTimer = setTimeout(naResolveArea, 600);
+        }
+
+        function naResolveArea() {
+            var district = document.getElementById('na_district').value;
+            var city = document.getElementById('na_city').value;
+            var province = document.getElementById('na_province').value;
+            var postal = document.getElementById('na_postal_code').value;
+            if (!city && !district && !province) return;
+            fetch(naAreaUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
+                body: JSON.stringify({ district: district, city: city, province: province, postal_code: postal })
+            }).then(function(r) { return r.json(); }).then(function(res) {
+                document.getElementById('na_area_id').value = res.area_id || '';
+            }).catch(function() {
+                document.getElementById('na_area_id').value = '';
+            });
+        }
+
+        function naHandleProvinceChange(value) {
+            var hasProvince = !!value;
+            document.getElementById('na_area_id').value = '';
+            naSetCityEnabled(hasProvince);
+            naSetDistrictEnabled(false);
+            naSetPostalEnabled(false);
+            var citySel = document.getElementById('na_city');
+            var distSel = document.getElementById('na_district');
+            if (hasProvince) {
+                citySel.value = '';
+                distSel.innerHTML = '<option value="">Pilih kota terlebih dahulu</option>';
+                naQuietSyncSelect('na_city', naCitySelect2Opts);
+                naQuietSyncSelect('na_district', naDistrictSelect2Opts);
+                var postSel = document.getElementById('na_postal_code');
+                postSel.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
+                naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
+                naLoadCities(value);
+            } else {
+                citySel.innerHTML = '<option value="">Pilih provinsi terlebih dahulu</option>';
+                naQuietSyncSelect('na_city', naCitySelect2Opts);
+                distSel.innerHTML = '<option value="">Pilih kota terlebih dahulu</option>';
+                naQuietSyncSelect('na_district', naDistrictSelect2Opts);
+                var postSel2 = document.getElementById('na_postal_code');
+                postSel2.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
+                naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
+                naResolveArea();
+            }
+        }
+
+        function naHandleCityChange(value) {
+            var hasCity = !!value;
+            document.getElementById('na_area_id').value = '';
+            naSetDistrictEnabled(hasCity);
+            naSetPostalEnabled(false);
+            var distSel = document.getElementById('na_district');
+            if (hasCity) {
+                naLoadDistricts(value);
+            } else {
+                distSel.innerHTML = '<option value="">Pilih kota terlebih dahulu</option>';
+                naQuietSyncSelect('na_district', naDistrictSelect2Opts);
+                var postSel = document.getElementById('na_postal_code');
+                postSel.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
+                naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
+                naResolveArea();
+            }
+        }
+
+        function naHandleDistrictChange(value) {
+            var hasDistrict = !!value;
+            document.getElementById('na_area_id').value = '';
+            naSetPostalEnabled(hasDistrict);
+            if (!hasDistrict) {
+                var postSel = document.getElementById('na_postal_code');
+                postSel.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
+                naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
+                naResolveArea();
+                return;
+            }
+            naLoadPostals();
+            naResolveArea();
+        }
+
+        function naBindRegionField(fid, isText) {
+            var el = document.getElementById(fid);
+            if (!el) return;
+            if (window.jQuery) {
+                window.jQuery(el).on('change', function() {
+                    if (fid === 'na_province') naHandleProvinceChange(this.value);
+                    else if (fid === 'na_city') naHandleCityChange(this.value);
+                    else if (fid === 'na_district') naHandleDistrictChange(this.value);
+                    else naResetAndResolveArea();
+                });
+                if (isText) {
+                    window.jQuery(el).on('input', function() { naResolveAreaDebounced(); });
+                }
+            } else {
+                el.addEventListener('change', function() {
+                    if (fid === 'na_province') naHandleProvinceChange(this.value);
+                    else if (fid === 'na_city') naHandleCityChange(this.value);
+                    else if (fid === 'na_district') naHandleDistrictChange(this.value);
+                    else naResetAndResolveArea();
+                });
+                if (isText) el.addEventListener('input', naResolveAreaDebounced);
+            }
+        }
+
+        function naLoadCities(provinceName) {
+            var citySel = document.getElementById('na_city');
+            citySel.innerHTML = '<option value="">Memuat kota...</option>';
+            naQuietSyncSelect('na_city', naCitySelect2Opts);
+            var code = naProvinceCodeByName[provinceName];
+            if (!code) {
+                citySel.innerHTML = '<option value="">Pilih/ketik kota</option>';
+                naQuietSyncSelect('na_city', naCitySelect2Opts);
+                return;
+            }
+            fetch(naWilayahRegenciesBaseUrl + '/' + encodeURIComponent(code))
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    var rows = (res && res.data) || [];
+                    rows.sort(function(x, y) { return String(x.name).localeCompare(String(y.name), 'id'); });
+                    citySel.innerHTML = '<option value="">Pilih/ketik kota</option>';
+                    rows.forEach(function(row) {
+                        naCityCodeByName[row.name] = row.code;
+                        var opt = document.createElement('option');
+                        opt.value = row.name;
+                        opt.textContent = row.name;
+                        citySel.appendChild(opt);
+                    });
+                    citySel.value = '';
+                    naQuietSyncSelect('na_city', naCitySelect2Opts);
+                })
+                .catch(function() {
+                    citySel.innerHTML = '<option value="">Pilih/ketik kota</option>';
+                    naQuietSyncSelect('na_city', naCitySelect2Opts);
+                });
+        }
+
+        function naLoadDistricts(cityName) {
+            var distSel = document.getElementById('na_district');
+            distSel.innerHTML = '<option value="">Memuat kecamatan...</option>';
+            naQuietSyncSelect('na_district', naDistrictSelect2Opts);
+            naSetPostalEnabled(false);
+            var postSel = document.getElementById('na_postal_code');
+            postSel.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
+            naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
+            var code = naCityCodeByName[cityName];
+            if (!code) {
+                distSel.innerHTML = '<option value="">Pilih/ketik kecamatan</option>';
+                naQuietSyncSelect('na_district', naDistrictSelect2Opts);
+                return;
+            }
+            fetch(naWilayahDistrictsBaseUrl + '/' + encodeURIComponent(code))
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    var rows = (res && res.data) || [];
+                    rows.sort(function(x, y) { return String(x.name).localeCompare(String(y.name), 'id'); });
+                    distSel.innerHTML = '<option value="">Pilih/ketik kecamatan</option>';
+                    rows.forEach(function(row) {
+                        var opt = document.createElement('option');
+                        opt.value = row.name;
+                        opt.textContent = row.name;
+                        distSel.appendChild(opt);
+                    });
+                    distSel.value = '';
+                    naQuietSyncSelect('na_district', naDistrictSelect2Opts);
+                })
+                .catch(function() {
+                    distSel.innerHTML = '<option value="">Pilih/ketik kecamatan</option>';
+                    naQuietSyncSelect('na_district', naDistrictSelect2Opts);
+                });
+        }
+
+        function naLoadPostals() {
+            var postSel = document.getElementById('na_postal_code');
+            var district = document.getElementById('na_district').value;
+            var city = document.getElementById('na_city').value;
+            var province = document.getElementById('na_province').value;
+            postSel.innerHTML = '<option value="">Memuat kode pos...</option>';
+            naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
+            if (!district && !city && !province) {
+                postSel.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
+                naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
+                return;
+            }
+            fetch(naWilayahPostalsBaseUrl + '?' + new URLSearchParams({ district: district, city: city, province: province }).toString())
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    var rows = (res && res.data) || [];
+                    postSel.innerHTML = '<option value="">Pilih/ketik kode pos</option>';
+                    rows.forEach(function(code) {
+                        var opt = document.createElement('option');
+                        opt.value = code;
+                        opt.textContent = code;
+                        postSel.appendChild(opt);
+                    });
+                    postSel.value = '';
+                    naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
+                })
+                .catch(function() {
+                    postSel.innerHTML = '<option value="">Pilih/ketik kode pos</option>';
+                    naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
+                });
+        }
+
+        function naLoadProvinces() {
+            var sel = document.getElementById('na_province');
+            fetch(naWilayahProvincesUrl)
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    var rows = (res && res.data) || [];
+                    var names = rows.map(function(row) {
+                        naProvinceCodeByName[row.name] = row.code;
+                        return row.name;
+                    });
+                    if (!names.length) throw new Error('empty');
+                    naFillProvinceOptions(names);
+                    naInitSelect2();
+                })
+                .catch(function() {
+                    naFillProvinceOptions(naProvinceFallback);
+                    naInitSelect2();
+                });
+        }
+
+        function naEnsureProvinces() {
+            if (naProvincesLoaded) return;
+            naProvincesLoaded = true;
+            naLoadProvinces();
+        }
+
+        ['na_province','na_city','na_district','na_postal_code'].forEach(function(fid) { naBindRegionField(fid, false); });
+        ['na_address'].forEach(function(fid) { naBindRegionField(fid, true); });
+
+        async function submitNewAddress() {
+            var lat = document.getElementById('na_lat').value;
+            var lng = document.getElementById('na_lng').value;
+
+            if (!lat || !lng) {
+                Swal.fire({ icon: 'warning', title: 'Pilih Titik Lokasi', text: 'Silakan klik peta untuk menentukan titik lokasi sebelum menyimpan.' });
+                return;
+            }
+
+            var payload = {
+                label: document.getElementById('na_label').value.trim(),
+                receiver_name: document.getElementById('na_receiver_name').value.trim(),
+                phone: document.getElementById('na_phone').value.trim(),
+                province: document.getElementById('na_province').value,
+                city: document.getElementById('na_city').value.trim(),
+                district: document.getElementById('na_district').value.trim(),
+                postal_code: document.getElementById('na_postal_code').value.trim(),
+                address: document.getElementById('na_address').value.trim(),
+                latitude: parseFloat(lat),
+                longitude: parseFloat(lng),
+                catatan: document.getElementById('na_catatan').value.trim(),
+                area_id: document.getElementById('na_area_id').value,
+                is_default: parseInt(document.getElementById('na_is_default').value || 0, 10) ? 1 : 0,
+            };
+
+            var errEl = document.getElementById('newAddrError');
+            errEl.style.display = 'none';
+
+            var saveBtn = document.getElementById('naSaveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Menyimpan...';
+
+            try {
+                var res = await fetch(naStoreUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
+                    body: JSON.stringify(payload)
+                });
+                var data = await res.json();
+
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Simpan Alamat';
+
+                if (!res.ok || !data.success) {
+                    errEl.textContent = data.message || 'Terjadi kesalahan. Periksa kembali isian form.';
+                    errEl.style.display = 'block';
+                    return;
+                }
+
+                // Sukses — simpan data toast & redirect ke checkout dengan address_id baru
+                var savedAddr = data.address || {};
+                sessionStorage.setItem('checkout_address_toast', JSON.stringify({
+                    title: 'Alamat Berhasil Ditambahkan',
+                    msg: (savedAddr.label || savedAddr.receiver_name || payload.receiver_name) + ' (' + (savedAddr.city || payload.city) + ') telah dipilih.'
+                }));
+
+                if (!savedAddr.id) {
+                    errEl.textContent = 'Alamat tersimpan, tetapi ID alamat tidak kembali dari server.';
+                    errEl.style.display = 'block';
+                    return;
+                }
+
+                var currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('address_id', savedAddr.id);
+                window.location.href = currentUrl.toString();
+
+            } catch (err) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Simpan Alamat';
+                errEl.textContent = 'Gagal terhubung ke server. Coba lagi.';
+                errEl.style.display = 'block';
+            }
+        }
+
+        function showCheckoutToast(title, msg) {
+            var toast = document.getElementById('checkoutToast');
+            if (!toast) return;
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMsg').textContent = msg;
+            toast.style.display = 'block';
+            toast.classList.remove('toast-animate');
+            void toast.offsetWidth; // trigger reflow
+            toast.classList.add('toast-animate');
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(function() {
+                toast.style.display = 'none';
+            }, 4500);
+        }
+
+        // Cek apakah ada notifikasi toast alamat baru dari sessionStorage
+        try {
+            var savedToast = sessionStorage.getItem('checkout_address_toast');
+            if (savedToast) {
+                sessionStorage.removeItem('checkout_address_toast');
+                var tData = JSON.parse(savedToast);
+                setTimeout(function() {
+                    showCheckoutToast(tData.title, tData.msg);
+                }, 200);
+            }
+        } catch(e) {}
     </script>
 @endpush

@@ -17,10 +17,12 @@ use App\Models\Voucher;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 
 class DashboardController extends Controller
 {
+
     public function overview()
     {
         if (!Auth::check()) {
@@ -76,7 +78,7 @@ class DashboardController extends Controller
 
         $user = Auth::user();
 
-        $query = Penjualan::with(['detail.barang', 'shipment', 'address'])
+        $query = Penjualan::with(['detail.barang.produk.fotoUtama', 'shipment', 'address'])
             ->where('order_web', true)
             ->where('created_by', $user->id);
 
@@ -92,10 +94,6 @@ class DashboardController extends Controller
                             });
                     });
             });
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
         }
 
         if ($request->filled('from')) {
@@ -115,7 +113,7 @@ class DashboardController extends Controller
 
         return view('dashboard-pesanan', [
             'orders' => $orders,
-            'filters' => $request->only(['q', 'status', 'from', 'to']),
+            'filters' => $request->only(['q', 'from', 'to']),
         ]);
     }
 
@@ -125,7 +123,7 @@ class DashboardController extends Controller
             return redirect()->route('login');
         }
 
-        $order = Penjualan::with(['detail.barang', 'address', 'shipment'])
+        $order = Penjualan::with(['detail.barang.produk.fotoUtama', 'address', 'shipment'])
             ->where('order_web', true)
             ->where('created_by', Auth::id())
             ->findOrFail($id);
@@ -144,8 +142,8 @@ class DashboardController extends Controller
         $userId = Auth::id();
 
         $query = Pembayaran::with([
-            'penjualanDraft' => fn ($q) => $q->with('items.barang.produk'),
-            'penjualan',
+            'penjualanDraft' => fn ($q) => $q->with('items.barang.produk.fotoUtama'),
+            'penjualan.detail.barang.produk.fotoUtama',
         ])
             ->where(function ($q) use ($userId) {
                 $q->whereHas('penjualanDraft', function ($q) use ($userId) {
@@ -311,6 +309,26 @@ class DashboardController extends Controller
         return view('dashboard-alamat', compact('addresses'));
     }
 
+    public function alamatForm()
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        return view('dashboard-alamat-form', ['address' => null]);
+    }
+
+    public function alamatFormEdit($id)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $address = UserAddress::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+
+        return view('dashboard-alamat-form', compact('address'));
+    }
+
     public function storeAddress(Request $request)
     {
         $request->validate([
@@ -352,6 +370,62 @@ class DashboardController extends Controller
         return redirect()->route('dashboard.alamat')->with('success', 'Alamat berhasil ditambahkan.');
     }
 
+    public function storeAddressAjax(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        try {
+            $request->validate([
+                'label'         => 'required|string|max:50',
+                'receiver_name' => 'required|string|max:100',
+                'phone'         => 'required|string|max:20',
+                'province'      => 'required|string|max:100',
+                'city'          => 'required|string|max:100',
+                'district'      => 'required|string|max:100',
+                'postal_code'   => 'required|string|max:10',
+                'address'       => 'required|string',
+                'latitude'      => 'required|numeric|between:-90,90',
+                'longitude'     => 'required|numeric|between:-180,180',
+                'catatan'       => 'nullable|string|max:500',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => collect($e->errors())->flatten()->first() ?? 'Data tidak lengkap.',
+                'errors'  => $e->errors(),
+            ], 422);
+        }
+
+        $data = $request->only(['label', 'receiver_name', 'phone', 'province', 'city', 'district', 'postal_code', 'address', 'latitude', 'longitude', 'catatan']);
+        $data['user_id'] = Auth::id();
+
+        $hasAddresses = Auth::user()->addresses()->exists();
+
+        if ($request->boolean('is_default')) {
+            Auth::user()->addresses()->update(['is_default' => false]);
+            $data['is_default'] = true;
+        } else {
+            $data['is_default'] = !$hasAddresses;
+        }
+
+        $areaId = $request->input('area_id');
+        if (!$areaId) {
+            $areaId = $this->lookupBiteshipArea($data['district'] ?? '', $data['city'], $data['province'], $data['postal_code']);
+        }
+        if ($areaId) {
+            $data['area_id'] = $areaId;
+        }
+
+        $address = UserAddress::create($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Alamat berhasil ditambahkan.',
+            'address' => $address,
+        ]);
+    }
+
     public function updateAddress(Request $request, $id)
     {
         $address = UserAddress::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
@@ -378,12 +452,13 @@ class DashboardController extends Controller
         }
 
         $areaId = $request->input('area_id');
-        if (!$areaId) {
-            $areaId = $this->lookupBiteshipArea($data['district'] ?? '', $data['city'], $data['province'], $data['postal_code']);
+            if (!$areaId) {
+            $data['area_id'] = $this->lookupBiteshipArea($data['district'] ?? '', $data['city'], $data['province'], $data['postal_code']);
         }
         if ($areaId) {
             $data['area_id'] = $areaId;
         }
+        // dd($data);
 
         $address->update($data);
 
@@ -519,6 +594,188 @@ class DashboardController extends Controller
                 'postal_code' => $area['postal_code'] ?? '',
             ] : null,
         ]);
+    }
+
+    /**
+     * Proxy ke API wilayah.id (daftar provinsi) agar tidak kena CORS di browser.
+     * Hasil di-cache 7 hari karena data wilayah jarang berubah.
+     */
+    public function wilayahProvinces()
+    {
+        if (!Auth::check()) {
+            return response()->json(['data' => []], 401);
+        }
+
+        $rows = Cache::remember('wilayah_provinces', 60 * 60 * 24 * 7, function () {
+            return $this->fetchWilayahList('https://wilayah.id/api/provinces.json');
+        });
+
+        return response()->json(['data' => $rows]);
+    }
+
+    /**
+     * Proxy ke API wilayah.id (daftar kota/kabupaten per kode provinsi).
+     */
+    public function wilayahRegencies($code)
+    {
+        if (!Auth::check()) {
+            return response()->json(['data' => []], 401);
+        }
+
+        if (!preg_match('/^\d{2}$/', (string) $code)) {
+            return response()->json(['data' => []], 422);
+        }
+
+        $rows = Cache::remember('wilayah_regencies_' . $code, 60 * 60 * 24 * 7, function () use ($code) {
+            return $this->fetchWilayahList('https://wilayah.id/api/regencies/' . $code . '.json');
+        });
+
+        return response()->json(['data' => $rows]);
+    }
+
+    /**
+     * Proxy ke API wilayah.id (daftar kecamatan per kode kota/kabupaten).
+     */
+    public function wilayahDistricts($code)
+    {
+        if (!Auth::check()) {
+            return response()->json(['data' => []], 401);
+        }
+
+        if (!preg_match('/^\d{2}\.\d{2}$/', (string) $code)) {
+            return response()->json(['data' => []], 422);
+        }
+
+        $rows = Cache::remember('wilayah_districts_' . $code, 60 * 60 * 24 * 7, function () use ($code) {
+            return $this->fetchWilayahList('https://wilayah.id/api/districts/' . $code . '.json');
+        });
+
+        return response()->json(['data' => $rows]);
+    }
+
+    /**
+     * Saran kode pos berdasarkan kecamatan/kota/provinsi.
+     * wilayah.id tidak menyediakan kode pos, jadi diambil dari
+     * hasil pencarian Biteship areas (tiap area punya postal_code).
+     * Tetap berupa saran — user boleh ketik bebas.
+     */
+    public function wilayahPostals(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['data' => []], 401);
+        }
+
+        $district = trim((string) $request->input('district', ''));
+        $city = trim((string) $request->input('city', ''));
+        $province = trim((string) $request->input('province', ''));
+
+        if (!$district && !$city && !$province) {
+            return response()->json(['data' => []]);
+        }
+
+        $cacheKey = 'wilayah_postals_' . md5(mb_strtolower($district . '|' . $city . '|' . $province));
+        $codes = Cache::remember($cacheKey, 60 * 60 * 24 * 7, function () use ($district, $city, $province) {
+            $apiKey = PengaturanWeb::where('key', 'Api Key Biteship')->value('value');
+            if (!$apiKey) {
+                return [];
+            }
+
+            $headers = [
+                'Authorization: Bearer ' . $apiKey,
+                'Content-Type: application/json',
+            ];
+
+            $input = trim(preg_replace('/\s+/', ' ', $district . ' ' . $city . ' ' . $province));
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => 'https://api.biteship.com/v1/maps/areas?input=' . urlencode($input),
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => $headers,
+                CURLOPT_TIMEOUT => 10,
+            ]);
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode !== 200 || !$response) {
+                return [];
+            }
+
+            $data = json_decode($response, true);
+            if (empty($data['success']) || empty($data['areas'])) {
+                return [];
+            }
+
+            $codes = [];
+            $push = function ($postal) use (&$codes) {
+                $postal = preg_replace('/\D/', '', (string) $postal);
+                if ($postal && !in_array($postal, $codes, true)) {
+                    $codes[] = $postal;
+                }
+            };
+
+            // 1) Kode pos kadang terselip di akhir nama area ("... DKI Jakarta. 12110").
+            foreach (array_slice($data['areas'], 0, 10) as $area) {
+                if (preg_match('/(\d{4,6})\s*$/', (string) ($area['name'] ?? ''), $m)) {
+                    $push($m[1]);
+                }
+            }
+
+            // 2) Detail 3 area teratas (postal_code hanya ada di endpoint detail).
+            foreach (array_slice($data['areas'], 0, 3) as $area) {
+                if (count($codes) >= 10 || empty($area['id'])) {
+                    continue;
+                }
+                $ch2 = curl_init();
+                curl_setopt_array($ch2, [
+                    CURLOPT_URL => 'https://api.biteship.com/v1/maps/areas/' . $area['id'],
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_HTTPHEADER => $headers,
+                    CURLOPT_TIMEOUT => 10,
+                ]);
+                $response2 = curl_exec($ch2);
+                $httpCode2 = curl_getinfo($ch2, CURLINFO_HTTP_CODE);
+                curl_close($ch2);
+
+                if ($httpCode2 !== 200 || !$response2) {
+                    continue;
+                }
+
+                $detail = json_decode($response2, true);
+                $detailAreas = $detail['areas'] ?? (isset($detail['area']) ? [$detail['area']] : []);
+                foreach ((array) $detailAreas as $detailArea) {
+                    $push($detailArea['postal_code'] ?? '');
+                }
+            }
+
+            sort($codes);
+
+            return array_slice($codes, 0, 10);
+        });
+
+        return response()->json(['data' => $codes]);
+    }
+
+    private function fetchWilayahList($url): array
+    {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_HTTPHEADER => ['Accept: application/json'],
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200 || !$response) {
+            return [];
+        }
+
+        $data = json_decode($response, true);
+
+        return is_array($data['data'] ?? null) ? array_values($data['data']) : [];
     }
 
     private function googleMapsKey()
@@ -1150,7 +1407,7 @@ class DashboardController extends Controller
 
         // Ambil varian pertama yang punya stok
         $varian = ProdukVarian::where('produk_id', $request->produk_id)
-            ->whereHas('stok', function ($q) {
+            ->whereHas('barang.stok', function ($q) {
                 $q->where('jumlah_stok', '>', 0);
             })
             ->first();

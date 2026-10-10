@@ -526,33 +526,40 @@
         .dot-status {
             display: inline-flex;
             align-items: center;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 999px;
             font-size: 10.5px;
             font-weight: 600;
             letter-spacing: 0.06em;
             text-transform: uppercase;
             width: fit-content;
+            color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10);
         }
 
+        
+        .dot-status--process {
+            background: #FFD51E;
+            color: #ffffff;
+        }
+
+        .dot-status--packing {
+            background: #EF6905;
+            color: #ffffff;
+        }
         .dot-status--shipping {
-            background: rgba(21, 101, 192, 0.1);
-            color: #1565C0;
+            background: #2563EB;
+            color: #ffffff;
         }
 
         .dot-status--done {
-            background: rgba(46, 125, 50, 0.1);
-            color: var(--green);
-        }
-
-        .dot-status--process {
-            background: rgba(184, 134, 11, 0.1);
-            color: var(--accent);
+            background: #16A34A;
+            color: #ffffff;
         }
 
         .dot-status--cancelled {
-            background: rgba(192, 57, 43, 0.1);
-            color: var(--red);
+            background: #DC2626;
+            color: #ffffff;
         }
 
         .dot-action-btn {
@@ -793,59 +800,235 @@
             flex-wrap: wrap;
         }
 
-        /* Order Card — collapsible */
+        /* Order Card — Shopee-style modern */
         .order-card {
             background: var(--bg-card);
             border: 1px solid var(--line);
             border-radius: var(--radius);
             overflow: hidden;
-            transition: box-shadow 0.2s;
+            transition: box-shadow 0.22s, transform 0.18s, border-color 0.18s;
+            cursor: pointer;
+            position: relative;
         }
+
+        .order-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+        }
+
+        .order-card[data-status="process"]::before { background: #D97706; }
+        .order-card[data-status="packing"]::before { background: #EA580C; }
+        .order-card[data-status="shipping"]::before { background: #2563EB; }
+        .order-card[data-status="done"]::before { background: #16A34A; }
+        .order-card[data-status="cancelled"]::before { background: #DC2626; }
 
         .order-card:hover {
-            box-shadow: var(--shadow-hover);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+            transform: translateY(-1px);
+            border-color: var(--accent);
         }
 
-        .order-card-header {
+        /* Card head: toko + status + tanggal */
+        .oc-head {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 20px;
-            background: var(--bg);
-            gap: 12px;
-            flex-wrap: wrap;
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.18s;
-        }
-
-        .order-card-header:hover {
-            background: var(--bg-soft);
-        }
-
-        .order-card.open .order-card-header {
+            padding: 12px 20px 12px 24px;
             border-bottom: 1px solid var(--line-soft);
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
-        .order-chevron {
-            transition: transform 0.25s ease;
+        .oc-head-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .oc-store-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            line-height: 1;
+            color: var(--accent);
             flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .oc-store-name {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--ink);
+            letter-spacing: 0.02em;
+        }
+
+        .oc-order-id {
+            font-size: 11px;
+            color: var(--ink-muted);
+            font-family: monospace;
+        }
+
+        .oc-head-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .oc-date {
+            font-size: 11.5px;
             color: var(--ink-muted);
         }
 
-        .order-card.open .order-chevron {
-            transform: rotate(180deg);
+        .oc-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10);
         }
 
-        .order-card-body {
-            max-height: 0;
+        .oc-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: #ffffff;
+        }
+
+        .oc-badge--process {
+            background: #FFD51E;
+            color: #ffffff;
+        }
+
+        .oc-badge--packing {
+            background: #EF6905;
+            color: #ffffff;
+        }
+
+        .oc-badge--shipping {
+            background: #2563EB;
+            color: #ffffff;
+        }
+
+        .oc-badge--done {
+            background: #16A34A;
+            color: #ffffff;
+        }
+
+        .oc-badge--cancelled {
+            background: #DC2626;
+            color: #ffffff;
+        }
+
+        /* Card body: produk preview */
+        .oc-body {
+            padding: 14px 20px 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .oc-thumbs {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .oc-thumb {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
             overflow: hidden;
-            transition: max-height 0.35s ease;
+            background: var(--bg);
+            border: 1px solid var(--line-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
-        .order-card.open .order-card-body {
-            max-height: 600px;
+        .oc-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+        .oc-thumb-placeholder { color: var(--ink-muted); opacity: 0.35; }
+
+        .oc-thumb-more {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--ink-muted);
+            background: var(--bg);
+            border: 1px solid var(--line-soft);
+            border-radius: 8px;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
+        .oc-info { flex: 1; min-width: 0; }
+
+        .oc-prod-name {
+            font-size: 13.5px;
+            font-weight: 500;
+            color: var(--ink);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .oc-prod-meta {
+            font-size: 12px;
+            color: var(--ink-muted);
+            margin-top: 3px;
+        }
+
+        /* Card footer: total + CTA */
+        .oc-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px 12px 24px;
+            border-top: 1px solid var(--line-soft);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .oc-total-label { font-size: 11.5px; color: var(--ink-muted); }
+
+        .oc-total-amount {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .oc-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+            border: 1.5px solid var(--accent);
+            border-radius: var(--radius-sm);
+            padding: 7px 16px;
+            background: none;
+            transition: background 0.18s, color 0.18s;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .oc-cta:hover { background: var(--accent); color: #fff; }
 
         .ofilter {
             padding: 7px 18px;
@@ -873,38 +1056,10 @@
         .orders-full-list {
             display: flex;
             flex-direction: column;
-            gap: 16px;
-        }
-
-        .order-full-card {
-            background: var(--bg-card);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            overflow: hidden;
-            transition: box-shadow 0.2s;
-        }
-
-        .order-full-card:hover {
-            box-shadow: var(--shadow-hover);
-        }
-
-        .ofc-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--line-soft);
-            background: var(--bg);
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .ofc-header-left {
-            display: flex;
-            align-items: center;
             gap: 12px;
         }
 
+        /* Kept for detail page compatibility */
         .ofc-id {
             font-size: 13px;
             font-family: monospace;
@@ -946,17 +1101,23 @@
         }
 
         .otb-dot {
-            width: 14px;
-            height: 14px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             border: 2px solid var(--line);
             background: var(--bg-card);
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            flex-shrink: 0;
         }
 
         .otb-step.done .otb-dot {
             background: var(--accent);
             border-color: var(--accent);
+            color: #fff;
         }
 
         .otb-step.done span {
@@ -965,9 +1126,10 @@
         }
 
         .otb-step.active .otb-dot {
-            background: #fff;
+            background: var(--accent);
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.2);
+            color: #fff;
+            box-shadow: 0 0 0 4px rgba(184, 134, 11, 0.22);
             animation: pulseStep 1.5s ease-in-out infinite;
         }
 
@@ -980,11 +1142,11 @@
 
             0%,
             100% {
-                box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.2);
+                box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.25);
             }
 
             50% {
-                box-shadow: 0 0 0 6px rgba(184, 134, 11, 0.08);
+                box-shadow: 0 0 0 7px rgba(184, 134, 11, 0.08);
             }
         }
 
@@ -2121,13 +2283,14 @@
                         <div class="dash-profile-info">
                             <h3>{{ $dashName }}</h3>
                             @if ($dashUser->role)
+                            @php $dashRoleLabel = $dashUser->role->nama_role ?? 'Member'; @endphp
                             <span class="dash-member-tag" style="margin-top:6px;">
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="var(--accent-light)"
                                     stroke="none">
                                     <polygon
                                         points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                                 </svg>
-                                {{ $dashUser->role->nama_role ?? 'Member' }}
+                                {{ strtolower($dashRoleLabel) === 'user' ? 'Pengguna' : $dashRoleLabel }}
                             </span>
                             @endif
                             <p>{{ $dashUser->email }}</p>

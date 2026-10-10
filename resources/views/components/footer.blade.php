@@ -58,13 +58,31 @@
           <h4 class="footer-col-title">Terhubung</h4>
           <ul class="footer-links footer-links--contact">
             <li>
-              <a href="mailto:hello@chrisbale.com" class="footer-contact-link">
+              <a href="mailto:hello@christoperbale.com" class="footer-contact-link">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                   <polyline points="22,6 12,13 2,6"/>
                 </svg>
-                hello@chrisbale.com
+                hello@christoperbale.com
               </a>
+            </li>
+            <li>
+              <span class="footer-contact-link" style="cursor:default;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                Ciapus, Bogor, Jawa Barat, Indonesia
+              </span>
+            </li>
+            <li>
+              <span class="footer-contact-link" style="cursor:default;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                Senin – Sabtu, 08.00 – 15.00 WIB
+              </span>
             </li>
             <li>
               <a href="tel:+6281234567890" class="footer-contact-link">

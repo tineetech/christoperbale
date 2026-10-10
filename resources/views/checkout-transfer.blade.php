@@ -3,6 +3,9 @@
 @section('title', 'Konfirmasi Pembayaran — CHRISBALE')
 
 @push('styles')
+    {{-- Boxicons (hapus baris ini jika layouts.app sudah memuat Boxicons) --}}
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
     <style>
         .checkout-wrap * {
             font-family: 'Inter', sans-serif;
@@ -194,6 +197,32 @@
             justify-content: center;
         }
 
+        /* Tombol dengan ikon Boxicons */
+        .btn-pay.has-icon,
+        .btn-ghost.has-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-pay.has-icon i,
+        .btn-ghost.has-icon i {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .btn-ghost.has-icon {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .btn-ghost.has-icon:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
         .pay-actions {
             display: flex;
             gap: 12px;
@@ -382,11 +411,18 @@
 
         .proof-done {
             margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
 
         .proof-done img {
+            display: block;
             max-width: 100%;
             max-height: 300px;
+            margin: 0 auto;
             border-radius: 10px;
             border: 1px solid var(--line);
             object-fit: contain;
@@ -396,6 +432,116 @@
             font-size: 12px;
             color: var(--ink-muted);
             margin-bottom: 8px;
+        }
+
+        /* ===== Info verifikasi & kontak admin ===== */
+        .verify-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .verify-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--line);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .verify-list li:last-child {
+            border-bottom: none;
+        }
+
+        .verify-list .vl-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, .05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .verify-list .vl-icon svg {
+            width: 15px;
+            height: 15px;
+            stroke: var(--accent);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .verify-list .vl-title {
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .verify-list .vl-desc {
+            color: var(--ink-muted);
+        }
+
+        .contact-box {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(37, 211, 102, .08);
+            border: 1px solid rgba(37, 211, 102, .35);
+        }
+
+        .contact-box .cb-text {
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--ink);
+            margin: 0 0 12px;
+        }
+
+        .btn-wa {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border-radius: 999px;
+            background: #25d366;
+            color: #fff;
+            font-size: 13.5px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: opacity .2s;
+        }
+
+        .btn-wa:hover {
+            opacity: .88;
+        }
+
+        .btn-wa svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 520px) {
+            .checkout-steps .step-label {
+                display: none;
+            }
+
+            .btn-wa {
+                width: 100%;
+            }
+
+            .pay-actions {
+                flex-direction: column;
+            }
+
+            .btn-pay,
+            .btn-ghost {
+                width: 100%;
+                min-width: 0;
+            }
         }
     </style>
 @endpush
@@ -507,6 +653,18 @@
                     </form>
                 </div>
             @else
+                @php
+                    $kodePesanan = $draft->kode_penjualan ?? ('#CB-PAY-' . $pembayaran->id);
+                    $waNumber = '6285817328482';
+                    $waText = "Halo Admin CHRISBALE, saya ingin menanyakan status pembayaran pesanan saya.\n\n"
+                        . "Kode Pesanan: {$kodePesanan}\n"
+                        . "Total Bayar: Rp" . number_format($pembayaran->amount, 0, ',', '.') . "\n"
+                        . "Metode: Transfer Bank BCA (Manual)\n\n"
+                        . "Mohon dibantu pengecekannya. Terima kasih.";
+                    $waLink = 'https://wa.me/' . $waNumber . '?text=' . rawurlencode($waText);
+                    $dashboardUrl = Route::has('dashboard') ? route('dashboard') : url('/dashboard');
+                @endphp
+
                 <div class="pay-card">
                     <div class="thanks-wrap">
                         <span class="thanks-icon">
@@ -521,7 +679,7 @@
 
                         <div class="pay-row" style="margin-top:24px;text-align:left;">
                             <span class="pay-label">Kode Pesanan</span>
-                            <span class="pay-value">{{ $draft->kode_penjualan ?? ('#CB-PAY-' . $pembayaran->id) }}</span>
+                            <span class="pay-value">{{ $kodePesanan }}</span>
                         </div>
                         <div class="pay-row" style="text-align:left;">
                             <span class="pay-label">Total Bayar</span>
@@ -538,10 +696,56 @@
                                 <img src="{{ asset('storage/' . $pembayaran->proof_img) }}" alt="Bukti transfer">
                             </div>
                         @endif
+                    </div>
+                </div>
 
-                        <div class="pay-actions" style="justify-content:center;margin-top:22px;">
-                            <a href="{{ route('dashboard.pesanan') }}" class="btn-pay" style="flex:none;text-decoration:none;">Lihat Pesanan Saya</a>
-                        </div>
+                {{-- Informasi proses verifikasi & kontak admin (khusus transfer manual) --}}
+                <div class="pay-card">
+                    <h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+                        Informasi Proses Verifikasi</h2>
+
+                    <ul class="verify-list">
+                        <li>
+                            <span class="vl-icon">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                            </span>
+                            <div>
+                                <div class="vl-title">Waktu Verifikasi</div>
+                                <div class="vl-desc">Pembayaran akan diproses paling lambat <strong>1x24 jam operasional</strong>.</div>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="vl-icon">
+                                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                            </span>
+                            <div>
+                                <div class="vl-title">Jam Operasional Admin</div>
+                                <div class="vl-desc">Senin – Sabtu, pukul <strong>08.00 – 15.00 WIB</strong>. Pembayaran di luar jam tersebut akan diproses pada hari operasional berikutnya.</div>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="contact-box">
+                        <p class="cb-text">
+                            Jika pembayaran kamu dirasa belum terupdate statusnya, silakan hubungi kontak admin berikut:
+                            <br><strong>+62 858-1732-8482</strong>
+                        </p>
+                        <a href="{{ $waLink }}" target="_blank" rel="noopener" class="btn-wa">
+                            <svg viewBox="0 0 24 24"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.7.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35zM12.04 2C6.5 2 2 6.5 2 12.04c0 1.77.46 3.5 1.34 5.02L2 22l5.06-1.33a10.02 10.02 0 004.98 1.32C17.58 22 22 17.5 22 11.96 22 6.5 17.58 2 12.04 2z" /></svg>
+                            Hubungi Admin via WhatsApp
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Kartu aksi: Lihat Pesanan Saya & Kembali ke Dashboard --}}
+                <div class="pay-card">
+                    <div class="pay-actions" style="margin-top:0;">
+                        <a href="{{ route('dashboard.pesanan') }}" class="btn-pay has-icon">
+                            <i class='bx bx-receipt'></i> Lihat Pesanan Saya
+                        </a>
+                        <a href="{{ $dashboardUrl }}" class="btn-ghost has-icon">
+                            <i class='bx bx-home-alt'></i> Kembali ke Dashboard
+                        </a>
                     </div>
                 </div>
             @endif
@@ -612,6 +816,9 @@
         (function() {
             var dropZone = document.getElementById('dropZone');
             var proofInput = document.getElementById('proofInput');
+
+            // Pada tampilan "selesai" form upload tidak dirender, jadi hentikan di sini
+            if (!dropZone || !proofInput) return;
 
             ['dragenter', 'dragover'].forEach(function(evName) {
                 dropZone.addEventListener(evName, function(e) {

@@ -3,450 +3,524 @@
 @section('title', 'Alamat Pengiriman — CHRISBALE')
 
 @push('styles')
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <style>
-        .addr-geo-hint {
-            font-size: 11px;
-            color: var(--ink-muted);
-            margin-top: 6px;
+        /* ---- Modern Address Cards ---- */
+        .addr-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
         }
 
-        .addr-map-wrap {
-            border: 1px solid var(--line);
-            border-radius: var(--radius-sm);
+        .addr-modern-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 0;
             overflow: hidden;
+            transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+            position: relative;
         }
 
-        .addr-map {
-            height: 260px;
+        .addr-modern-card:hover {
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.10);
+            border-color: #d1d5db;
+            transform: translateY(-2px);
+        }
+
+        .addr-modern-card--default {
+            border-color: var(--accent);
+            box-shadow: 0 4px 16px rgba(184, 134, 11, 0.14);
+        }
+
+        .addr-modern-card--default:hover {
+            box-shadow: 0 8px 28px rgba(184, 134, 11, 0.20);
+        }
+
+        /* Card top accent bar */
+        .addr-card-bar {
+            height: 4px;
+            background: #f3f4f6;
+        }
+
+        .addr-modern-card--default .addr-card-bar {
+            background: linear-gradient(90deg, var(--accent-dark), var(--accent-light));
+        }
+
+        /* Card body */
+        .addr-card-body {
+            padding: 20px 22px 18px;
+        }
+
+        /* Header: icon + label + badge */
+        .addr-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            gap: 10px;
+        }
+
+        .addr-card-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .addr-icon-wrap {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(184, 134, 11, 0.10);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .addr-icon-wrap svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--accent);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .addr-label-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: #111827;
+            letter-spacing: -0.01em;
+        }
+
+        .addr-utama-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgba(184, 134, 11, 0.12);
+            color: var(--accent);
+            border: 1px solid rgba(184, 134, 11, 0.3);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Divider */
+        .addr-card-divider {
+            height: 1px;
+            background: #f3f4f6;
+            margin: 0 22px;
+        }
+
+        /* Info rows */
+        .addr-card-info {
+            padding: 14px 22px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .addr-info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .addr-info-bx {
+            font-size: 16px;
+            color: #9ca3af;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .addr-info-text {
+            font-size: 13px;
+            color: #4b5563;
+            line-height: 1.5;
+        }
+
+        .addr-info-text strong {
+            color: #111827;
+            font-weight: 600;
+        }
+
+        /* Footer actions */
+        .addr-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 22px 16px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .addr-action-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .addr-btn-edit {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+            border: 1.5px solid var(--accent);
+            border-radius: 8px;
+            padding: 6px 14px;
+            background: none;
+            cursor: pointer;
+            transition: all 0.18s;
+            text-decoration: none;
+        }
+
+        .addr-btn-edit:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .addr-btn-edit i {
+            font-size: 14px;
+        }
+
+        .addr-btn-delete {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #dc2626;
+            border: 1.5px solid #fca5a5;
+            border-radius: 8px;
+            padding: 6px 14px;
+            background: none;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+
+        .addr-btn-delete:hover {
+            background: #dc2626;
+            color: #fff;
+            border-color: #dc2626;
+        }
+
+        .addr-btn-delete i {
+            font-size: 14px;
+        }
+
+        .addr-btn-default {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #6b7280;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 6px 12px;
+            background: none;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+
+        .addr-btn-default:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .addr-btn-default i {
+            font-size: 13px;
+        }
+
+        /* ---- Flash Alert ---- */
+        .addr-flash {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    margin-bottom: 22px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    animation: addrFlashIn 0.35s ease both;
+}
+
+
+.addr-flash--success {
+    background: linear-gradient(135deg, #ecfdf3 0%, #f6fef9 100%);
+    border-color: #bbf7d0;
+    box-shadow: 0 6px 20px rgba(22, 163, 74, 0.10);
+}
+.addr-flash--error {
+    background: linear-gradient(135deg, #fef2f2 0%, #fffafa 100%);
+    border-color: #fecaca;
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.10);
+}
+.addr-flash-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 24px;
+    color: #fff;
+}
+.addr-flash--success .addr-flash-icon {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.15);
+}
+.addr-flash--error .addr-flash-icon {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15);
+}
+
+.addr-flash-content { flex: 1; min-width: 0; }
+
+.addr-flash-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 2px;
+}
+.addr-flash--success .addr-flash-title { color: #166534; }
+.addr-flash--error .addr-flash-title { color: #991b1b; }
+
+.addr-flash-msg {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #4b5563;
+}
+
+.addr-flash-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 18px;
+    flex-shrink: 0;
+    transition: background 0.18s, color 0.18s;
+}
+.addr-flash-close:hover { background: rgba(0, 0, 0, 0.06); color: #374151; }
+
+@keyframes addrFlashIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+        /* Empty state */
+        .addr-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
             width: 100%;
-            z-index: 0;
+            padding: 60px 24px;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px dashed #d1d5db;
+        }
+
+        .addr-empty-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(184, 134, 11, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .addr-empty-icon svg {
+            width: 30px;
+            height: 30px;
+            stroke: var(--accent);
+            fill: none;
+            stroke-width: 1.5;
+            opacity: 0.7;
+        }
+
+        .addr-empty-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .addr-empty-desc {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-bottom: 24px;
         }
     </style>
 @endpush
 
 @section('dashboard-content')
-                    <div class="dash-panel" id="panel-address">
-                        <h2 class="dash-section-title " style="margin-bottom:28px;">Alamat Pengiriman</h2>
-
-                        @if (session('success'))
-                        <div class="dash-alert" style="border-color:var(--green);background:rgba(46,125,50,0.06);margin-bottom:20px;">
-                            <div class="dash-alert-dot" style="background:var(--green);animation:none;"></div>
-                            <div class="dash-alert-content">
-                                <strong style="color:var(--green);">{{ session('success') }}</strong>
-                            </div>
-                        </div>
-                        @endif
-
-                        @if (session('warning'))
-                        <div class="dash-alert" style="border-color:var(--accent);background:rgba(184,134,11,0.06);margin-bottom:20px;">
-                            <div class="dash-alert-dot" style="background:var(--accent);animation:none;"></div>
-                            <div class="dash-alert-content">
-                                <strong style="color:var(--accent);">{{ session('warning') }}</strong>
-                            </div>
-                        </div>
-                        @endif
-
-                        @if (session('error'))
-                        <div class="dash-alert" style="border-color:var(--red);background:rgba(192,57,43,0.06);margin-bottom:20px;">
-                            <div class="dash-alert-dot" style="background:var(--red);animation:none;"></div>
-                            <div class="dash-alert-content">
-                                <strong style="color:var(--red);">{{ session('error') }}</strong>
-                            </div>
-                        </div>
-                        @endif
-
-                        @if ($errors->any())
-                        <div class="dash-alert" style="border-color:var(--red);background:rgba(192,57,43,0.06);margin-bottom:20px;">
-                            <div class="dash-alert-dot" style="background:var(--red);animation:none;"></div>
-                            <div class="dash-alert-content">
-                                <strong style="color:var(--red);">Periksa kembali isian form.</strong>
-                            </div>
-                        </div>
-                        @endif
-
-                        <div class="dash-section-head" style="margin-bottom:24px;">
-                            <h2 class="dash-section-title" style="font-size:16px;">Alamat Tersimpan</h2>
-                            <button class="ofc-btn ofc-btn--primary" onclick="openAddressModal()">+ Tambah Alamat</button>
-                        </div>
-
-                        @if ($addresses->isEmpty())
-                        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;width:100%;min-height:200px;padding:48px 20px;color:var(--ink-muted);background:var(--bg-card);border-radius:var(--radius);border:1px solid var(--line);">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="margin-bottom:16px;opacity:0.4;">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                                <circle cx="12" cy="10" r="3" />
-                            </svg>
-                            <p style="font-size:14px;">Belum ada alamat tersimpan.</p>
-                            <button class="ofc-btn ofc-btn--primary" onclick="openAddressModal()" style="margin-top:12px;">Tambah Alamat Baru</button>
-                        </div>
-                        @else
-                        <div class="address-list">
-                            @foreach ($addresses as $address)
-                            <div class="address-card {{ $address->is_default ? 'address-card--main' : '' }}">
-                                <div class="address-card-header">
-                                    <span class="address-label">{{ $address->label }}</span>
-                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                                        @if ($address->is_default)
-                                        <span class="address-default-badge">Utama</span>
-                                        @else
-                                        <form method="POST" action="{{ route('dashboard.alamat.default', $address->id) }}" style="display:inline;">
-                                            @csrf
-                                            @method('PUT')
-                                            <button type="submit" class="address-set-main">Jadikan Utama</button>
-                                        </form>
-                                        @endif
-                                    </div>
-                                </div>
-                                <p class="address-name">{{ $address->receiver_name }} · {{ $address->phone }}</p>
-                                <p class="address-detail">{{ $address->address }}, {{ $address->district ? $address->district . ', ' : '' }}{{ $address->city }}, {{ $address->province }} {{ $address->postal_code }}</p>
-                                @if ($address->catatan)
-                                <p class="address-catatan" style="font-size:12px;color:var(--ink-muted);margin-top:4px;">Catatan: {{ $address->catatan }}</p>
-                                @endif
-                                <div class="address-actions">
-                                    <button class="address-btn" onclick="openAddressModal({{ $address->id }})">Edit</button>
-                                    <form method="POST" action="{{ route('dashboard.alamat.delete', $address->id) }}" style="display:inline;" class="delete-address-form">
-                                        @csrf
-                        @method('DELETE')
-                                        <button type="button" class="address-btn address-btn--danger btn-delete-address">Hapus</button>
-                                    </form>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                        @endif
-                    </div><!-- /panel-address -->
-
-    <!-- ADDRESS MODAL -->
-    <div class="modal-overlay" id="addressModal" onclick="if(event.target===this)closeAddressModal()">
-        <div class="modal-box" style="max-width:560px;">
-            <div class="modal-header">
-                <h3 id="addressModalTitle">Tambah Alamat Baru</h3>
-                <button class="modal-close" onclick="closeAddressModal()">✕</button>
+    <div class="dash-panel" id="panel-address">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px;">
+            <div>
+                <h2 class="dash-section-title" style="margin-bottom:4px;">Alamat Pengiriman</h2>
+                <p style="font-size:13px;color:var(--ink-muted);margin:0;">Kelola alamat pengiriman untuk transaksimu.</p>
             </div>
-            <div class="modal-body">
-                <form method="POST" action="" id="addressForm">
-                    @csrf
-                    <input type="hidden" name="_method" id="addressFormMethod" value="POST">
-                    <div class="pform-grid">
-                        <div class="form-group">
-                            <label for="addr_label">Label Alamat <span style="color:var(--red);">*</span></label>
-                            <input type="text" id="addr_label" name="label" placeholder="Rumah / Kantor / Lainnya" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="addr_receiver_name">Nama Penerima <span style="color:var(--red);">*</span></label>
-                            <input type="text" id="addr_receiver_name" name="receiver_name" placeholder="Nama lengkap" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="addr_phone">Nomor Telepon <span style="color:var(--red);">*</span></label>
-                            <input type="tel" id="addr_phone" name="phone" placeholder="08xx-xxxx-xxxx" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="addr_province">Provinsi <span style="color:var(--red);">*</span></label>
-                            <select id="addr_province" name="province" required>
-                                <option value="">Pilih Provinsi</option>
-                                <option value="DKI Jakarta">DKI Jakarta</option>
-                                <option value="Jawa Barat">Jawa Barat</option>
-                                <option value="Jawa Tengah">Jawa Tengah</option>
-                                <option value="DI Yogyakarta">DI Yogyakarta</option>
-                                <option value="Jawa Timur">Jawa Timur</option>
-                                <option value="Banten">Banten</option>
-                                <option value="Bali">Bali</option>
-                                <option value="Sumatera Utara">Sumatera Utara</option>
-                                <option value="Sumatera Selatan">Sumatera Selatan</option>
-                                <option value="Kalimantan Timur">Kalimantan Timur</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="addr_city">Kota/Kabupaten <span style="color:var(--red);">*</span></label>
-                            <input type="text" id="addr_city" name="city" placeholder="Jakarta Selatan" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="addr_district">Kecamatan</label>
-                            <input type="text" id="addr_district" name="district" placeholder="Kebayoran Baru" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="addr_postal_code">Kode Pos <span style="color:var(--red);">*</span></label>
-                            <input type="text" id="addr_postal_code" name="postal_code" placeholder="12190" required>
-                        </div>
-                        <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:4px;">
-                            <label class="addr-checkbox-label">
-                                <input type="checkbox" name="is_default" id="addr_is_default" value="1">
-                                <span class="addr-checkbox-mark"></span>
-                                Jadikan utama
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="addr_catatan">Catatan <span style="color:var(--ink-muted);font-weight:400;">(opsional)</span></label>
-                        <textarea id="addr_catatan" name="catatan" style="height:54px;" placeholder="Contoh: dekat warung Bu Indah, pagar hijau, patokan lainnya..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="addr_address">Alamat Lengkap <span style="color:var(--red);">*</span></label>
-                        <textarea id="addr_address" name="address" style="height:80px;" placeholder="Jl. Nama Jalan No.xx, RT/RW, Kelurahan, dsb. (ketik alamat lengkap)" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Peta Lokasi <span style="color:var(--red);">*</span></label>
-                        <div class="addr-map-wrap">
-                            <div id="addrMap" class="addr-map"></div>
-                        </div>
-                        <div class="addr-geo-hint" id="addrGeoHint">Klik peta atau geser marker untuk menentukan titik lokasi. Titik lokasi wajib diisi sebelum menyimpan.</div>
-                    </div>
-                    <input type="hidden" name="area_id" id="addr_area_id">
-                    <input type="hidden" name="latitude" id="addr_lat">
-                    <input type="hidden" name="longitude" id="addr_lng">
-                    <div style="display:flex;gap:12px;margin-top:8px;">
-                        <button type="submit" class="btn-submit" id="addressSubmitBtn">Simpan Alamat</button>
-                        <button type="button" class="btn-outline-light" style="padding:12px 24px;border-radius:var(--radius-sm);font-size:13px;" onclick="closeAddressModal()">Batal</button>
-                    </div>
-                </form>
-            </div>
+            <a href="{{ route('dashboard.alamat.create') }}" class="ofc-btn ofc-btn--primary" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;">
+                <i class='bx bx-plus' style="font-size:17px;"></i>
+                Tambah Alamat
+            </a>
         </div>
+
+        @if (session('success'))
+    <div class="addr-flash addr-flash--success" role="alert" data-flash>
+        <div class="addr-flash-icon">
+            <i class='bx bx-check'></i>
+        </div>
+        <div class="addr-flash-content">
+            <div class="addr-flash-title">Berhasil!</div>
+            <div class="addr-flash-msg">{{ session('success') }}</div>
+        </div>
+        <button type="button" class="addr-flash-close" aria-label="Tutup">
+            <i class='bx bx-x'></i>
+        </button>
+        
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="addr-flash addr-flash--error" role="alert" data-flash>
+        <div class="addr-flash-icon">
+            <i class='bx bx-error'></i>
+        </div>
+        <div class="addr-flash-content">
+            <div class="addr-flash-title">Terjadi kesalahan</div>
+            <div class="addr-flash-msg">{{ session('error') }}</div>
+        </div>
+        <button type="button" class="addr-flash-close" aria-label="Tutup">
+            <i class='bx bx-x'></i>
+        </button>
+        
+    </div>
+@endif
+
+        @if (session('error'))
+            <div class="dash-alert" style="border-color:var(--red);background:rgba(192,57,43,0.06);margin-bottom:20px;">
+                <div class="dash-alert-dot" style="background:var(--red);animation:none;"></div>
+                <div class="dash-alert-content">
+                    <strong style="color:var(--red);">{{ session('error') }}</strong>
+                </div>
+            </div>
+        @endif
+
+        @if ($addresses->isEmpty())
+            <div class="addr-empty-state">
+                <div class="addr-empty-icon">
+                    <i class='bx bx-map-pin' style="font-size:32px;color:var(--accent);"></i>
+                </div>
+                <div class="addr-empty-title">Belum ada alamat tersimpan</div>
+                <div class="addr-empty-desc">Tambahkan alamat pengiriman untuk memudahkan proses checkout.</div>
+                <a href="{{ route('dashboard.alamat.create') }}" class="ofc-btn ofc-btn--primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                    <i class='bx bx-plus' style="font-size:16px;"></i>
+                    Tambah Alamat Baru
+                </a>
+            </div>
+        @else
+            <div class="addr-cards-grid">
+                @foreach ($addresses as $address)
+                    <div class="addr-modern-card {{ $address->is_default ? 'addr-modern-card--default' : '' }}">
+                        <div class="addr-card-bar"></div>
+                        <div class="addr-card-body">
+                            <div class="addr-card-header">
+                                <div class="addr-card-header-left">
+                                    <div class="addr-icon-wrap">
+                                        <i class='bx bx-map-pin' style="font-size:20px;color:var(--accent);"></i>
+                                    </div>
+                                    <span class="addr-label-text">{{ $address->label }}</span>
+                                </div>
+                                @if ($address->is_default)
+                                    <span class="addr-utama-badge">
+                                        <i class='bx bxs-check-circle' style="font-size:12px;"></i>
+                                        Utama
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="addr-card-divider"></div>
+
+                        <div class="addr-card-info">
+                            <div class="addr-info-row">
+                                <i class='bx bx-user addr-info-bx'></i>
+                                <div class="addr-info-text"><strong>{{ $address->receiver_name }}</strong></div>
+                            </div>
+                            <div class="addr-info-row">
+                                <i class='bx bx-phone addr-info-bx'></i>
+                                <div class="addr-info-text">{{ $address->phone }}</div>
+                            </div>
+                            <div class="addr-info-row">
+                                <i class='bx bx-map addr-info-bx'></i>
+                                <div class="addr-info-text">
+                                    {{ $address->address }}{{ $address->district ? ', ' . $address->district : '' }},
+                                    {{ $address->city }}, {{ $address->province }} {{ $address->postal_code }}
+                                </div>
+                            </div>
+                            @if ($address->catatan)
+                                <div class="addr-info-row">
+                                    <i class='bx bx-notepad addr-info-bx'></i>
+                                    <div class="addr-info-text" style="font-style:italic;color:#9ca3af;">{{ $address->catatan }}</div>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="addr-card-divider"></div>
+
+                        <div class="addr-card-footer">
+                            <div class="addr-action-group">
+                                <a href="{{ route('dashboard.alamat.edit', $address->id) }}" class="addr-btn-edit">
+                                    <i class='bx bx-edit-alt'></i>
+                                    Edit
+                                </a>
+                                <form method="POST" action="{{ route('dashboard.alamat.delete', $address->id) }}" class="delete-address-form" style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="addr-btn-delete btn-delete-address">
+                                        <i class='bx bx-trash'></i>
+                                        Hapus
+                                    </button>
+                                </form>
+                            </div>
+                            @if (!$address->is_default)
+                                <form method="POST" action="{{ route('dashboard.alamat.default', $address->id) }}" style="display:inline;">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" class="addr-btn-default">
+                                        <i class='bx bx-check'></i>
+                                        Jadikan Utama
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     </div>
 @endsection
 
 @push('scripts')
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    var addressData = @json($addresses);
-    var addressUpdateBase = '{{ url('dashboard/alamat') }}';
-    var addrGeocodeUrl = '{{ route('dashboard.alamat.geocode') }}';
-    var addrReverseUrl = '{{ route('dashboard.alamat.reverse') }}';
-    var addrAreaUrl = '{{ route('dashboard.alamat.area') }}';
-    var addrDetailsUrl = '{{ route('dashboard.alamat.details') }}';
-    var csrfToken = document.querySelector('meta[name=csrf-token]') ? document.querySelector('meta[name=csrf-token]').content : '';
-
-    // ---------- MAP ----------
-    var map = null;
-    var marker = null;
-
-    function ensureMap() {
-        if (map) return;
-        map = L.map('addrMap', { scrollWheelZoom: false }).setView([-6.5950, 106.8166], 13);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-        map.on('click', function(e) {
-            setMarker(e.latlng.lat, e.latlng.lng);
-            reverseGeocode(e.latlng.lat, e.latlng.lng);
-        });
-    }
-
-    function setMarker(lat, lng) {
-        if (!map) return;
-        if (marker) {
-            marker.setLatLng([lat, lng]);
-        } else {
-            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-            marker.on('dragend', function() {
-                var p = marker.getLatLng();
-                reverseGeocode(p.lat, p.lng);
-            });
-        }
-        map.setView([lat, lng], 16);
-        document.getElementById('addr_lat').value = lat;
-        document.getElementById('addr_lng').value = lng;
-    }
-
-    function removeMarker() {
-        if (marker && map) {
-            map.removeLayer(marker);
-            marker = null;
-        }
-    }
-
-    function reverseGeocode(lat, lng) {
-        var hint = document.getElementById('addrGeoHint');
-        hint.textContent = 'Mencari lokasi...';
-        fetch(addrReverseUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-            body: JSON.stringify({ lat: lat, lng: lng })
-        }).then(function(r) { return r.json(); }).then(function(res) {
-            hint.textContent = 'Klik peta atau geser marker untuk menentukan titik lokasi.';
-            if (res.error) {
-                Swal.fire({ icon: 'warning', title: 'Lokasi tidak ditemukan', text: res.error });
-                return;
-            }
-            applyPlace(res.result);
-        }).catch(function() {
-            hint.textContent = 'Klik peta untuk menentukan titik lokasi.';
-        });
-    }
-
-    function setProvinceSelect(value) {
-        var sel = document.getElementById('addr_province');
-        if (!value) return '';
-        var exists = false;
-        for (var i = 0; i < sel.options.length; i++) {
-            if (sel.options[i].value === value) { exists = true; break; }
-        }
-        if (!exists) {
-            var opt = document.createElement('option');
-            opt.value = value;
-            opt.textContent = value;
-            sel.appendChild(opt);
-        }
-        sel.value = value;
-        return value;
-    }
-
-    function applyPlace(p) {
-        if (!p) return;
-        document.getElementById('addr_address').value = p.address || '';
-        setProvinceSelect(p.province || '');
-        document.getElementById('addr_city').value = p.city || '';
-        document.getElementById('addr_district').value = p.district || p.subdistrict || p.city || '';
-        document.getElementById('addr_postal_code').value = p.postal_code || '';
-        if (p.lat && p.lng) {
-            setMarker(p.lat, p.lng);
-        }
-        resolveArea(true);
-    }
-
-    function resolveArea(overwriteFields) {
-        var district = document.getElementById('addr_district').value;
-        var city = document.getElementById('addr_city').value;
-        var province = document.getElementById('addr_province').value;
-        var postal = document.getElementById('addr_postal_code').value;
-        if (!city && !district && !province) return;
-        fetch(addrAreaUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-            body: JSON.stringify({ district: district, city: city, province: province, postal_code: postal })
-        }).then(function(r) { return r.json(); }).then(function(res) {
-            document.getElementById('addr_area_id').value = res.area_id || '';
-            if (overwriteFields && res.area) {
-                setProvinceSelect(res.area.province || province);
-                document.getElementById('addr_city').value = res.area.city || city;
-                document.getElementById('addr_district').value = res.area.district || district;
-                document.getElementById('addr_postal_code').value = res.area.postal_code || postal;
-            }
-        });
-    }
-
-    ['addr_province', 'addr_city', 'addr_district', 'addr_postal_code'].forEach(function(fid) {
-        document.getElementById(fid).addEventListener('change', function() {
-            document.getElementById('addr_area_id').value = '';
-            resolveArea(false);
-        });
-    });
-
-    function fetchPlaceDetails(placeId, cb) {
-        fetch(addrDetailsUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-            body: JSON.stringify({ place_id: placeId })
-        }).then(function(r) { return r.json(); }).then(function(res) {
-            cb(res.result || null);
-        }).catch(function() {
-            cb(null);
-        });
-    }
-
-    function placeMarkerFromStored(addr) {
-        var q = [addr.address, addr.district, addr.city, addr.province, addr.postal_code].filter(Boolean).join(', ');
-        var hint = document.getElementById('addrGeoHint');
-        hint.textContent = 'Mencari lokasi tersimpan...';
-        fetch(addrGeocodeUrl + '?q=' + encodeURIComponent(q), { headers: { 'X-CSRF-TOKEN': csrfToken } })
-            .then(function(r) { return r.json(); })
-            .then(function(res) {
-                hint.textContent = 'Klik peta atau geser marker untuk menentukan titik lokasi.';
-                var first = (res.results || [])[0];
-                if (!first) { hint.textContent = 'Klik peta untuk menentukan titik lokasi.'; return; }
-                if (first.place_id) {
-                    fetchPlaceDetails(first.place_id, function(detail) {
-                        if (detail && detail.lat && detail.lng) {
-                            setMarker(detail.lat, detail.lng);
-                        }
-                    });
-                } else if (first.lat && first.lng) {
-                    setMarker(first.lat, first.lng);
-                }
-            })
-            .catch(function() {
-                hint.textContent = 'Klik peta untuk menentukan titik lokasi.';
-            });
-    }
-
-    // ---------- MODAL ----------
-    function openAddressModal(id) {
-        var form = document.getElementById('addressForm');
-        var title = document.getElementById('addressModalTitle');
-        var method = document.getElementById('addressFormMethod');
-        var submitBtn = document.getElementById('addressSubmitBtn');
-
-        if (id) {
-            var addr = addressData.find(function(a) { return a.id === id; });
-            if (!addr) return;
-            title.textContent = 'Edit Alamat';
-            method.value = 'PUT';
-            form.action = addressUpdateBase + '/' + id;
-            submitBtn.textContent = 'Simpan Perubahan';
-            document.getElementById('addr_label').value = addr.label || '';
-            document.getElementById('addr_receiver_name').value = addr.receiver_name || '';
-            document.getElementById('addr_phone').value = addr.phone || '';
-            setProvinceSelect(addr.province || '');
-            document.getElementById('addr_city').value = addr.city || '';
-            document.getElementById('addr_district').value = addr.district || '';
-            document.getElementById('addr_postal_code').value = addr.postal_code || '';
-            document.getElementById('addr_catatan').value = addr.catatan || '';
-            document.getElementById('addr_address').value = addr.address || '';
-            document.getElementById('addr_area_id').value = addr.area_id || '';
-            document.getElementById('addr_lat').value = addr.latitude || '';
-            document.getElementById('addr_lng').value = addr.longitude || '';
-            document.getElementById('addr_is_default').checked = addr.is_default ? true : false;
-        } else {
-            title.textContent = 'Tambah Alamat Baru';
-            method.value = 'POST';
-            form.action = '{{ route("dashboard.alamat.store") }}';
-            submitBtn.textContent = 'Simpan Alamat';
-            form.reset();
-            document.getElementById('addr_area_id').value = '';
-            document.getElementById('addr_lat').value = '';
-            document.getElementById('addr_lng').value = '';
-            removeMarker();
-        }
-
-        ensureMap();
-        document.getElementById('addressModal').classList.add('open');
-        setTimeout(function() {
-            if (map) map.invalidateSize();
-        }, 300);
-
-        if (id && addr) {
-            if (addr.latitude && addr.longitude) {
-                setMarker(parseFloat(addr.latitude), parseFloat(addr.longitude));
-            } else {
-                placeMarkerFromStored(addr);
-            }
-        }
-    }
-
-    function closeAddressModal() {
-        document.getElementById('addressModal').classList.remove('open');
-    }
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeAddressModal();
-        }
-    });
-
-    // Marker wajib sebelum menyimpan
-    document.getElementById('addressForm').addEventListener('submit', function(e) {
-        var lat = document.getElementById('addr_lat').value;
-        var lng = document.getElementById('addr_lng').value;
-        if (!lat || !lng) {
-            e.preventDefault();
-            Swal.fire({
-                icon: 'warning',
-                title: 'Pilih Titik Lokasi',
-                text: 'Silakan klik peta atau geser marker untuk menentukan titik lokasi sebelum menyimpan alamat.'
-            });
-        }
-    });
-
     // Delete address confirmation with SweetAlert2
     document.querySelectorAll('.btn-delete-address').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
@@ -456,11 +530,12 @@
                 text: 'Alamat yang dihapus tidak dapat dikembalikan.',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#C0392B',
-                cancelButtonColor: '#6c757d',
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
                 confirmButtonText: 'Ya, hapus!',
                 cancelButtonText: 'Batal',
                 reverseButtons: true,
+                borderRadius: '12px',
             }).then(function(result) {
                 if (result.isConfirmed) {
                     form.submit();
@@ -468,5 +543,11 @@
             });
         });
     });
+    // Tombol tutup flash alert
+document.querySelectorAll('[data-flash]').forEach(function (el) {
+    el.querySelector('.addr-flash-close').addEventListener('click', function () {
+        el.remove();
+    });
+});
 </script>
 @endpush

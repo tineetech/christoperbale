@@ -26,6 +26,7 @@ use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
+
     private $allowedServices = [
         'jne'       => ['reg'],
         'sicepat'   => ['reg'],
@@ -108,6 +109,7 @@ class CheckoutController extends Controller
 
         $selectedAddressId = $request->query('address_id');
         if ($selectedAddressId) {
+            // dd($allAddresses->firstWhere('id', $selectedAddressId) ?? $allAddresses->first());
             $defaultAddress = $allAddresses->firstWhere('id', $selectedAddressId) ?? $allAddresses->first();
         } else {
             $defaultAddress = $allAddresses->firstWhere('is_default', true) ?? $allAddresses->first();
@@ -142,6 +144,8 @@ class CheckoutController extends Controller
         });
 
         $originAreaId = PengaturanWeb::where('key', 'Origin Area Id')->value('value');
+
+        // dd($defaultAddress);
         $shippingOptions = [];
 
         if ($originAreaId && $defaultAddress && $defaultAddress->area_id) {

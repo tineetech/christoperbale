@@ -7,16 +7,129 @@
     $userName = $user->full_name ?: $user->nama;
     $userInitials = strtoupper(substr($userName, 0, 1));
 @endphp
+
+@push('styles')
+    <style>
+        /* ---- Flash Alert (sama persis dengan dashboard alamat) ---- */
+        .addr-flash {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            margin-bottom: 22px;
+            border-radius: 14px;
+            border: 1px solid transparent;
+            animation: addrFlashIn 0.35s ease both;
+        }
+
+        .addr-flash--success {
+            background: linear-gradient(135deg, #ecfdf3 0%, #f6fef9 100%);
+            border-color: #bbf7d0;
+            box-shadow: 0 6px 20px rgba(22, 163, 74, 0.10);
+        }
+
+        .addr-flash--error {
+            background: linear-gradient(135deg, #fef2f2 0%, #fffafa 100%);
+            border-color: #fecaca;
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.10);
+        }
+
+        .addr-flash-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .addr-flash--success .addr-flash-icon {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.15);
+        }
+
+        .addr-flash--error .addr-flash-icon {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15);
+        }
+
+        .addr-flash-content { flex: 1; min-width: 0; }
+
+        .addr-flash-title {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 2px;
+        }
+
+        .addr-flash--success .addr-flash-title { color: #166534; }
+        .addr-flash--error .addr-flash-title { color: #991b1b; }
+
+        .addr-flash-msg {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #4b5563;
+        }
+
+        .addr-flash-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: background 0.18s, color 0.18s;
+        }
+
+        .addr-flash-close:hover { background: rgba(0, 0, 0, 0.06); color: #374151; }
+
+        @keyframes addrFlashIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+@endpush
 @section('dashboard-content')
                     <div class="dash-panel" id="panel-profile">
                         <h2 class="dash-section-title" style="margin-bottom:28px;">Profil & Akun</h2>
 
                         @if (session('success'))
-                        <div class="dash-alert" style="border-color:var(--green);background:rgba(46,125,50,0.06);margin-bottom:20px;">
-                            <div class="dash-alert-dot" style="background:var(--green);animation:none;"></div>
-                            <div class="dash-alert-content">
-                                <strong style="color:var(--green);">{{ session('success') }}</strong>
+                        <div class="addr-flash addr-flash--success" role="alert" data-flash>
+                            <div class="addr-flash-icon">
+                                <i class='bx bx-check'></i>
                             </div>
+                            <div class="addr-flash-content">
+                                <div class="addr-flash-title">Berhasil!</div>
+                                <div class="addr-flash-msg">{{ session('success') }}</div>
+                            </div>
+                            <button type="button" class="addr-flash-close" aria-label="Tutup">
+                                <i class='bx bx-x'></i>
+                            </button>
+                        </div>
+                        @endif
+
+                        @if (session('error'))
+                        <div class="addr-flash addr-flash--error" role="alert" data-flash>
+                            <div class="addr-flash-icon">
+                                <i class='bx bx-error'></i>
+                            </div>
+                            <div class="addr-flash-content">
+                                <div class="addr-flash-title">Terjadi kesalahan</div>
+                                <div class="addr-flash-msg">{{ session('error') }}</div>
+                            </div>
+                            <button type="button" class="addr-flash-close" aria-label="Tutup">
+                                <i class='bx bx-x'></i>
+                            </button>
                         </div>
                         @endif
 
@@ -40,13 +153,14 @@
                                     <h3 style="font-size:18px;margin-bottom:4px;">{{ $userName }}</h3>
                                     <p style="color:var(--ink-muted);font-size:13px;margin:0;">{{ $user->email }}</p>
                                     @if ($user->role)
+                                    @php $profilRoleLabel = $user->role->nama_role ?? 'Member'; @endphp
                                     <span class="dash-member-tag" style="margin-top:8px;display:inline-flex;">
                                         <svg width="11" height="11" viewBox="0 0 24 24"
                                             fill="var(--accent-light)" stroke="none">
                                             <polygon
                                                 points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                                         </svg>
-                                        {{ $user->role->nama_role ?? 'Member' }}
+                                        {{ strtolower($profilRoleLabel) === 'user' ? 'Pengguna' : $profilRoleLabel }}
                                     </span>
                                     @endif
                                 </div>
@@ -136,6 +250,13 @@
 
 @push('scripts')
     <script>
+        // Tombol tutup flash alert (sama persis dengan dashboard alamat)
+        document.querySelectorAll('[data-flash]').forEach(function (el) {
+            el.querySelector('.addr-flash-close').addEventListener('click', function () {
+                el.remove();
+            });
+        });
+
         function togglePasswordForm() {
             var wrap = document.getElementById('passwordFormWrap');
             var icon = document.getElementById('passwordToggleIcon');

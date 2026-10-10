@@ -54,7 +54,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/dashboard/profil', [DashboardController::class, 'updateProfile'])->name('dashboard.profil.update');
     Route::post('/dashboard/profil/password', [DashboardController::class, 'updatePassword'])->name('dashboard.profil.password');
     Route::get('/dashboard/alamat', [DashboardController::class, 'alamat'])->name('dashboard.alamat');
+    Route::get('/dashboard/alamat/tambah', [DashboardController::class, 'alamatForm'])->name('dashboard.alamat.create');
+    Route::get('/dashboard/alamat/{id}/edit', [DashboardController::class, 'alamatFormEdit'])->name('dashboard.alamat.edit');
     Route::post('/dashboard/alamat', [DashboardController::class, 'storeAddress'])->name('dashboard.alamat.store');
+    Route::post('/dashboard/alamat/ajax', [DashboardController::class, 'storeAddressAjax'])->name('dashboard.alamat.store.ajax');
     Route::put('/dashboard/alamat/{id}', [DashboardController::class, 'updateAddress'])->name('dashboard.alamat.update');
     Route::delete('/dashboard/alamat/{id}', [DashboardController::class, 'deleteAddress'])->name('dashboard.alamat.delete');
     Route::put('/dashboard/alamat/{id}/default', [DashboardController::class, 'setDefaultAddress'])->name('dashboard.alamat.default');
@@ -62,6 +65,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/dashboard/alamat/reverse', [DashboardController::class, 'reverseGeocode'])->name('dashboard.alamat.reverse');
     Route::post('/dashboard/alamat/area', [DashboardController::class, 'resolveArea'])->name('dashboard.alamat.area');
     Route::post('/dashboard/alamat/details', [DashboardController::class, 'placeDetails'])->name('dashboard.alamat.details');
+    Route::get('/dashboard/wilayah/provinces', [DashboardController::class, 'wilayahProvinces'])->name('dashboard.wilayah.provinces');
+    Route::get('/dashboard/wilayah/regencies/{code}', [DashboardController::class, 'wilayahRegencies'])->name('dashboard.wilayah.regencies');
+    Route::get('/dashboard/wilayah/districts/{code}', [DashboardController::class, 'wilayahDistricts'])->name('dashboard.wilayah.districts');
+    Route::get('/dashboard/wilayah/postals', [DashboardController::class, 'wilayahPostals'])->name('dashboard.wilayah.postals');
     Route::get('/dashboard/voucher', [DashboardController::class, 'voucher'])->name('dashboard.voucher');
     Route::get('/dashboard/voucher/{id}', [DashboardController::class, 'voucherDetail'])->name('dashboard.voucher.detail');
     Route::post('/dashboard/voucher/claim', [DashboardController::class, 'claimVoucher'])->name('dashboard.voucher.claim');

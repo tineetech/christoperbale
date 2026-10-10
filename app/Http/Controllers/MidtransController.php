@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 
 class MidtransController extends Controller
 {
+
     public function notification(Request $request)
     {
         $payload = $request->all();

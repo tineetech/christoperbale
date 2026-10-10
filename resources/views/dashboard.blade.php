@@ -61,16 +61,25 @@
                         @endphp
 
                         @if ($activeOrder)
-                        <div class="dash-alert">
-                            <div class="dash-alert-dot"></div>
-                            <div class="dash-alert-content">
-                                <strong>Pesanan #{{ $activeOrder->kode_penjualan ?? $activeOrder->kode_penjualan }}</strong> sedang dalam proses
-                                @if ($activeOrder->status === 'dikirim')
-                                — estimasi tiba sesuai jadwal pengiriman
-                                @endif
+                        <div style="background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:28px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                            <div style="width:42px;height:42px;border-radius:12px;background:rgba(184,134,11,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                                    <line x1="3" y1="6" x2="21" y2="6" />
+                                    <path d="M16 10a4 4 0 01-8 0" />
+                                </svg>
                             </div>
-                            <a href="{{ route('dashboard.pesanan') }}" class="dash-alert-link">
-                                Lacak
+                            <div style="flex:1;min-width:200px;">
+                                <p style="font-size:11px;font-weight:600;color:var(--ink-muted);letter-spacing:.04em;text-transform:uppercase;margin:0 0 4px;">Pesanan Aktif</p>
+                                <p style="font-size:14px;font-weight:600;color:var(--ink);margin:0;">
+                                    Pesanan #{{ $activeOrder->kode_penjualan ?? $activeOrder->kode_penjualan }} sedang dalam proses
+                                    @if ($activeOrder->status === 'dikirim')
+                                    dengan estimasi tiba sesuai jadwal pengiriman
+                                    @endif
+                                </p>
+                            </div>
+                            <a href="{{ route('dashboard.pesanan') }}" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--accent);text-decoration:none;border:1px solid var(--accent);border-radius:999px;padding:8px 16px;flex-shrink:0;">
+                                Lacak Pesanan
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                     <path d="M5 12h14M13 6l6 6-6 6" />
                                 </svg>
@@ -140,7 +149,7 @@
                                 <span class="dot-date">{{ $orderDate }}</span>
                                 <span class="dot-total">{{ $total }}</span>
                                 <span class="dot-status {{ $statusClass }}">{{ $statusText }}</span>
-                                <button class="dot-action-btn">Detail</button>
+                                <a href="{{ route('dashboard.pesanan.detail', $order->id) }}" class="dot-action-btn" style="text-decoration:none;display:inline-flex;">Detail</a>
                             </div>
                             @endforeach
                         </div>
