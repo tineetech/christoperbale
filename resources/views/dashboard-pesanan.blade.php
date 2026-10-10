@@ -220,7 +220,7 @@
                             : $order->created_at;
                         $etaDate   = $baseDate->copy()->addDays((int) $order->shipment->estimation_days);
                         $today     = \Carbon\Carbon::today();
-                        $diffDays  = $today->diffInDays($etaDate, false); // negatif = sudah lewat
+                        $diffDays  = (int) floor($today->diffInDays($etaDate, false)); // negatif = sudah lewat
 
                         if ($diffDays < 0) {
                             // estimasi sudah lewat tapi belum selesai

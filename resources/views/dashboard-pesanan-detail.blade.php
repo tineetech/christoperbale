@@ -40,7 +40,7 @@
         $baseDate = $order->tanggal ? \Carbon\Carbon::parse($order->tanggal) : $order->created_at;
         $etaDate = $baseDate->copy()->addDays((int) $order->shipment->estimation_days);
         $today = \Carbon\Carbon::today();
-        $diffDays = $today->diffInDays($etaDate, false);
+        $diffDays = (int) floor($today->diffInDays($etaDate, false));
 
         if ($diffDays < 0) {
             $etaText = 'Est. Tiba: ' . $etaDate->format('d M Y') . ' ';

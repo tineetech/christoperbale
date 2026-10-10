@@ -1195,7 +1195,7 @@
                                 </div>
                             </div>
                         @else
-                            <p class="addr-empty">Belum ada alamat pengiriman. <a href="javascript:void(0)" onclick="openNewAddressFormModal()">+ Tambah alamat sekarang</a></p>
+                            <p class="addr-empty">Belum ada alamat pengiriman. </p>
                         @endif
                     </div>
 
@@ -1476,26 +1476,62 @@
                 <div class="form-group">
                     <label for="na_province">Provinsi <span style="color:var(--red);">*</span></label>
                     <select id="na_province">
-                        <option value="">Memuat provinsi...</option>
+                        <option value="">Pilih Provinsi</option>
+                        <option value="Aceh">Aceh</option>
+                        <option value="Bali">Bali</option>
+                        <option value="Banten">Banten</option>
+                        <option value="Bengkulu">Bengkulu</option>
+                        <option value="DI Yogyakarta">DI Yogyakarta</option>
+                        <option value="DKI Jakarta">DKI Jakarta</option>
+                        <option value="Gorontalo">Gorontalo</option>
+                        <option value="Jambi">Jambi</option>
+                        <option value="Jawa Barat">Jawa Barat</option>
+                        <option value="Jawa Tengah">Jawa Tengah</option>
+                        <option value="Jawa Timur">Jawa Timur</option>
+                        <option value="Kalimantan Barat">Kalimantan Barat</option>
+                        <option value="Kalimantan Selatan">Kalimantan Selatan</option>
+                        <option value="Kalimantan Tengah">Kalimantan Tengah</option>
+                        <option value="Kalimantan Timur">Kalimantan Timur</option>
+                        <option value="Kalimantan Utara">Kalimantan Utara</option>
+                        <option value="Kepulauan Bangka Belitung">Kepulauan Bangka Belitung</option>
+                        <option value="Kepulauan Riau">Kepulauan Riau</option>
+                        <option value="Lampung">Lampung</option>
+                        <option value="Maluku">Maluku</option>
+                        <option value="Maluku Utara">Maluku Utara</option>
+                        <option value="Nusa Tenggara Barat">Nusa Tenggara Barat</option>
+                        <option value="Nusa Tenggara Timur">Nusa Tenggara Timur</option>
+                        <option value="Papua">Papua</option>
+                        <option value="Papua Barat">Papua Barat</option>
+                        <option value="Papua Barat Daya">Papua Barat Daya</option>
+                        <option value="Papua Pegunungan">Papua Pegunungan</option>
+                        <option value="Papua Selatan">Papua Selatan</option>
+                        <option value="Papua Tengah">Papua Tengah</option>
+                        <option value="Riau">Riau</option>
+                        <option value="Sulawesi Barat">Sulawesi Barat</option>
+                        <option value="Sulawesi Selatan">Sulawesi Selatan</option>
+                        <option value="Sulawesi Tengah">Sulawesi Tengah</option>
+                        <option value="Sulawesi Tenggara">Sulawesi Tenggara</option>
+                        <option value="Sulawesi Utara">Sulawesi Utara</option>
+                        <option value="Sumatera Barat">Sumatera Barat</option>
+                        <option value="Sumatera Selatan">Sumatera Selatan</option>
+                        <option value="Sumatera Utara">Sumatera Utara</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="na_city">Kota/Kabupaten <span style="color:var(--red);">*</span></label>
-                    <select id="na_city" disabled>
-                        <option value="">Pilih provinsi terlebih dahulu</option>
+                    <select id="na_city">
+                        <option value="">Pilih/ketik kota</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="na_district">Kecamatan <span style="color:var(--red);">*</span></label>
-                    <select id="na_district" disabled>
-                        <option value="">Pilih kota terlebih dahulu</option>
+                    <select id="na_district">
+                        <option value="">Pilih/ketik kecamatan</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="na_postal_code">Kode Pos <span style="color:var(--red);">*</span></label>
-                    <select id="na_postal_code" disabled>
-                        <option value="">Pilih kecamatan terlebih dahulu</option>
-                    </select>
+                    <input type="text" id="na_postal_code" placeholder="Contoh: 12190">
                 </div>
                 <div class="form-group">
                     <label>Jadikan alamat utama?</label>
@@ -1788,11 +1824,10 @@
         var naWilayahProvincesUrl = '{{ route("dashboard.wilayah.provinces") }}';
         var naWilayahRegenciesBaseUrl = '{{ url("/dashboard/wilayah/regencies") }}';
         var naWilayahDistrictsBaseUrl = '{{ url("/dashboard/wilayah/districts") }}';
-        var naWilayahPostalsBaseUrl = '{{ route("dashboard.wilayah.postals") }}';
         var naProvinceCodeByName = {};
         var naCityCodeByName = {};
-        var naProvincesLoaded = false;
-        var naProvinceFallback = ['DKI Jakarta','Jawa Barat','Jawa Tengah','DI Yogyakarta','Jawa Timur','Banten','Bali','Sumatera Utara','Sumatera Selatan','Riau','Lampung','Kalimantan Timur','Sulawesi Selatan','Aceh','Papua'];
+        var naCitiesLoadedFor = '';
+        var naDistrictsLoadedFor = '';
 
         function openNewAddressFormModal() {
             closeAddressModal();
@@ -1806,7 +1841,6 @@
             document.getElementById('na_lat').value = '';
             document.getElementById('na_lng').value = '';
             naResetRegionSelects();
-            naEnsureProvinces();
             document.getElementById('naGeoHint').textContent = 'Klik peta atau geser marker untuk menentukan titik lokasi. Wajib diisi. Pastikan titiknya sama persis dengan alamat yang Anda ketik di form.';
             var errEl = document.getElementById('newAddrError');
             if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
@@ -1877,31 +1911,33 @@
             return window.jQuery('#newAddressModal .modal-content');
         }
 
-        function naAppendOption(selId, text, selected) {
+        // Tambah opsi tanpa menghapus yang sudah ada (termasuk ketikan user).
+        function naAppendOptions(selId, names) {
             var sel = document.getElementById(selId);
-            var opt = document.createElement('option');
-            opt.value = text;
-            opt.textContent = text;
-            if (selected) opt.selected = true;
-            sel.appendChild(opt);
+            var existing = {};
+            for (var i = 0; i < sel.options.length; i++) {
+                existing[sel.options[i].value] = true;
+            }
+            names.slice().sort(naSortAbjad).forEach(function(name) {
+                if (!existing[name]) {
+                    var opt = document.createElement('option');
+                    opt.value = name;
+                    opt.textContent = name;
+                    sel.appendChild(opt);
+                }
+            });
+            naRefreshOpenDropdown(selId);
         }
 
-        function naSetCityEnabled(enabled) {
-            var s = document.getElementById('na_city');
-            s.disabled = !enabled;
-            if (naHasSelect2()) window.jQuery(s).prop('disabled', !enabled);
-        }
-
-        function naSetDistrictEnabled(enabled) {
-            var s = document.getElementById('na_district');
-            s.disabled = !enabled;
-            if (naHasSelect2()) window.jQuery(s).prop('disabled', !enabled);
-        }
-
-        function naSetPostalEnabled(enabled) {
-            var s = document.getElementById('na_postal_code');
-            s.disabled = !enabled;
-            if (naHasSelect2()) window.jQuery(s).prop('disabled', !enabled);
+        // Refresh dropdown yang sedang terbuka agar opsi hasil fetch langsung tampil.
+        function naRefreshOpenDropdown(selId) {
+            if (!naHasSelect2()) return;
+            var $s = window.jQuery('#' + selId);
+            var inst = $s.data('select2');
+            if (inst && inst.isOpen()) {
+                $s.select2('close');
+                $s.select2('open');
+            }
         }
 
         function naCitySelect2Opts() {
@@ -1930,19 +1966,6 @@
             };
         }
 
-        function naPostalSelect2Opts() {
-            return {
-                placeholder: 'Pilih/ketik kode pos',
-                tags: true,
-                width: '100%',
-                dropdownParent: naModalContent(),
-                language: {
-                    noResults: function() { return 'Tidak ditemukan — tekan Enter untuk memakai ketikan Anda'; },
-                    searching: function() { return 'Mencari...'; }
-                }
-            };
-        }
-
         var naSelect2Ready = {};
 
         function naInitSelect2() {
@@ -1958,8 +1981,6 @@
             naSelect2Ready['na_city'] = true;
             window.jQuery('#na_district').select2(naDistrictSelect2Opts());
             naSelect2Ready['na_district'] = true;
-            window.jQuery('#na_postal_code').select2(naPostalSelect2Opts());
-            naSelect2Ready['na_postal_code'] = true;
         }
 
         function naQuietSyncSelect(selId, optsFn) {
@@ -1969,33 +1990,20 @@
             $s.select2(optsFn());
         }
 
-        function naFillProvinceOptions(names) {
-            var sel = document.getElementById('na_province');
-            sel.innerHTML = '<option value="">Pilih Provinsi</option>';
-            names.slice().sort(naSortAbjad).forEach(function(name) {
-                var opt = document.createElement('option');
-                opt.value = name;
-                opt.textContent = name;
-                sel.appendChild(opt);
-            });
-        }
-
+        // Reset form tiap modal dibuka (belum ada interaksi user, aman me-reset).
         function naResetRegionSelects() {
             var prov = document.getElementById('na_province');
             var city = document.getElementById('na_city');
             var dist = document.getElementById('na_district');
-            var post = document.getElementById('na_postal_code');
             prov.value = '';
-            city.innerHTML = '<option value="">Pilih provinsi terlebih dahulu</option>';
-            dist.innerHTML = '<option value="">Pilih kota terlebih dahulu</option>';
-            post.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
+            city.innerHTML = '<option value="">Pilih/ketik kota</option>';
+            dist.innerHTML = '<option value="">Pilih/ketik kecamatan</option>';
+            document.getElementById('na_postal_code').value = '';
+            naCitiesLoadedFor = '';
+            naDistrictsLoadedFor = '';
             naQuietSyncSelect('na_province', function() { return { placeholder: 'Pilih Provinsi', width: '100%', dropdownParent: naModalContent() }; });
             naQuietSyncSelect('na_city', naCitySelect2Opts);
             naQuietSyncSelect('na_district', naDistrictSelect2Opts);
-            naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
-            naSetCityEnabled(false);
-            naSetDistrictEnabled(false);
-            naSetPostalEnabled(false);
         }
 
         function naResetAndResolveArea() {
@@ -2027,65 +2035,69 @@
             });
         }
 
+        // Flag agar sinkronisasi tampilan Select2 tidak memicu handler change (anti rekursi).
+        var naSuppressRegionChange = false;
+
+        // Set value select + sinkronkan tampilan Select2 TANPA menjalankan handler.
+        function naSetSelectValueQuiet(selId, value) {
+            var sel = document.getElementById(selId);
+            if (!sel) return;
+            sel.value = value;
+            if (naHasSelect2()) {
+                naSuppressRegionChange = true;
+                try {
+                    window.jQuery('#' + selId).trigger('change');
+                } finally {
+                    naSuppressRegionChange = false;
+                }
+            }
+        }
+
+        // Aturan reset (hanya saat value DIUBAH user, bukan saat diklik/dibuka):
+        // - Provinsi diubah  -> kota, kecamatan, kode pos dihapus nilainya.
+        // - Kota diubah      -> provinsi stay, kecamatan + kode pos dihapus.
+        // - Kecamatan diubah -> provinsi + kota stay, kode pos dihapus.
+        // - Kode pos diubah  -> semua induk stay.
         function naHandleProvinceChange(value) {
+            if (naSuppressRegionChange) return;
             var hasProvince = !!value;
             document.getElementById('na_area_id').value = '';
-            naSetCityEnabled(hasProvince);
-            naSetDistrictEnabled(false);
-            naSetPostalEnabled(false);
-            var citySel = document.getElementById('na_city');
-            var distSel = document.getElementById('na_district');
+            naCitiesLoadedFor = '';
+            naDistrictsLoadedFor = '';
+            naCityCodeByName = {};
             if (hasProvince) {
-                citySel.value = '';
-                distSel.innerHTML = '<option value="">Pilih kota terlebih dahulu</option>';
-                naQuietSyncSelect('na_city', naCitySelect2Opts);
-                naQuietSyncSelect('na_district', naDistrictSelect2Opts);
-                var postSel = document.getElementById('na_postal_code');
-                postSel.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
-                naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
-                naLoadCities(value);
+                naSetSelectValueQuiet('na_city', '');
+                naSetSelectValueQuiet('na_district', '');
+                document.getElementById('na_postal_code').value = '';
+                naEnsureCities();
             } else {
-                citySel.innerHTML = '<option value="">Pilih provinsi terlebih dahulu</option>';
-                naQuietSyncSelect('na_city', naCitySelect2Opts);
-                distSel.innerHTML = '<option value="">Pilih kota terlebih dahulu</option>';
-                naQuietSyncSelect('na_district', naDistrictSelect2Opts);
-                var postSel2 = document.getElementById('na_postal_code');
-                postSel2.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
-                naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
-                naResolveArea();
+                naSetSelectValueQuiet('na_city', '');
+                naSetSelectValueQuiet('na_district', '');
+                document.getElementById('na_postal_code').value = '';
             }
+            naResolveArea();
         }
 
         function naHandleCityChange(value) {
+            if (naSuppressRegionChange) return;
             var hasCity = !!value;
             document.getElementById('na_area_id').value = '';
-            naSetDistrictEnabled(hasCity);
-            naSetPostalEnabled(false);
-            var distSel = document.getElementById('na_district');
+            naDistrictsLoadedFor = '';
             if (hasCity) {
-                naLoadDistricts(value);
+                naSetSelectValueQuiet('na_district', '');
+                document.getElementById('na_postal_code').value = '';
+                naEnsureDistricts();
             } else {
-                distSel.innerHTML = '<option value="">Pilih kota terlebih dahulu</option>';
-                naQuietSyncSelect('na_district', naDistrictSelect2Opts);
-                var postSel = document.getElementById('na_postal_code');
-                postSel.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
-                naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
-                naResolveArea();
+                naSetSelectValueQuiet('na_district', '');
+                document.getElementById('na_postal_code').value = '';
             }
+            naResolveArea();
         }
 
-        function naHandleDistrictChange(value) {
-            var hasDistrict = !!value;
+        function naHandleDistrictChange() {
+            if (naSuppressRegionChange) return;
             document.getElementById('na_area_id').value = '';
-            naSetPostalEnabled(hasDistrict);
-            if (!hasDistrict) {
-                var postSel = document.getElementById('na_postal_code');
-                postSel.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
-                naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
-                naResolveArea();
-                return;
-            }
-            naLoadPostals();
+            document.getElementById('na_postal_code').value = '';
             naResolveArea();
         }
 
@@ -2113,133 +2125,73 @@
             }
         }
 
-        function naLoadCities(provinceName) {
-            var citySel = document.getElementById('na_city');
-            citySel.innerHTML = '<option value="">Memuat kota...</option>';
-            naQuietSyncSelect('na_city', naCitySelect2Opts);
-            var code = naProvinceCodeByName[provinceName];
-            if (!code) {
-                citySel.innerHTML = '<option value="">Pilih/ketik kota</option>';
-                naQuietSyncSelect('na_city', naCitySelect2Opts);
-                return;
-            }
-            fetch(naWilayahRegenciesBaseUrl + '/' + encodeURIComponent(code))
+        // Bangun peta nama provinsi -> kode (untuk fetch kota).
+        // Tidak menyentuh opsi/nilai select sama sekali.
+        function naEnsureProvinceCodes(cb) {
+            if (Object.keys(naProvinceCodeByName).length) { if (cb) cb(); return; }
+            fetch(naWilayahProvincesUrl)
                 .then(function(r) { return r.json(); })
                 .then(function(res) {
-                    var rows = (res && res.data) || [];
-                    rows.sort(function(x, y) { return String(x.name).localeCompare(String(y.name), 'id'); });
-                    citySel.innerHTML = '<option value="">Pilih/ketik kota</option>';
-                    rows.forEach(function(row) {
-                        naCityCodeByName[row.name] = row.code;
-                        var opt = document.createElement('option');
-                        opt.value = row.name;
-                        opt.textContent = row.name;
-                        citySel.appendChild(opt);
+                    ((res && res.data) || []).forEach(function(row) {
+                        naProvinceCodeByName[row.name] = row.code;
                     });
-                    citySel.value = '';
-                    naQuietSyncSelect('na_city', naCitySelect2Opts);
+                    if (cb) cb();
                 })
-                .catch(function() {
-                    citySel.innerHTML = '<option value="">Pilih/ketik kota</option>';
-                    naQuietSyncSelect('na_city', naCitySelect2Opts);
-                });
+                .catch(function() { if (cb) cb(); });
         }
 
-        function naLoadDistricts(cityName) {
-            var distSel = document.getElementById('na_district');
-            distSel.innerHTML = '<option value="">Memuat kecamatan...</option>';
-            naQuietSyncSelect('na_district', naDistrictSelect2Opts);
-            naSetPostalEnabled(false);
-            var postSel = document.getElementById('na_postal_code');
-            postSel.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
-            naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
-            var code = naCityCodeByName[cityName];
-            if (!code) {
-                distSel.innerHTML = '<option value="">Pilih/ketik kecamatan</option>';
-                naQuietSyncSelect('na_district', naDistrictSelect2Opts);
-                return;
-            }
+        function naEnsureCities() {
+            var prov = document.getElementById('na_province').value;
+            if (!prov || naCitiesLoadedFor === prov) return;
+            naEnsureProvinceCodes(function() {
+                var code = naProvinceCodeByName[prov];
+                if (!code) return;
+                fetch(naWilayahRegenciesBaseUrl + '/' + encodeURIComponent(code))
+                    .then(function(r) { return r.json(); })
+                    .then(function(res) {
+                        var rows = (res && res.data) || [];
+                        naCityCodeByName = {};
+                        var names = rows.map(function(row) {
+                            naCityCodeByName[row.name] = row.code;
+                            return row.name;
+                        });
+                        naAppendOptions('na_city', names);
+                        naCitiesLoadedFor = prov;
+                    })
+                    .catch(function() {});
+            });
+        }
+
+        function naEnsureDistricts() {
+            var city = document.getElementById('na_city').value;
+            if (!city || naDistrictsLoadedFor === city) return;
+            var code = naCityCodeByName[city];
+            if (!code) return;
             fetch(naWilayahDistrictsBaseUrl + '/' + encodeURIComponent(code))
                 .then(function(r) { return r.json(); })
                 .then(function(res) {
                     var rows = (res && res.data) || [];
-                    rows.sort(function(x, y) { return String(x.name).localeCompare(String(y.name), 'id'); });
-                    distSel.innerHTML = '<option value="">Pilih/ketik kecamatan</option>';
-                    rows.forEach(function(row) {
-                        var opt = document.createElement('option');
-                        opt.value = row.name;
-                        opt.textContent = row.name;
-                        distSel.appendChild(opt);
-                    });
-                    distSel.value = '';
-                    naQuietSyncSelect('na_district', naDistrictSelect2Opts);
+                    naAppendOptions('na_district', rows.map(function(row) { return row.name; }));
+                    naDistrictsLoadedFor = city;
                 })
-                .catch(function() {
-                    distSel.innerHTML = '<option value="">Pilih/ketik kecamatan</option>';
-                    naQuietSyncSelect('na_district', naDistrictSelect2Opts);
-                });
+                .catch(function() {});
         }
 
-        function naLoadPostals() {
-            var postSel = document.getElementById('na_postal_code');
-            var district = document.getElementById('na_district').value;
-            var city = document.getElementById('na_city').value;
-            var province = document.getElementById('na_province').value;
-            postSel.innerHTML = '<option value="">Memuat kode pos...</option>';
-            naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
-            if (!district && !city && !province) {
-                postSel.innerHTML = '<option value="">Pilih kecamatan terlebih dahulu</option>';
-                naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
-                return;
-            }
-            fetch(naWilayahPostalsBaseUrl + '?' + new URLSearchParams({ district: district, city: city, province: province }).toString())
-                .then(function(r) { return r.json(); })
-                .then(function(res) {
-                    var rows = (res && res.data) || [];
-                    postSel.innerHTML = '<option value="">Pilih/ketik kode pos</option>';
-                    rows.forEach(function(code) {
-                        var opt = document.createElement('option');
-                        opt.value = code;
-                        opt.textContent = code;
-                        postSel.appendChild(opt);
-                    });
-                    postSel.value = '';
-                    naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
-                })
-                .catch(function() {
-                    postSel.innerHTML = '<option value="">Pilih/ketik kode pos</option>';
-                    naQuietSyncSelect('na_postal_code', naPostalSelect2Opts);
-                });
+        naBindRegionField('na_province', false);
+        naBindRegionField('na_city', false);
+        naBindRegionField('na_district', false);
+        naBindRegionField('na_postal_code', true);
+        naBindRegionField('na_address', true);
+
+        if (naHasSelect2()) {
+            window.jQuery('#na_city').on('select2:open', function() { naEnsureCities(); });
+            window.jQuery('#na_district').on('select2:open', function() { naEnsureDistricts(); });
+        } else {
+            document.getElementById('na_city').addEventListener('focus', function() { naEnsureCities(); });
+            document.getElementById('na_district').addEventListener('focus', function() { naEnsureDistricts(); });
         }
 
-        function naLoadProvinces() {
-            var sel = document.getElementById('na_province');
-            fetch(naWilayahProvincesUrl)
-                .then(function(r) { return r.json(); })
-                .then(function(res) {
-                    var rows = (res && res.data) || [];
-                    var names = rows.map(function(row) {
-                        naProvinceCodeByName[row.name] = row.code;
-                        return row.name;
-                    });
-                    if (!names.length) throw new Error('empty');
-                    naFillProvinceOptions(names);
-                    naInitSelect2();
-                })
-                .catch(function() {
-                    naFillProvinceOptions(naProvinceFallback);
-                    naInitSelect2();
-                });
-        }
-
-        function naEnsureProvinces() {
-            if (naProvincesLoaded) return;
-            naProvincesLoaded = true;
-            naLoadProvinces();
-        }
-
-        ['na_province','na_city','na_district','na_postal_code'].forEach(function(fid) { naBindRegionField(fid, false); });
-        ['na_address'].forEach(function(fid) { naBindRegionField(fid, true); });
+        naInitSelect2();
 
         async function submitNewAddress() {
             var lat = document.getElementById('na_lat').value;
