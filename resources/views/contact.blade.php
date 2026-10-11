@@ -51,7 +51,7 @@
           <div class="info-icon">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
-          <div class="info-text"><h4>Jam Operasional</h4><span>Sen — Jum, 09:00 — 18:00</span></div>
+          <div class="info-text"><h4>Jam Operasional</h4><span>Senin - Sabtu, Pukul 08:00 — 15:00 WIB</span></div>
         </div>
       </div>
       <form class="contact-form" id="contactForm">
