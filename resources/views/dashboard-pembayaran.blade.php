@@ -401,6 +401,7 @@
         .pay-cta--primary {
             background: var(--accent);
             color: #ffffff;
+            height: 40px;
             border: 1.5px solid var(--accent);
         }
 
@@ -418,6 +419,63 @@
         .pay-cta--outline:hover {
             background: var(--accent);
             color: #ffffff;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            border: 1.5px solid var(--line);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--ink-soft);
+            background: #ffffff;
+            cursor: pointer;
+            transition: all .2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .pagination button:hover:not(:disabled):not(.active) {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .pagination button.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+
+        .pagination .page-info {
+            font-size: 13px;
+            color: var(--ink-muted);
+            padding: 0 8px;
+            white-space: nowrap;
+        }
+
+        @media(max-width:600px) {
+            .pagination button {
+                min-width: 36px;
+                height: 36px;
+                font-size: 12px;
+                padding: 0 8px;
+            }
         }
     </style>
 @endpush
@@ -442,7 +500,7 @@
                     <svg viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 </div>
                 <div>
-                    <div class="ps-num">{{ $payments->count() }}</div>
+                    <div class="ps-num">{{ $totalCount }}</div>
                     <div class="ps-label">Total Pembayaran</div>
                 </div>
             </div>
@@ -460,7 +518,7 @@
                     <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M20 6L9 17l-5-5"/></svg>
                 </div>
                 <div>
-                    <div class="ps-num">{{ $payments->where('status', 'paid')->count() }}</div>
+                    <div class="ps-num">{{ $paidCount }}</div>
                     <div class="ps-label">Lunas</div>
                 </div>
             </div>
@@ -469,7 +527,7 @@
                     <svg viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                 </div>
                 <div>
-                    <div class="ps-num">{{ $payments->whereIn('status', ['deny', 'cancel', 'expire', 'failure'])->count() }}</div>
+                    <div class="ps-num">{{ $failedCount }}</div>
                     <div class="ps-label">Gagal / Dibatalkan</div>
                 </div>
             </div>
@@ -588,35 +646,22 @@
                             </div>
 
                             <div class="pay-main-right">
-                                {{-- Info Tambahan: Expired / Tanggal Bayar --}}
-                                @if ($isPending && $p->expired_at)
+                                {{-- Info Tambahan: Expired (hanya saat pending, bukan konfirmasi admin) --}}
+                                @if ($p->status === 'pending' && $p->expired_at)
                                     <div class="pay-expiry-box">
                                         <i class='bx bx-time-five'></i>
                                         <div>
-                                            <div class="pay-expiry-label">Batas Waktu Bayar</div>
+                                            <div class="pay-expiry-label">BATAS PEMBAYARAN</div>
                                             <div class="pay-expiry-val">{{ $p->expired_at->format('d M Y H:i') }}</div>
-                                        </div>
-                                    </div>
-                                @elseif ($p->status === 'paid' && $p->paid_at)
-                                    <div class="pay-paid-box">
-                                        <i class='bx bx-check-circle'></i>
-                                        <div>
-                                            <div class="pay-paid-label">Waktu Lunas</div>
-                                            <div class="pay-paid-val">{{ $p->paid_at->format('d M Y H:i') }}</div>
                                         </div>
                                     </div>
                                 @endif
 
                                 {{-- CTA Button --}}
                                 <div>
-                                    @if ($isPending)
+                                    @if ($p->status === 'pending')
                                         <span class="pay-cta pay-cta--primary">
                                             Bayar Sekarang
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                                        </span>
-                                    @elseif ($p->status === 'paid_confirmation')
-                                        <span class="pay-cta pay-cta--outline">
-                                            Cek Status
                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                                         </span>
                                     @else
@@ -631,6 +676,55 @@
                     </a>
                 @endforeach
             </div>
+
+            @if ($payments->hasPages())
+                <div class="pagination">
+                    @if ($payments->onFirstPage())
+                        <button disabled>‹</button>
+                    @else
+                        <a href="{{ $payments->previousPageUrl() }}"><button>‹</button></a>
+                    @endif
+
+                    @php
+                        $current = $payments->currentPage();
+                        $last = $payments->lastPage();
+                        $start = max(1, $current - 2);
+                        $end = min($last, $current + 2);
+                        if ($end - $start < 4) {
+                            $start = max(1, $end - 4);
+                            $end = min($last, $start + 4);
+                        }
+                    @endphp
+
+                    @if ($start > 1)
+                        <a href="{{ $payments->url(1) }}"><button>1</button></a>
+                        @if ($start > 2)
+                            <span class="page-info">…</span>
+                        @endif
+                    @endif
+
+                    @for ($i = $start; $i <= $end; $i++)
+                        @if ($i == $current)
+                            <button class="active">{{ $i }}</button>
+                        @else
+                            <a href="{{ $payments->url($i) }}"><button>{{ $i }}</button></a>
+                        @endif
+                    @endfor
+
+                    @if ($end < $last)
+                        @if ($end < $last - 1)
+                            <span class="page-info">…</span>
+                        @endif
+                        <a href="{{ $payments->url($last) }}"><button>{{ $last }}</button></a>
+                    @endif
+
+                    @if ($payments->hasMorePages())
+                        <a href="{{ $payments->nextPageUrl() }}"><button>›</button></a>
+                    @else
+                        <button disabled>›</button>
+                    @endif
+                </div>
+            @endif
         @endif
     </div>
 @endsection

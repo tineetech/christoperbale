@@ -188,15 +188,19 @@ class DashboardController extends Controller
             $query->whereDate('created_at', '<=', $request->to);
         }
 
-        $payments = $query->orderByRaw(
-            "CASE WHEN status = 'pending' THEN 0 ELSE 1 END"
-        )->orderBy('created_at', 'desc')->get();
+        $pendingCount = (clone $query)->where('status', 'pending')->count();
+        $paidCount = (clone $query)->where('status', 'paid')->count();
+        $failedCount = (clone $query)->whereIn('status', ['deny', 'cancel', 'expire', 'failure'])->count();
+        $totalCount = (clone $query)->count();
 
-        $pendingCount = $payments->where('status', 'pending')->count();
+        $payments = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
         return view('dashboard-pembayaran', [
             'payments' => $payments,
             'pendingCount' => $pendingCount,
+            'paidCount' => $paidCount,
+            'failedCount' => $failedCount,
+            'totalCount' => $totalCount,
             'filters' => $request->only(['q', 'status', 'from', 'to']),
         ]);
     }

@@ -81,7 +81,11 @@
                 <span style="font-size:18px;font-weight:700;font-family:monospace;letter-spacing:0.04em;">{{ $orderId }}</span>
                 <span class="dot-status {{ $statusClass }}">{{ $statusText }}</span>
             </div>
-            <span style="font-size:13px;color:var(--ink-muted);">{{ $orderDate }}</span>
+            <div style="display: flex; flex-direction: column;align-items: flex-end">
+                <span class="" style="font-size: 12px; opacity: .4;">Tanggal Pesan</span>
+                <span style="fontstfont-size:13px;color:var(--ink-muted);">{{ $orderDate }}</span>
+
+            </div>
         </div>
     </div>
 
