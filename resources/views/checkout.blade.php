@@ -1302,7 +1302,7 @@
                                     <rect x="1" y="4" width="22" height="16" rx="2" />
                                     <line x1="1" y1="10" x2="23" y2="10" />
                                 </svg> Metode Pembayaran</span></h2>
-                        <label class="option-card">
+                        {{-- <label class="option-card">
                             <input type="radio" name="payment" value="ewallet" checked>
                             <span class="opt-icon"><svg viewBox="0 0 24 24">
                                     <rect x="1" y="4" width="22" height="16" rx="2" />
@@ -1317,9 +1317,9 @@
                                 <img src="{{ asset('images/payment/gopay.png') }}" alt="GoPay" title="GoPay">
                                 <img src="{{ asset('images/payment/dana.png') }}" alt="DANA" title="DANA">
                             </span>
-                        </label>
+                        </label> --}}
                         <label class="option-card">
-                            <input type="radio" name="payment" value="bca">
+                            <input type="radio" name="payment" value="bca" checked>
                             <span class="opt-icon"><svg viewBox="0 0 24 24">
                                     <rect x="1" y="4" width="22" height="16" rx="2" />
                                     <line x1="1" y1="10" x2="23" y2="10" />

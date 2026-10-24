@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Kebijakan Privasi — CHRISBALE')
+@section('meta_description', 'Kebijakan privasi CHRISBALE: informasi yang dikumpulkan, penggunaan data, perlindungan data, cookie, dan berbagi data pihak ketiga.')
+@section('noindex', '1')
 
 @section('content')
 

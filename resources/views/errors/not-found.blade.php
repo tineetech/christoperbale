@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Halaman Tidak Ditemukan — CHRISBALE')
+@section('meta_description', 'Halaman yang Anda cari tidak ditemukan di CHRISBALE.')
+@section('noindex', '1')
 
 @section('content') <style>
         .error-page {

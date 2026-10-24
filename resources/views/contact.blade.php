@@ -1,12 +1,13 @@
 @extends('layouts.app')
 
 @section('title', 'Hubungi Kami — CHRISBALE')
+@section('meta_description', 'Hubungi CHRISBALE untuk pertanyaan produk, bantuan pesanan, retur, grosir, atau kemitraan. Email hello@christoperbale.com, lokasi Ciapus Bogor, jam operasional Senin–Sabtu 08.00–15.00 WIB.')
+@section('meta_keywords', 'kontak CHRISBALE, hubungi kami, customer service sepatu, bantuan pesanan')
 
 @push('styles')
 <style>
 .parallax-head{position:relative;overflow:hidden;padding:100px 0;}
-.parallax-bg{position:absolute;inset:0;}
-.parallax-bg img{width:100%;height:100%;object-fit:cover;}
+.parallax-bg{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;}
 .parallax-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,8,6,0.85) 0%,rgba(10,8,6,0.65) 50%,rgba(10,8,6,0.8) 100%);}
 @media(max-width:768px){.parallax-head{padding:70px 0;}}
 </style>
@@ -15,7 +16,7 @@
 @section('content')
 
 <section class="page-head parallax-head">
-  <div class="parallax-bg"><img src="https://down-id.img.susercontent.com/file/id-11134207-822wp-mmvjdftw8miu2ad?w=1400&q=80&auto=format&fit=crop" alt="" id="parallaxImg"></div>
+  <div class="parallax-bg" style="background-image: url('https://images.unsplash.com/photo-1549298916-b41d501d3772?w=1400&q=80&auto=format&fit=crop');background-attachment: fixed"></div>
   <div class="parallax-overlay"></div>
   <div class="wrap" style="position:relative;z-index:2;">
     <h1>Hubungi Kami</h1>

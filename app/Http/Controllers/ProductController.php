@@ -110,6 +110,12 @@ class ProductController extends Controller
             ? env('BE_URL') . '/storage/' . $product->fotoUtama->foto
             : null;
 
+        // URL gambar untuk SEO/OG: pakai domain publik, BUKAN BE_URL internal.
+        $seoBase = rtrim((string) (env('SEO_URL') ?: 'https://christoperbale.com'), '/');
+        $imgSeo = $product->fotoUtama
+            ? $seoBase . '/storage/' . ltrim((string) $product->fotoUtama->foto, '/')
+            : null;
+
         $imgs = $product->foto->sortBy('urutan')->map(fn($f) => env('BE_URL') . '/storage/' . $f->foto)->toArray();
         if (empty($imgs) && $imgUrl) {
             $imgs = [$imgUrl];
@@ -234,6 +240,7 @@ class ProductController extends Controller
             'review_count' => $reviewCount,
             'total_buyers' => $reviewCount,
             'img' => $imgUrl,
+            'img_seo' => $imgSeo,
             'imgs' => $imgs,
             'desc' => $product->deskripsi ?? '',
             'features' => [],

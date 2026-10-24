@@ -1,9 +1,25 @@
 @extends('layouts.app')
 
-@section('title', 'CHRISBALE — Premium Footwear Marketplace')
+@section('title', 'CHRISBALE — Sepatu & Alas Kaki Premium Pria Indonesia')
+@section('meta_description', 'CHRISBALE adalah toko alas kaki premium Indonesia: sneaker urban, boots klasik, loafers elegan, dan sandal kasual untuk pria modern. Belanja online aman, produk original, pengiriman seluruh Indonesia.')
+@section('meta_keywords', 'sepatu pria, alas kaki premium, sneaker urban, boots klasik, loafers, sandal kasual, toko sepatu online Indonesia, CHRISBALE')
+@section('og_image', 'https://down-id.img.susercontent.com/file/id-11134207-7r98o-lzyg2optyrvx4e?w=1200&q=80&auto=format&fit=crop')
 
 @push('styles')
 <style>
+/* Judul slide non-pertama: visual sama dengan h1 hero (SEO: 1 h1 per halaman) */
+.hero-overlay .hero-h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: clamp(30px, 4.5vw, 58px);
+    color: #fff;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+    max-width: 700px;
+    margin: 0;
+}
+
 /* Scroll Fade-in Animations */
 .reveal {
     opacity: 0;
@@ -249,7 +265,11 @@
                         <img src="{{ env('BE_URL') . '/storage/' . $banner->gambar }}" alt="{{ $banner->title }}">
                     </div>
                     <div class="hero-overlay">
-                        <h1>{{ $banner->title }}</h1>
+                        @if ($index === 0)
+                            <h1>{{ $banner->title }}</h1>
+                        @else
+                            <div class="hero-h1" role="heading" aria-level="2">{{ $banner->title }}</div>
+                        @endif
                         @if ($banner->catatan)
                             <p>{{ $banner->catatan }}</p>
                         @endif

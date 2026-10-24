@@ -13,7 +13,7 @@
       </form>
     </div>
     <div>
-      <img src="{{ asset('images/logo-cb3.png') }}" style="width: 150px;" alt="">
+      <img src="{{ asset('images/logo-cb3.png') }}" style="width: 150px;" alt="CHRISBALE — Alas Kaki Premium">
     </div>
     <div class="header-actions">
       <a href="/login" class="header-action-item auth-guest" aria-label="Masuk">

@@ -12,6 +12,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\SeoController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -23,6 +24,10 @@ Route::get('/products/{brand?}', [ProductController::class, 'index']);
 Route::get('/product/{slug}', [ProductController::class, 'show']);
 Route::view('/terms', 'terms');
 Route::view('/privacy', 'privacy');
+
+// SEO: sitemap dinamis + robots dinamis (dengan referensi sitemap absolut)
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap']);
+Route::get('/robots.txt', [SeoController::class, 'robots']);
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'index'])->name('login');

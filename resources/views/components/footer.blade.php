@@ -8,7 +8,7 @@
       <div class="footer-brand">
         
         <div>
-          <img src="{{ asset('images/logo-cb5.png') }}" style="width: 150px;" alt="">
+          <img src="{{ asset('images/logo-cb5.png') }}" style="width: 150px;" alt="CHRISBALE — Alas Kaki Premium">
         </div>
         <a href="/" class="footer-logo">CHRIS<span>BALE</span> x AGA<span>THA</span></a>
         <p class="footer-tagline">Destinasi alas kaki premium Anda. Setiap pasang dikurasi untuk kenyamanan, dibuat untuk ketahanan, dan dirancang untuk gaya hidup modern.</p>

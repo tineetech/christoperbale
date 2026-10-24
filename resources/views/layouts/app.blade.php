@@ -5,7 +5,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'CHRISBALE — Premium Footwear Marketplace')</title>
+
+    {{-- ================= SEO : Fondasi ================= --}}
+    @php
+        $seoSiteUrl    = rtrim((string) (env('SEO_URL') ?: config('app.url')), '/');
+        $seoCurrentUrl = request()->url(); // tanpa query string (size/color dsb)
+        $seoRootPath   = rtrim(str_replace(url('/'), '', $seoCurrentUrl), '/');
+        $seoCanonical  = $seoRootPath === ''
+            ? $seoSiteUrl . '/'
+            : $seoSiteUrl . $seoRootPath;
+
+        $seoTitles     = trim(strip_tags(trim((string) $__env->getSection('title', ''))));
+        if (!$seoTitles) {
+            $seoTitles = 'CHRISBALE — Alas Kaki Premium & Sepatu Pria Modern';
+        }
+        $seoDesc     = trim(strip_tags((string) $__env->getSection('meta_description', '')));
+        $seoKeywords = trim(strip_tags((string) $__env->getSection('meta_keywords', '')));
+        $seoOgImage  = trim((string) $__env->getSection('og_image', ''));
+        $seoNoindex  = (bool) $__env->getSection('noindex');
+    @endphp
+
+    <title>{{ $seoTitles }}</title>
+    <meta name="description" content="{{ $seoDesc }}">
+    @if ($seoKeywords)
+        <meta name="keywords" content="{{ $seoKeywords }}">
+    @endif
+    <link rel="canonical" href="{{ $seoCanonical }}">
+    <meta name="robots" content="{{ $seoNoindex ? 'noindex, follow' : 'index, follow' }}">
+    <meta name="theme-color" content="#11100E">
+
+    {{-- Open Graph --}}
+    <meta property="og:site_name" content="CHRISBALE">
+    <meta property="og:locale" content="id_ID">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ $seoTitles }}">
+    <meta property="og:description" content="{{ $seoDesc }}">
+    <meta property="og:url" content="{{ $seoCanonical }}">
+    @if ($seoOgImage)
+        <meta property="og:image" content="{{ $seoOgImage }}">
+        <meta property="og:image:alt" content="{{ $seoTitles }}">
+    @endif
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="{{ $seoOgImage ? 'summary_large_image' : 'summary' }}">
+    <meta name="twitter:title" content="{{ $seoTitles }}">
+    <meta name="twitter:description" content="{{ $seoDesc }}">
+    @if ($seoOgImage)
+        <meta name="twitter:image" content="{{ $seoOgImage }}">
+    @endif
+
+    @stack('schema')
     <style>
         :root {
             --bg: #FAFAF8;
@@ -36,6 +85,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="shortcut icon" href="{{ asset('images/logo-cb6.png') }}" type="image/x-icon">
     <link rel="stylesheet" href="/css/app.css">
     @stack('styles')
 </head>

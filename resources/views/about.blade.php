@@ -1,24 +1,23 @@
 ﻿@extends('layouts.app')
 
 @section('title', 'Tentang Kami — CHRISBALE')
+@section('meta_description', 'Kenali CHRISBALE: brand alas kaki lokal Indonesia sejak 2022. Sneaker, boots, loafers, dan sandal premium yang dibuat untuk dikenakan bertahun-tahun.')
+@section('meta_keywords', 'tentang CHRISBALE, brand sepatu lokal Indonesia, alas kaki premium')
 
 @section('content')
 
     <!-- ABOUT HERO -->
     <section class="about-hero">
         <div class="about-hero-bg">
-            <div class="about-hero-bg-half">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTE-Vu5vOjdjNewrHHWxDn2ibcYl1mep47Y12ojjtkRmLhamzqE65VdM6M&s=10?w=900&q=80&auto=format&fit=crop"
-                    alt="">
+            <div class="about-hero-bg-half"
+                style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTE-Vu5vOjdjNewrHHWxDn2ibcYl1mep47Y12ojjtkRmLhamzqE65VdM6M&s=10?w=900&q=80&auto=format&fit=crop');background-attachment: fixed;background-size: cover">
             </div>
-            <div class="about-hero-bg-half">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQwQ2JrQTV8ems5XIU3TuPjNJwt2gAGsoYZrMeIyinQykoPwubq44j5dbM&s=10?w=900&q=80&auto=format&fit=crop"
-                    alt="">
+            <div class="about-hero-bg-half"
+                style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQwQ2JrQTV8ems5XIU3TuPjNJwt2gAGsoYZrMeIyinQykoPwubq44j5dbM&s=10?w=900&q=80&auto=format&fit=crop');">
             </div>
         </div>
         <div class="about-hero-overlay"></div>
         <div class="about-hero-content">
-            <span class="about-hero-tag">&#9679; Berdiri 2022 — Jakarta, Indonesia</span>
             <h1>Kami Membuat <em>Alas Kaki</em><br>yang Bergerak Bersama<br>Cerita Anda</h1>
             <p>Lahir dari passion untuk desain modern yang berakar pada kriya tradisional — setiap pasang sepatu CHRISBALE
                 dibuat untuk dikenakan bertahun-tahun, bukan sekadar musiman.</p>
@@ -82,8 +81,9 @@
         <div class="wrap">
             <div class="story-grid reveal">
                 <div class="story-img-wrap">
-                    <img src="https://down-id.img.susercontent.com/file/id-11134207-7r98s-lzyg2opu06gdc5?w=800&q=80&auto=format&fit=crop"
-                        alt="CHRISBALE Story">
+                    <div class="story-img-bg"
+                        style="background-image: url('https://down-id.img.susercontent.com/file/id-11134207-7r98s-lzyg2opu06gdc5?w=800&q=80&auto=format&fit=crop');background-attachment: fixed">
+                    </div>
                     <div class="story-img-badge">
                         <div class="badge-label">Berdiri</div>
                         <div class="badge-val">2022</div>
@@ -240,7 +240,7 @@
                 </div>
             </div>
             <div class="accordion reveal">
-                <div class="accordion-item">
+                {{-- <div class="accordion-item">
                     <button class="accordion-btn" data-acc>
                         Di mana sepatu CHRISBALE dibuat?
                         <svg class="accordion-icon" viewBox="0 0 24 24">
@@ -253,7 +253,7 @@
                             workshop mitra kami di Bandung, Jawa Barat — atelier keluarga dengan pengalaman lebih dari 30
                             tahun dalam pembuatan sepatu.</div>
                     </div>
-                </div>
+                </div> --}}
                 <div class="accordion-item">
                     <button class="accordion-btn" data-acc>
                         Bahan apa yang Anda gunakan?

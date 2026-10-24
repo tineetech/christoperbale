@@ -2,9 +2,19 @@
 
 @section('title')
     @if ($brand)
-        {{ $brand }} —
-    @endif Produk — CHRISBALE
+        Koleksi {{ $brand }} — Sepatu & Alas Kaki CHRISBALE
+    @else
+        Semua Produk — Sepatu & Alas Kaki CHRISBALE
+    @endif
 @endsection
+@section('meta_description')
+    @if ($brand)
+        Jelajahi koleksi lengkap {{ $brand }} di CHRISBALE: sneaker urban, boots klasik, loafers elegan, dan sandal kasual premium untuk pria Indonesia. Produk original, harga transparan, pengiriman seluruh Indonesia.
+    @else
+        Katalog lengkap alas kaki premium CHRISBALE untuk pria Indonesia: sneaker urban, boots klasik, loafers elegan, dan sandal kasual. Belanja online aman dengan produk original.
+    @endif
+@endsection
+@section('meta_keywords', 'katalog sepatu, koleksi sepatu pria, sneaker, boots, loafers, sandal, alas kaki premium Indonesia')
 
 @push('styles')
     <style>
@@ -142,12 +152,9 @@
         .parallax-bg {
             position: absolute;
             inset: 0;
-        }
-
-        .parallax-bg img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .parallax-overlay {
@@ -166,9 +173,9 @@
 
 @section('content')
     <section class="page-head parallax-head">
-        <div class="parallax-bg"><img
-                src="https://down-id.img.susercontent.com/file/id-11134207-7r98o-lzyg2optyrvx4e?w=1400&q=80&auto=format&fit=crop"
-                alt="" id="parallaxImg"></div>
+        <div class="parallax-bg"
+            style="background-image: url('https://down-id.img.susercontent.com/file/id-11134207-7r98o-lzyg2optyrvx4e?w=1400&q=80&auto=format&fit=crop');background-attachment: fixed">
+        </div>
         <div class="parallax-overlay"></div>
         <div class="wrap" style="position:relative;z-index:2;">
             <h1>

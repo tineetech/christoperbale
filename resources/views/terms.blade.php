@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Syarat & Ketentuan — CHRISBALE')
+@section('meta_description', 'Syarat dan ketentuan penggunaan situs CHRISBALE: pemesanan produk, pengiriman, pengembalian, dan kekayaan intelektual.')
+@section('noindex', '1')
 
 @section('content')
 

@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('title', $product['name'] . ' — CHRISBALE')
+@section('meta_description', \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags($product['desc'] ?? ''))) !== '' ? trim(preg_replace('/\s+/', ' ', strip_tags($product['desc']))) : ($product['name'] . ' dari ' . $product['brand'] . ' di CHRISBALE. Alas kaki premium untuk pria Indonesia, produk original dengan pengiriman seluruh Indonesia.'), 155, ''))
+@section('meta_keywords', $product['name'] . ', ' . $product['brand'] . ', sepatu pria, alas kaki premium, CHRISBALE')
+@section('og_image', $product['img_seo'] ?? '')
 
 @push('styles')
     <style>
@@ -209,7 +212,7 @@
                         <div class="pd-thumbs">
                             @foreach ($product['imgs'] as $i => $img)
                                 <div class="thumb {{ $i === 0 ? 'active' : '' }}"><img src="{{ $img }}"
-                                        alt=""></div>
+                                        alt="{{ $product['name'] }} — foto {{ $i + 1 }}" loading="lazy"></div>
                             @endforeach
                         </div>
                     @endif
