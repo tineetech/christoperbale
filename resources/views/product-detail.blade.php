@@ -99,11 +99,11 @@
         .pd-actions button .btn-text{margin-left:8px;}
         .pd-wishlist{margin-bottom:24px;}
         .pd-actions button:disabled{cursor:not-allowed;opacity:0.5;pointer-events:none;}
-        .pd-stock{display:flex;align-items:center;gap:8px;margin-top:14px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(46,125,50,0.05);font-size:12.5px;color:var(--ink-soft);}
+        .pd-stock{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:10px 14px;border-radius:10px;border:none;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,0.08);font-size:12.5px;color:var(--ink-soft);width:auto;max-width:100%;}
         .pd-stock .pd-stock-dot{width:9px;height:9px;border-radius:50%;background:var(--green);flex-shrink:0;}
-        .pd-stock.is-low{border-color:rgba(212,148,62,0.5);background:rgba(212,148,62,0.08);color:#8a6d1a;}
+        .pd-stock.is-low{border:none;background:#fff;box-shadow:0 2px 10px rgba(212,148,62,0.18);color:#8a6d1a;}
         .pd-stock.is-low .pd-stock-dot{background:#d4943e;}
-        .pd-stock.is-out{border-color:rgba(192,57,43,0.4);background:rgba(192,57,43,0.06);color:var(--red);}
+        .pd-stock.is-out{border:none;background:#fff;box-shadow:0 2px 10px rgba(192,57,43,0.15);color:var(--red);}
 .pd-stock.is-out .pd-stock-dot{background:var(--red);}
         .pd-stock .pd-stock-strong{font-weight:700;color:inherit;}
 
@@ -283,10 +283,9 @@
                         <div class="pd-label">Pilih Warna</div>
                         <div class="pd-colors">
                             @foreach ($product['colors'] as $color)
-                                <div class="pd-color-option {{ !$color['available'] ? 'disabled' : '' }}">
+                                <div class="pd-color-option">
                                     <input type="radio" name="color" id="color-{{ $loop->index }}"
-                                        value="{{ $color['name'] }}" {{ $loop->first ? 'checked' : '' }}
-                                        {{ !$color['available'] ? 'disabled' : '' }}>
+                                        value="{{ $color['name'] }}" {{ $loop->first ? 'checked' : '' }}>
                                     <label for="color-{{ $loop->index }}" style="background:{{ $color['hex'] }};"
                                         title="{{ $color['name'] }}"></label>
                                 </div>
@@ -548,9 +547,26 @@
         }
         startSlide();
         var isLoggedIn = {{ Auth::check() ? 'true' : 'false' }};
+        var pdVariants = @json($product['variants'] ?? []);
         function authGuard(cb) {
             if (!isLoggedIn) { window.location.href = '/login'; return; }
             cb();
+        }
+
+        function updateVariantAvailability() {
+            var colorInput = document.querySelector('input[name=color]:checked');
+            var color = colorInput ? colorInput.value : '';
+
+            document.querySelectorAll('.pd-size-option').forEach(function(opt) {
+                var input = opt.querySelector('input');
+                if (!input) return;
+                var val = input.value;
+                var ok = pdVariants.some(function(v) {
+                    return v.size === val && (!color || v.color === color) && v.stok > 0;
+                });
+                input.disabled = !ok;
+                opt.classList.toggle('disabled', !ok);
+            });
         }
         document.querySelectorAll('.pd-size-option input').forEach(function(r) {
             r.addEventListener('change', function() {
@@ -560,6 +576,7 @@
                 });
                 if (this.checked) this.closest('.pd-size-option').querySelector('label').style.borderColor =
                     'var(--accent)';
+                updateVariantAvailability();
                 updateStockInfo();
             });
         });
@@ -567,6 +584,7 @@
             r.addEventListener('change', function() {
                 var name = this.value;
                 document.getElementById('selectedColorName').textContent = name;
+                updateVariantAvailability();
                 updateStockInfo();
             });
         });
@@ -586,13 +604,14 @@
         })();
 
         updateStockInfo();
+        updateVariantAvailability();
 
         function getSelectedVariant() {
             var sizeInput = document.querySelector('input[name=size]:checked');
             var colorInput = document.querySelector('input[name=color]:checked');
             var size = sizeInput ? sizeInput.value : '';
             var color = colorInput ? colorInput.value : '';
-            var variants = @json($product['variants'] ?? []);
+            var variants = pdVariants;
             var match = null;
             if (size && color) {
                 match = variants.find(function(v) { return v.size === size && v.color === color; });

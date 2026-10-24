@@ -828,44 +828,12 @@
                         </div>
                     </div>
 
-                    <!-- Testimonial kecil -->
-                    <div class="login-left-testi">
-                        <div class="login-testi-stars">
-                            <svg viewBox="0 0 24 24">
-                                <polygon
-                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                            </svg>
-                            <svg viewBox="0 0 24 24">
-                                <polygon
-                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                            </svg>
-                            <svg viewBox="0 0 24 24">
-                                <polygon
-                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                            </svg>
-                            <svg viewBox="0 0 24 24">
-                                <polygon
-                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                            </svg>
-                            <svg viewBox="0 0 24 24">
-                                <polygon
-                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                            </svg>
-                        </div>
-                        <p>"Kualitas terbaik yang pernah saya beli. CHRISBALE benar-benar berbeda!"</p>
-                        <div class="login-testi-author">— Sarah J., Pembeli Terverifikasi</div>
-                    </div>
                 </div>
             </div>
 
             <!-- RIGHT SIDE - FORM -->
             <div class="login-right">
                 <div class="login-form-wrap">
-
-                    <!-- Mobile Logo -->
-                    {{-- <div class="login-mobile-logo">
-          <a href="/" class="logo">CHRIS<span>BALE</span></a>
-        </div> --}}
 
                     <!-- Header Form -->
                     <div class="login-form-header">
