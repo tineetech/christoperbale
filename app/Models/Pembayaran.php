@@ -9,6 +9,7 @@ class Pembayaran extends Model
     protected $table = 'pembayaran';
 
     protected $fillable = [
+        'user_id',
         'penjualan_id',
         'penjualan_draft_id',
         'order_id_midtrans',
@@ -36,6 +37,11 @@ class Pembayaran extends Model
     public function penjualan()
     {
         return $this->belongsTo(Penjualan::class, 'penjualan_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(Pengguna::class, 'user_id');
     }
 
     public function penjualanDraft()

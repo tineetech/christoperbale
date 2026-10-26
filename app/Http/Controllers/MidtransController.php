@@ -15,6 +15,7 @@ use App\Models\PengaturanWeb;
 use App\Models\StokBarang;
 use App\Models\StokMovement;
 use App\Models\UserVoucher;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -55,8 +56,8 @@ class MidtransController extends Controller
         } elseif ($transactionStatus === 'settlement') {
             $this->finalize($pembayaran, $paymentType, $transactionId);
         } elseif (in_array($transactionStatus, ['deny', 'cancel', 'expire', 'failure'])) {
-            $pembayaran->update(['status' => $transactionStatus]);
             $this->notifyPaymentFailed($pembayaran, $transactionStatus);
+            app(PaymentService::class)->cancel($pembayaran, 'canceled');
         } elseif ($transactionStatus === 'pending') {
             $pembayaran->update(['status' => 'pending']);
         }
@@ -157,8 +158,8 @@ class MidtransController extends Controller
         }
 
         if (in_array($transactionStatus, ['deny', 'cancel', 'expire', 'failure'])) {
-            $pembayaran->update(['status' => $transactionStatus]);
             $this->notifyPaymentFailed($pembayaran, $transactionStatus);
+            app(PaymentService::class)->cancel($pembayaran, 'canceled');
         }
 
         return false;
@@ -169,7 +170,7 @@ class MidtransController extends Controller
         DB::transaction(function () use ($pembayaran, $paymentType, $transactionId) {
             $locked = Pembayaran::where('id', $pembayaran->id)->lockForUpdate()->first();
 
-            if (!$locked || $locked->status === 'paid') {
+            if (!$locked || in_array($locked->status, ['paid', 'canceled'], true)) {
                 return;
             }
 
@@ -181,6 +182,8 @@ class MidtransController extends Controller
                 $locked->update(['status' => 'paid', 'paid_at' => now()]);
                 return;
             }
+
+            $hasReservedStock = app(PaymentService::class)->hasReservedStock($draft);
 
             $voucherId = null;
             $keterangan = trim(preg_replace('/\[Voucher:\d+\]|\[Cart:[\d,]+\]/', '', (string) $draft->keterangan));
@@ -216,28 +219,41 @@ class MidtransController extends Controller
                 $stok = StokBarang::where('barang_id', $draftItem->barang_id)->lockForUpdate()->first();
                 $stokSebelum = $stok->jumlah_stok ?? 0;
 
-                if ($stokSebelum < $draftItem->qty) {
-                    throw new \Exception("Stok tidak cukup untuk barang ID " . $draftItem->barang_id);
+                if (!$hasReservedStock) {
+                    if ($stokSebelum < $draftItem->qty) {
+                        throw new \Exception("Stok tidak cukup untuk barang ID " . $draftItem->barang_id);
+                    }
+
+                    $stokSesudah = $stokSebelum - $draftItem->qty;
+
+                    StokBarang::updateOrCreate(
+                        ['barang_id' => $draftItem->barang_id],
+                        ['jumlah_stok' => $stokSesudah]
+                    );
+
+                    StokMovement::create([
+                        'barang_id'      => $draftItem->barang_id,
+                        'jenis'          => 'keluar',
+                        'qty'            => $draftItem->qty,
+                        'stok_sebelum'   => $stokSebelum,
+                        'stok_sesudah'   => $stokSesudah,
+                        'referensi_tipe' => 'penjualan',
+                        'referensi_id'   => $penjualan->id,
+                        'keterangan'     => 'Penjualan ' . $penjualan->kode_penjualan,
+                        'created_by'     => $draft->created_by,
+                    ]);
                 }
+            }
 
-                $stokSesudah = $stokSebelum - $draftItem->qty;
-
-                StokBarang::updateOrCreate(
-                    ['barang_id' => $draftItem->barang_id],
-                    ['jumlah_stok' => $stokSesudah]
-                );
-
-                StokMovement::create([
-                    'barang_id'      => $draftItem->barang_id,
-                    'jenis'          => 'keluar',
-                    'qty'            => $draftItem->qty,
-                    'stok_sebelum'   => $stokSebelum,
-                    'stok_sesudah'   => $stokSesudah,
-                    'referensi_tipe' => 'penjualan',
-                    'referensi_id'   => $penjualan->id,
-                    'keterangan'     => 'Penjualan ' . $penjualan->kode_penjualan,
-                    'created_by'     => $draft->created_by,
-                ]);
+            if ($hasReservedStock) {
+                StokMovement::where('referensi_tipe', 'penjualan_draft')
+                    ->where('referensi_id', $draft->id)
+                    ->where('jenis', 'keluar')
+                    ->update([
+                        'referensi_tipe' => 'penjualan',
+                        'referensi_id'   => $penjualan->id,
+                        'keterangan'     => 'Penjualan ' . $penjualan->kode_penjualan,
+                    ]);
             }
 
             PenjualanAddress::where('penjualan_draft_id', $draft->id)

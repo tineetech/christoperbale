@@ -19,8 +19,10 @@ use App\Models\ShippingRateCacheRate;
 use App\Models\UserAddress;
 use App\Models\UserVoucher;
 use App\Models\Voucher;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -201,6 +203,8 @@ class CheckoutController extends Controller
             ], 422);
         }
 
+        app(PaymentService::class)->cancelExpiredPayments();
+
         $pendingPayments = \App\Models\Pembayaran::whereIn('status', ['pending', 'paid_confirmation'])
             ->where(function ($q) {
                 $q->whereNull('expired_at')->orWhere('expired_at', '>', now());
@@ -361,62 +365,94 @@ class CheckoutController extends Controller
             $keterangan = '[Cart:' . implode(',', $cartIds) . '] ' . $keterangan;
         }
 
-        $draft = PenjualanDraft::create([
-            'kode_penjualan' => $kode,
-            'tanggal' => now(),
-            'total_harga' => $total,
-            'harga_discount' => $voucherDiscount,
-            'shipping_cost' => $shippingCost,
-            'subtotal_harga' => $subtotal,
-            'keterangan' => $keterangan,
-            'order_web' => true,
-            'status' => 'waiting_payment',
-            'created_by' => Auth::id(),
-        ]);
+        $isBankTransfer = strtolower(trim((string) $request->payment_method)) === 'bca';
+        $paymentService = app(PaymentService::class);
 
-        foreach ($items as $item) {
-            PenjualanDraftItem::create([
-                'penjualan_draft_id' => $draft->id,
-                'barang_id' => $item->barang_id,
-                'qty' => $item->qty,
-                'harga' => $item->finalPrice,
-                'subtotal' => $item->finalPrice * $item->qty,
-            ]);
+        try {
+            [$draft, $pembayaran] = DB::transaction(function () use (
+                $items,
+                $kode,
+                $total,
+                $voucherDiscount,
+                $shippingCost,
+                $subtotal,
+                $keterangan,
+                $address,
+                $shippingCourier,
+                $shippingService,
+                $estimationDays,
+                $isBankTransfer,
+                $paymentService
+            ) {
+                $draft = PenjualanDraft::create([
+                    'kode_penjualan' => $kode,
+                    'tanggal' => now(),
+                    'total_harga' => $total,
+                    'harga_discount' => $voucherDiscount,
+                    'shipping_cost' => $shippingCost,
+                    'subtotal_harga' => $subtotal,
+                    'keterangan' => $keterangan,
+                    'order_web' => true,
+                    'status' => 'waiting_payment',
+                    'created_by' => Auth::id(),
+                ]);
+
+                foreach ($items as $item) {
+                    PenjualanDraftItem::create([
+                        'penjualan_draft_id' => $draft->id,
+                        'barang_id' => $item->barang_id,
+                        'qty' => $item->qty,
+                        'harga' => $item->finalPrice,
+                        'subtotal' => $item->finalPrice * $item->qty,
+                    ]);
+                }
+
+                PenjualanAddress::create([
+                    'penjualan_draft_id' => $draft->id,
+                    'recipient_name' => $address->receiver_name,
+                    'phone' => $address->phone,
+                    'province' => $address->province,
+                    'city' => $address->city,
+                    'district' => $address->district,
+                    'postal_code' => $address->postal_code,
+                    'address' => $address->address,
+                    'label' => $address->label,
+                    'latitude' => $address->latitude,
+                    'longitude' => $address->longitude,
+                ]);
+
+                PenjualanShipment::create([
+                    'penjualan_draft_id' => $draft->id,
+                    'courier' => $shippingCourier,
+                    'service' => $shippingService,
+                    'tracking_number' => null,
+                    'shipping_cost' => $shippingCost,
+                    'estimation_days' => $estimationDays,
+                ]);
+
+                // Stok langsung dikurangi saat pembayaran dibuat (mendukung 1 atau banyak barang)
+                $paymentService->deductStockForDraft($draft, Auth::id());
+
+                $pembayaran = Pembayaran::create([
+                    'user_id' => Auth::id(),
+                    'penjualan_draft_id' => $draft->id,
+                    'payment_method' => $isBankTransfer ? 'bank_transfer' : $request->payment_method,
+                    'payment_type' => $isBankTransfer ? 'bank_transfer' : null,
+                    'amount' => $total,
+                    'status' => 'pending',
+                    'expired_at' => now()->addMinutes(15),
+                ]);
+
+                return [$draft, $pembayaran];
+            });
+        } catch (\Throwable $e) {
+            Log::error('Checkout gagal: ' . $e->getMessage(), ['user_id' => Auth::id()]);
+
+            return response()->json([
+                'message' => 'Gagal membuat pesanan karena stok tidak mencukupi atau terjadi kesalahan. Silakan coba lagi.',
+            ], 422);
         }
 
-        PenjualanAddress::create([
-            'penjualan_draft_id' => $draft->id,
-            'recipient_name' => $address->receiver_name,
-            'phone' => $address->phone,
-            'province' => $address->province,
-            'city' => $address->city,
-            'district' => $address->district,
-            'postal_code' => $address->postal_code,
-            'address' => $address->address,
-            'label' => $address->label,
-            'latitude' => $address->latitude,
-            'longitude' => $address->longitude,
-        ]);
-
-        PenjualanShipment::create([
-            'penjualan_draft_id' => $draft->id,
-            'courier' => $shippingCourier,
-            'service' => $shippingService,
-            'tracking_number' => null,
-            'shipping_cost' => $shippingCost,
-            'estimation_days' => $estimationDays,
-        ]);
-
-        $isBankTransfer = strtolower(trim((string) $request->payment_method)) === 'bca';
-
-        $pembayaran = Pembayaran::create([
-            'penjualan_draft_id' => $draft->id,
-            'payment_method' => $isBankTransfer ? 'bank_transfer' : $request->payment_method,
-            'payment_type' => $isBankTransfer ? 'bank_transfer' : null,
-            'amount' => $total,
-            'status' => 'pending',
-            'expired_at' => now()->addHours(24),
-        ]);
 
         if ($isBankTransfer) {
             Notifikasi::create([
@@ -483,6 +519,16 @@ class CheckoutController extends Controller
             return response()->view('errors.not-found', [], 404);
         }
 
+        if ($pembayaran->status === 'canceled') {
+            return redirect()->route('dashboard.pembayaran');
+        }
+
+        if ($pembayaran->status === 'pending' && $pembayaran->expired_at && $pembayaran->expired_at->lte(now())) {
+            app(PaymentService::class)->cancel($pembayaran);
+
+            return redirect()->route('dashboard.pembayaran');
+        }
+
         $draft = PenjualanDraft::with('items.barang.produk')
             ->where('id', $pembayaran->penjualan_draft_id)
             ->first();
@@ -534,6 +580,12 @@ class CheckoutController extends Controller
             return response()->view('errors.not-found', [], 404);
         }
 
+        if ($pembayaran->status === 'pending' && $pembayaran->expired_at && $pembayaran->expired_at->lte(now())) {
+            app(PaymentService::class)->cancel($pembayaran);
+
+            return redirect()->route('dashboard.pembayaran');
+        }
+
         if ($pembayaran->status !== 'pending') {
             return redirect()->route('checkout.transfer', $pembayaran->id);
         }
@@ -570,6 +622,16 @@ class CheckoutController extends Controller
             return response()->view('errors.not-found', [], 404);
         }
 
+        if ($pembayaran->status === 'canceled') {
+            return redirect()->route('dashboard.pembayaran');
+        }
+
+        if ($pembayaran->status === 'pending' && $pembayaran->expired_at && $pembayaran->expired_at->lte(now())) {
+            app(PaymentService::class)->cancel($pembayaran);
+
+            return redirect()->route('dashboard.pembayaran');
+        }
+
         $draft = PenjualanDraft::with('items.barang.produk', 'creator')
             ->where('id', $pembayaran->penjualan_draft_id)
             ->first();
@@ -588,6 +650,10 @@ class CheckoutController extends Controller
         if ($pembayaran->status !== 'paid') {
             app(MidtransController::class)->syncStatus($pembayaran);
             $pembayaran->refresh();
+        }
+
+        if ($pembayaran->status === 'canceled') {
+            return redirect()->route('dashboard.pembayaran');
         }
 
         if ($pembayaran->status === 'paid') {
@@ -666,7 +732,7 @@ class CheckoutController extends Controller
             ]);
         }
 
-        if (in_array($pembayaran->status, ['deny', 'cancel', 'expire', 'failure'])) {
+        if (in_array($pembayaran->status, ['canceled', 'deny', 'cancel', 'expire', 'failure'])) {
             return response()->json(['status' => $pembayaran->status, 'penjualan_id' => $pembayaran->penjualan_id]);
         }
 
@@ -789,8 +855,8 @@ class CheckoutController extends Controller
             ],
             'expiry' => [
                 'start_time' => now()->format('Y-m-d H:i:s O'),
-                'unit' => 'hours',
-                'duration' => 24,
+                'unit' => 'minutes',
+                'duration' => 15,
             ],
         ];
 
@@ -884,8 +950,8 @@ class CheckoutController extends Controller
             ],
             'expiry' => [
                 'start_time' => now()->format('Y-m-d H:i:s O'),
-                'unit' => 'hours',
-                'duration' => 24,
+                'unit' => 'minutes',
+                'duration' => 15,
             ],
         ];
 

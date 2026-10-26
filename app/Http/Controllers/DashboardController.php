@@ -15,6 +15,7 @@ use App\Models\UserAddress;
 use App\Models\UserVoucher;
 use App\Models\Voucher;
 use App\Models\Wishlist;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -141,16 +142,19 @@ class DashboardController extends Controller
 
         $userId = Auth::id();
 
+        app(PaymentService::class)->cancelExpiredPayments();
+
         $query = Pembayaran::with([
             'penjualanDraft' => fn ($q) => $q->with('items.barang.produk.fotoUtama'),
             'penjualan.detail.barang.produk.fotoUtama',
         ])
             ->where(function ($q) use ($userId) {
-                $q->whereHas('penjualanDraft', function ($q) use ($userId) {
-                    $q->where('created_by', $userId);
-                })->orWhereHas('penjualan', function ($q) use ($userId) {
-                    $q->where('created_by', $userId);
-                });
+                $q->where('user_id', $userId)
+                    ->orWhereHas('penjualanDraft', function ($q) use ($userId) {
+                        $q->where('created_by', $userId);
+                    })->orWhereHas('penjualan', function ($q) use ($userId) {
+                        $q->where('created_by', $userId);
+                    });
             });
 
         if ($request->filled('q')) {
@@ -174,7 +178,9 @@ class DashboardController extends Controller
 
         if ($request->filled('status')) {
             if ($request->status === 'gagal') {
-                $query->whereIn('status', ['deny', 'cancel', 'expire', 'failure']);
+                $query->whereIn('status', ['canceled', 'deny', 'cancel', 'expire', 'failure']);
+            } elseif ($request->status === 'canceled') {
+                $query->where('status', 'canceled');
             } else {
                 $query->where('status', $request->status);
             }
@@ -190,7 +196,7 @@ class DashboardController extends Controller
 
         $pendingCount = (clone $query)->where('status', 'pending')->count();
         $paidCount = (clone $query)->where('status', 'paid')->count();
-        $failedCount = (clone $query)->whereIn('status', ['deny', 'cancel', 'expire', 'failure'])->count();
+        $failedCount = (clone $query)->whereIn('status', ['canceled', 'deny', 'cancel', 'expire', 'failure'])->count();
         $totalCount = (clone $query)->count();
 
         $payments = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();

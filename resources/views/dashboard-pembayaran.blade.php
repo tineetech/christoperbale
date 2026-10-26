@@ -187,6 +187,7 @@
         .pay-card[data-status="confirmation"]::before { background: #2563EB; }
         .pay-card[data-status="paid"]::before         { background: #16A34A; }
         .pay-card[data-status="failed"]::before       { background: #DC2626; }
+        .pay-card[data-status="canceled"]::before     { background: #DC2626; }
 
         /* Card Header: Store + ID + Date + Badge */
         .pay-card-head {
@@ -541,6 +542,7 @@
                 <option value="">Semua Status</option>
                 <option value="pending" {{ ($filters['status'] ?? '') === 'pending' ? 'selected' : '' }}>Pending (Belum Dibayar)</option>
                 <option value="paid" {{ ($filters['status'] ?? '') === 'paid' ? 'selected' : '' }}>Lunas</option>
+                <option value="canceled" {{ ($filters['status'] ?? '') === 'canceled' ? 'selected' : '' }}>Dibatalkan (Canceled)</option>
                 <option value="gagal" {{ ($filters['status'] ?? '') === 'gagal' ? 'selected' : '' }}>Gagal / Dibatalkan</option>
             </select>
 
@@ -581,15 +583,16 @@
                             $badgeText = 'Lunas';
                             $badgeClass = 'pay-badge--paid';
                             $dataStatus = 'paid';
-                        } elseif (in_array($p->status, ['deny', 'cancel', 'expire', 'failure'])) {
+                        } elseif (in_array($p->status, ['canceled', 'deny', 'cancel', 'expire', 'failure'])) {
                             $badgeText = match($p->status) {
+                                'canceled' => 'Dibatalkan',
                                 'expire' => 'Kedaluwarsa',
                                 'cancel' => 'Dibatalkan',
                                 'deny'   => 'Ditolak',
                                 default  => 'Gagal',
                             };
                             $badgeClass = 'pay-badge--failed';
-                            $dataStatus = 'failed';
+                            $dataStatus = $p->status === 'canceled' ? 'canceled' : 'failed';
                         } elseif ($p->status === 'pending') {
                             $badgeText = 'Belum Dibayar';
                             $badgeClass = 'pay-badge--pending';
@@ -606,7 +609,9 @@
 
                         $isPending = $p->status === 'pending' || $p->status === 'paid_confirmation';
 
-                        if ($p->status === 'paid_confirmation' || ($p->payment_method === 'bank_transfer' && $isPending)) {
+                        if (in_array($p->status, ['canceled', 'deny', 'cancel', 'expire', 'failure'])) {
+                            $targetUrl = route('dashboard.pembayaran');
+                        } elseif ($p->status === 'paid_confirmation' || ($p->payment_method === 'bank_transfer' && $isPending)) {
                             $targetUrl = route('checkout.transfer', $p->id);
                         } elseif ($p->status === 'pending' || !$p->penjualan_id) {
                             $targetUrl = route('checkout.payment', $p->id);
